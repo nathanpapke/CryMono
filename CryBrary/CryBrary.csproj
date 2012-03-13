@@ -144,7 +144,6 @@
     <Compile Include="Types\Ray.cs" />
     <Compile Include="Types\Vec2.cs" />
     <Compile Include="Types\Vec4.cs" />
-    <Compile Include="UI.cs" />
     <Compile Include="Serialization\AppDomainSerializer.cs" />
     <Compile Include="Misc\Convert.cs" />
     <Compile Include="Misc\Math.cs" />
