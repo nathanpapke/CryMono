@@ -1,0 +1,5 @@
+D:\Dev\INK\Yethow\Builds\CryBasic.dll
+D:\Dev\INK\Yethow\Builds\CryBasic.pdb
+D:\Dev\INK\Yethow\VisualBasic\obj\Release\CryBasic.dll
+D:\Dev\INK\Yethow\VisualBasic\obj\Release\CryBasic.pdb
+D:\Dev\INK\Yethow\VisualBasic\obj\Release\ResolveAssemblyReference.cache

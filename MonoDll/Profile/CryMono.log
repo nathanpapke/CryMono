@@ -1,0 +1,19 @@
+﻿Build started 19-Jun-12 18:09:00.
+     1>Project "D:\Dev\INK\MiniMonoGame\Code\CryMono\MonoDll\CryMono.vcxproj" on node 2 (build target(s)).
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppBuild.targets(299,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+     1>InitializeBuildStatus:
+         Creating "Profile\CryMono.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         All outputs are up-to-date.
+         All outputs are up-to-date.
+       Link:
+         All outputs are up-to-date.
+         CryMono.vcxproj -> D:\Dev\INK\MiniMonoGame\Code\CryMono\Solutions\..\..\..\Bin32\CryMono.dll
+       FinalizeBuildStatus:
+         Deleting file "Profile\CryMono.unsuccessfulbuild".
+         Touching "Profile\CryMono.lastbuildstate".
+     1>Done Building Project "D:\Dev\INK\MiniMonoGame\Code\CryMono\MonoDll\CryMono.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.04

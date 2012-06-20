@@ -1,0 +1,5 @@
+D:\Dev\INK\CryMono Plugins\Builds\Immolation.dll
+D:\Dev\INK\CryMono Plugins\Builds\Immolation.pdb
+D:\Dev\INK\CryMono Plugins\Immolation\obj\Debug\Immolation.dll
+D:\Dev\INK\CryMono Plugins\Immolation\obj\Debug\Immolation.pdb
+D:\Dev\INK\CryMono Plugins\Immolation\obj\Debug\Project Immolation.csprojResolveAssemblyReference.cache

@@ -1,0 +1,5 @@
+D:\Dev\INK\Yethow\Builds\CSharp.dll
+D:\Dev\INK\Yethow\Builds\CSharp.pdb
+D:\Dev\INK\Yethow\CSharp\obj\Release\CSharp.dll
+D:\Dev\INK\Yethow\CSharp\obj\Release\CSharp.pdb
+D:\Dev\INK\Yethow\CSharp\obj\Release\ResolveAssemblyReference.cache

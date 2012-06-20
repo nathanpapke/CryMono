@@ -1,0 +1,14 @@
+D:\Dev\INK\Yethow\VisualBasic\bin\Debug\CryBasic.dll
+D:\Dev\INK\Yethow\VisualBasic\bin\Debug\CryBasic.pdb
+D:\Dev\INK\Yethow\VisualBasic\bin\Debug\CryBrary.dll
+D:\Dev\INK\Yethow\VisualBasic\obj\Debug\VisualBasic.csprojResolveAssemblyReference.cache
+D:\Dev\INK\Yethow\VisualBasic\obj\Debug\CryBasic.dll
+D:\Dev\INK\Yethow\VisualBasic\obj\Debug\CryBasic.pdb
+D:\Dev\INK\CryMono Plugins\Compilers\VisualBasic\bin\Debug\CryBasic.dll
+D:\Dev\INK\CryMono Plugins\Compilers\VisualBasic\bin\Debug\CryBasic.pdb
+D:\Dev\INK\CryMono Plugins\Compilers\VisualBasic\bin\Debug\CryBrary.dll
+D:\Dev\INK\CryMono Plugins\Compilers\VisualBasic\obj\Debug\CryBasic.dll
+D:\Dev\INK\CryMono Plugins\Compilers\VisualBasic\obj\Debug\CryBasic.pdb
+D:\Dev\INK\CryMono Plugins\Builds\CryBasic.dll
+D:\Dev\INK\CryMono Plugins\Builds\CryBasic.pdb
+D:\Dev\INK\CryMono Plugins\Compilers\VisualBasic\obj\Debug\VisualBasic.csprojResolveAssemblyReference.cache

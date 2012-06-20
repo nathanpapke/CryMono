@@ -1,0 +1,6 @@
+D:\Dev\INK\MiniMonoGame\Bin64\CryBrary.dll
+D:\Dev\INK\MiniMonoGame\Bin64\CryBrary.pdb
+D:\Dev\INK\MiniMonoGame\Bin64\CryBrary.xml
+D:\Dev\INK\MiniMonoGame\Code\CryMono\CryBrary\obj\x64\Debug\ResolveAssemblyReference.cache
+D:\Dev\INK\MiniMonoGame\Code\CryMono\CryBrary\obj\x64\Debug\CryBrary.dll
+D:\Dev\INK\MiniMonoGame\Code\CryMono\CryBrary\obj\x64\Debug\CryBrary.pdb

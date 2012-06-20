@@ -1,0 +1,8 @@
+D:\Dev\INK\MiniMonoGame\Code\CryMono\Utils\pdb2mdb\obj\Debug\pdb2mdb.csprojResolveAssemblyReference.cache
+D:\Dev\INK\MiniMonoGame\Code\CryMono\Utils\pdb2mdb\bin\Debug\pdb2mdb.dll
+D:\Dev\INK\MiniMonoGame\Code\CryMono\Utils\pdb2mdb\bin\Debug\pdb2mdb.pdb
+D:\Dev\INK\MiniMonoGame\Code\CryMono\Utils\pdb2mdb\bin\Debug\Mono.Cecil.dll
+D:\Dev\INK\MiniMonoGame\Code\CryMono\Utils\pdb2mdb\bin\Debug\Mono.Cecil.Mdb.dll
+D:\Dev\INK\MiniMonoGame\Code\CryMono\Utils\pdb2mdb\bin\Debug\Mono.Cecil.Pdb.dll
+D:\Dev\INK\MiniMonoGame\Code\CryMono\Utils\pdb2mdb\obj\Debug\pdb2mdb.dll
+D:\Dev\INK\MiniMonoGame\Code\CryMono\Utils\pdb2mdb\obj\Debug\pdb2mdb.pdb

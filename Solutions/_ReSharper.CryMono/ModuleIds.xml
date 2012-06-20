@@ -1,0 +1,4 @@
+<Modules>
+  <Module PersistentId="4A7993B3-6611-4D9D-B8AB-836D6C27B12B" ModuleId="CryBrary" />
+  <Module PersistentId="25588172-6725-4C61-8CE5-3799FA125533" ModuleId="CryBrary.Tests" />
+</Modules>
