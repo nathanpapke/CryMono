@@ -1,5 +1,0 @@
-D:\Dev\INK\CryMono Plugins\Immolation\obj\Release\ResolveAssemblyReference.cache
-D:\Dev\INK\CryMono Plugins\Builds\Immolation.dll
-D:\Dev\INK\CryMono Plugins\Builds\Immolation.pdb
-D:\Dev\INK\CryMono Plugins\Immolation\obj\Release\Immolation.dll
-D:\Dev\INK\CryMono Plugins\Immolation\obj\Release\Immolation.pdb

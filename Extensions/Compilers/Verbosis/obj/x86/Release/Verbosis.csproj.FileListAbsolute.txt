@@ -1,6 +1,0 @@
-D:\Dev\INK\Yethow\Verbosis\bin\Release\Verbosis.dll
-D:\Dev\INK\Yethow\Verbosis\bin\Release\Verbosis.pdb
-D:\Dev\INK\Yethow\Verbosis\obj\x86\Release\Verbosis.dll
-D:\Dev\INK\Yethow\Verbosis\obj\x86\Release\Verbosis.pdb
-D:\Dev\INK\Yethow\Verbosis\obj\x86\Release\ResolveAssemblyReference.cache
-D:\Dev\INK\Yethow\Verbosis\bin\Release\CryBrary.dll
