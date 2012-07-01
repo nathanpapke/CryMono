@@ -90,7 +90,7 @@ namespace CryEngine
     {
         public MyClass()
         {
-            GameRules.OnSetTeam += OnPlayerSetTeam;
+            GameRules.SetTeam += OnPlayerSetTeam;
         }
 
         // public delegate void OnSetTeamDelegate(EntityId actorId, EntityId teamId);
