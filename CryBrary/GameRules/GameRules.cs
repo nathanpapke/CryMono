@@ -17,50 +17,87 @@ namespace CryEngine
 		public static GameRules Current { get; internal set; }
 		#endregion
 
-		// Shared
-		public virtual void PrecacheLevel() { }
-		public virtual void RequestSpawnGroup(EntityId spawnGroupId) { }
-		public virtual void SetPlayerSpawnGroup(EntityId playerId, EntityId spawnGroupId) { }
-		public virtual EntityId GetPlayerSpawnGroup(EntityId actorId) { return new EntityId(System.Convert.ToUInt32(0)); }
-		public virtual void ShowScores(bool show) { }
+        #region Events
+        public delegate void OnSetTeamDelegate(EntityId actorId, EntityId teamId);
 
-		public virtual void OnSetTeam(EntityId actorId, EntityId teamId) { }
+        public delegate void OnSpawnDelegate();
 
-		public virtual void OnSpawn() { }
+        public delegate void OnClientConnectDelegate(int channelId, bool isReset = false, string playerName = "");
+        public delegate void OnClientDisconnectDelegate(int channelId);
 
-		public virtual void OnClientConnect(int channelId, bool isReset = false, string playerName = "") { }
-		public virtual void OnClientDisconnect(int channelId) { }
+        public delegate void OnClientEnteredGameDelegate(int channelId, EntityId playerId, bool reset, bool loadingSaveGame);
 
-		public virtual void OnClientEnteredGame(int channelId, EntityId playerId, bool reset, bool loadingSaveGame) { }
+        public delegate void OnItemDroppedDelegate(EntityId itemId, EntityId actorId);
+        public delegate void OnItemPickedUpDelegate(EntityId itemId, EntityId actorId);
 
-		public virtual void OnItemDropped(EntityId itemId, EntityId actorId) { }
-		public virtual void OnItemPickedUp(EntityId itemId, EntityId actorId) { }
+        public delegate void OnAddTaggedEntityDelegate(EntityId shooterId, EntityId targetId);
 
-		public virtual void SvOnVehicleDestroyed(EntityId vehicleId) { }
-		public virtual void SvOnVehicleSubmerged(EntityId vehicleId, float ratio) { }
+        public delegate void OnChangeSpectatorModeDelegate(EntityId actorId, byte mode, EntityId targetId, bool resetAll);
+        public delegate void RequestSpectatorTargetDelegate(EntityId playerId, int change);
 
-		public virtual void OnAddTaggedEntity(EntityId shooterId, EntityId targetId) { }
+        public delegate void OnChangeTeamDelegate(EntityId actorId, int teamId);
 
-		public virtual void OnChangeSpectatorMode(EntityId actorId, byte mode, EntityId targetId, bool resetAll) { }
-		public virtual void RequestSpectatorTarget(EntityId playerId, int change) { }
+        public delegate void OnSpawnGroupInvalidDelegate(EntityId playerId, EntityId spawnGroupId);
 
-		public virtual void OnChangeTeam(EntityId actorId, int teamId) { }
+        // client only
+        public delegate void OnConnectDelegate();
+        public delegate void OnDisconnectDelegate(DisconnectionCause cause, string description);
 
-		public virtual void OnSpawnGroupInvalid(EntityId playerId, EntityId spawnGroupId) { }
+        public delegate void OnReviveDelegate(EntityId actorId, Vec3 pos, Vec3 rot, int teamId);
+        public delegate void OnReviveInVehicleDelegate(EntityId actorId, EntityId vehicleId, int seatId, int teamId);
+        public delegate void OnKillDelegate(EntityId actorId, EntityId shooterId, string weaponClassName, int damage, int material, int hitType);
 
-		public virtual void RestartGame(bool forceInGame) { }
+        public delegate void OnVehicleDestroyedDelegate(EntityId vehicleId);
+        public delegate void OnVehicleSubmergedDelegate(EntityId vehicleId, float ratio);
+        #endregion
 
-		// Client-only
-		public virtual void OnConnect() { }
-		public virtual void OnDisconnect(DisconnectionCause cause, string description) { }
+        public static event OnSetTeamDelegate SetTeam;
+        public static event OnSpawnDelegate Spawn;
 
-		public virtual void OnRevive(EntityId actorId, Vec3 pos, Vec3 rot, int teamId) { }
-		public virtual void OnReviveInVehicle(EntityId actorId, EntityId vehicleId, int seatId, int teamId) { }
-		public virtual void OnKill(EntityId actorId, EntityId shooterId, string weaponClassName, int damage, int material, int hitType) { }
+        public static event OnClientConnectDelegate ClientConnect;
+        public static event OnClientDisconnectDelegate ClientDisconnect;
 
-		public virtual void OnVehicleDestroyed(EntityId vehicleId) { }
-		public virtual void OnVehicleSubmerged(EntityId vehicleId, float ratio) { }
+        public static event OnClientEnteredGameDelegate ClientEnteredGame;
+
+        public static event OnItemDroppedDelegate ItemDropped;
+        public static event OnItemPickedUpDelegate ItemPickedUp;
+
+        public static event OnVehicleDestroyedDelegate VehicleDestroyedServer;
+        public static event OnVehicleSubmergedDelegate VehicleSubmergedServer;
+
+        public static event OnAddTaggedEntityDelegate AddTaggedEntity;
+
+        public static event OnChangeSpectatorModeDelegate ChangeSpectatorMode;
+        public static event RequestSpectatorTargetDelegate RequestSpectatorTarget;
+
+        public static event OnChangeTeamDelegate ChangeTeam;
+
+        public static event OnSpawnGroupInvalidDelegate SpawnGroupInvalid;
+
+        // client only
+        public static event OnConnectDelegate Connect;
+        public static event OnDisconnectDelegate Disconnect;
+
+        public static event OnReviveDelegate Revive;
+        public static event OnReviveInVehicleDelegate ReviveInVehicle;
+        public static event OnKillDelegate Kill;
+
+        public static event OnVehicleDestroyedDelegate VehicleDestroyed;
+        public static event OnVehicleSubmergedDelegate VehicleSubmerged;
 	}
+
+    public class MyClass
+    {
+        public MyClass()
+        {
+            GameRules.OnSetTeam += OnPlayerSetTeam;
+        }
+
+        // public delegate void OnSetTeamDelegate(EntityId actorId, EntityId teamId);
+        public void OnPlayerSetTeam(EntityId actorId, EntityId teamId)
+        {
+        }
+    }
 
 	[AttributeUsage(AttributeTargets.Class)]
 	public sealed class GameRulesAttribute : Attribute
