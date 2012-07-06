@@ -32,6 +32,11 @@ namespace CryBrary.Tests.Serialization
             public int Hello { get; set; }
         }
 
+        internal class ClassInheritingFromClassImplementingISerializable : ClassWithSerializableAttributeAndISerializableImplementation
+        {
+            public int HelloThere { get; set; }
+        }
+
         internal class ClassWithoutSerializableAttributeButWithISerialzableImplementation : ISerializable
         {
             public bool GetObjectDataCalled;
@@ -112,7 +117,7 @@ namespace CryBrary.Tests.Serialization
         }
 
         [Test]
-        public void GetSurrogate_ClassInheritingFromSerializableClass_DefaultSerializationSurrogate()
+        public void GetSurrogate_ClassInheritingFromSerializableClass_SerializeAllSerializationSurrogate()
         {
             // Arrange
             var selector = new CrySurrogateSelector();
@@ -121,6 +126,21 @@ namespace CryBrary.Tests.Serialization
 
             // Act
             serializationSurrogate = selector.GetSurrogate(typeof(ClassInheritingFromClassWithSerializableAttribute), new StreamingContext(), out selectorResult);
+
+            // Assert
+            Assert.IsTrue(serializationSurrogate is SerializeAllSerializationSurrogate);
+        }
+
+        [Test]
+        public void GetSurrogate_ClassInheritingFromClassImplementingISerializable_DefaultSerializationSurrogate()
+        {
+            // Arrange
+            var selector = new CrySurrogateSelector();
+            ISurrogateSelector selectorResult = null;
+            ISerializationSurrogate serializationSurrogate = null;
+
+            // Act
+            serializationSurrogate = selector.GetSurrogate(typeof(ClassInheritingFromClassImplementingISerializable), new StreamingContext(), out selectorResult);
 
             // Assert
             Assert.IsTrue(serializationSurrogate is DefaultSerializationSurrogate);
