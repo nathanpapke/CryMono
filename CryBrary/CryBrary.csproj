@@ -224,6 +224,8 @@
     <Compile Include="Math\Ray.cs" />
     <Compile Include="Math\Vec2.cs" />
     <Compile Include="Math\Vec4.cs" />
+    <Compile Include="Serialization\CrySurrogateSelector.cs" />
+    <Compile Include="Serialization\DefaultSerializationSurrogate.cs" />
     <Compile Include="Serialization\SerializedObjectReference.cs" />
     <Compile Include="Testing\Assertion.cs" />
     <Compile Include="Testing\Attributes.cs" />

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using CryEngine.Initialization;
 
 namespace CryEngine.Serialization
@@ -12,10 +14,11 @@ namespace CryEngine.Serialization
 	{
 		public AppDomainSerializer()
 		{
-			Formatter = new CrySerializer();
+			//Formatter = new CrySerializer();
+            Formatter = new BinaryFormatter {SurrogateSelector = new CrySurrogateSelector()};
 		}
 
-		CrySerializer Formatter { get; set; }
+		IFormatter Formatter { get; set; }
 
 		public void DumpScriptData()
 		{
