@@ -9,50 +9,6 @@ namespace CryBrary.Tests.Serialization
     [TestFixture]
     public class CrySurrogateSelectorTests : CryBraryTests
     {
-        [Serializable]
-        internal class ClassWithSerializableAttribute
-        {
-            public string SerializableProperty { get; set; }
-
-        }
-
-        [Serializable]
-        internal class ClassWithSerializableAttributeAndISerializableImplementation : ISerializable
-        {
-            public bool GetObjectDataCalled;
-
-            public void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                GetObjectDataCalled = true;
-            }
-        }
-
-        internal class ClassInheritingFromClassWithSerializableAttribute : ClassWithSerializableAttribute
-        {
-            public int Hello { get; set; }
-        }
-
-        internal class ClassInheritingFromClassImplementingISerializable : ClassWithSerializableAttributeAndISerializableImplementation
-        {
-            public int HelloThere { get; set; }
-        }
-
-        internal class ClassWithoutSerializableAttributeButWithISerialzableImplementation : ISerializable
-        {
-            public bool GetObjectDataCalled;
-
-            public void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                GetObjectDataCalled = true;
-            }
-        }
-
-        internal class ClassWithoutSerializableAttribute
-        {
-            public string PropertyA { get; set; }
-        }
-
-
         [Test]
         public void GetSurrogate_SerializableType_DefaultNullSerialization()
         {
@@ -110,7 +66,7 @@ namespace CryBrary.Tests.Serialization
             ISerializationSurrogate serializationSurrogate = null;
 
             // Act
-            serializationSurrogate = selector.GetSurrogate(typeof(ClassWithoutSerializableAttribute), new StreamingContext(), out selectorResult);
+            serializationSurrogate = selector.GetSurrogate(typeof(SimpleClass), new StreamingContext(), out selectorResult);
 
             // Assert
             Assert.IsTrue(serializationSurrogate is SerializeAllSerializationSurrogate);

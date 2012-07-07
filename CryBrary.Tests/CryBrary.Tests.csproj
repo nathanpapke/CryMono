@@ -65,6 +65,8 @@
     <Compile Include="Script Handling\ScriptManagerTests.cs" />
     <Compile Include="Serialization\CrySerializerTests.cs" />
     <Compile Include="Serialization\CrySurrogateSelectorTests.cs" />
+    <Compile Include="Serialization\DefaultSerializationSurrogateTests.cs" />
+    <Compile Include="Serialization\SampleClasses.cs" />
     <Compile Include="Serialization\ScriptsTests.cs" />
     <Compile Include="Testing\Assertion.cs" />
     <Compile Include="Testing\Exceptions.cs" />
