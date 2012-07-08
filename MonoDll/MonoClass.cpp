@@ -11,6 +11,7 @@
 
 CScriptClass::CScriptClass(MonoClass *pClass, CScriptAssembly *pDeclaringAssembly)
 	: m_pDeclaringAssembly(pDeclaringAssembly)
+	, m_refs(0)
 {
 	CRY_ASSERT(pClass);
 
@@ -21,8 +22,6 @@ CScriptClass::CScriptClass(MonoClass *pClass, CScriptAssembly *pDeclaringAssembl
 
 	m_name = string(mono_class_get_name(pClass));
 	m_namespace = string(mono_class_get_namespace(pClass));
-
-	gEnv->pMonoScriptSystem->RegisterListener(this);
 }
 
 CScriptClass::~CScriptClass()
@@ -30,8 +29,6 @@ CScriptClass::~CScriptClass()
 	// Remove this class from the assembly's class registry, and decrement its release counter.
 	m_pDeclaringAssembly->OnClassReleased(this);
 	SAFE_RELEASE(m_pDeclaringAssembly);
-
-	gEnv->pMonoScriptSystem->UnregisterListener(this);
 
 	m_name.clear();
 	m_namespace.clear();
