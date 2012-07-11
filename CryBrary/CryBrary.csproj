@@ -199,6 +199,7 @@
     <Compile Include="Script Handling\ExceptionMessage.Designer.cs">
       <DependentUpon>ExceptionMessage.cs</DependentUpon>
     </Compile>
+    <Compile Include="Script Handling\IScriptManagerCallback.cs" />
     <Compile Include="Script Handling\ScriptRegistrationParams.cs" />
     <Compile Include="Script Handling\ScriptCompiler.cs" />
     <Compile Include="Engine\Material.cs" />

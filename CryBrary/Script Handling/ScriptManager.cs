@@ -17,7 +17,7 @@ using System.Runtime.Serialization;
 
 namespace CryEngine.Initialization
 {
-	class ScriptManager
+    internal class ScriptManager : IScriptManagerCallback
 	{
 		public ScriptManager()
 		{
