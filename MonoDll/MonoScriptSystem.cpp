@@ -41,6 +41,7 @@
 #include "Scriptbinds\Entity.h"
 #include "Scriptbinds\Network.h"
 #include "Scriptbinds\Time.h"
+#include "Scriptbinds\AppDomain.h"
 
 #include "FlowManager.h"
 #include "MonoInput.h"
@@ -56,6 +57,7 @@ CScriptSystem::CScriptSystem()
 	, m_pCryBraryAssembly(nullptr)
 	, m_pPdb2MdbAssembly(nullptr)
 	, m_pScriptManager(nullptr)
+	, m_pAppDomainManager(nullptr)
 	, m_pInput(nullptr)
 	, m_bHasPostInitialized(false)
 {
@@ -124,6 +126,7 @@ CScriptSystem::~CScriptSystem()
 	SAFE_DELETE(m_pConverter);
 
 	SAFE_RELEASE(m_pScriptManager);
+	SAFE_RELEASE(m_pAppDomainManager);
 
 	SAFE_DELETE(m_pCryBraryAssembly);
 
@@ -150,7 +153,7 @@ bool CScriptSystem::CompleteInit()
 	CryLogAlways("		Registering default scriptbinds...");
 	RegisterDefaultBindings();
 
-	m_pScriptManager = m_pCryBraryAssembly->GetClass("ScriptManager", "CryEngine.Initialization")->CreateInstance();
+	m_pAppDomainManager = m_pCryBraryAssembly->GetClass("AppDomainManager")->CreateInstance();
 
 	gEnv->pGameFramework->RegisterListener(this, "CryMono", eFLPriority_Game);
 
@@ -163,6 +166,11 @@ bool CScriptSystem::CompleteInit()
 	CryLogAlways("		Initializing CryMono done, MemUsage=%iKb", (memInfo.allocated + pCryStats->GetProperty("MemoryUsage")->Unbox<long>()) / 1024);
 
 	return true;
+}
+
+void CScriptSystem::ReloadScriptManager()
+{
+	m_pScriptManager = m_pCryBraryAssembly->GetClass("ScriptManager", "CryEngine.Initialization")->CreateInstance();
 }
 
 void CScriptSystem::OnSystemEvent(ESystemEvent event,UINT_PTR wparam,UINT_PTR lparam)
@@ -208,6 +216,7 @@ void CScriptSystem::RegisterDefaultBindings()
 	RegisterBinding(CUI);
 	RegisterBinding(CScriptbind_Entity);
 	RegisterBinding(CNetwork);
+	RegisterBinding(CAppDomain);
 
 #define RegisterBindingAndSet(var, T) RegisterBinding(T); var = (T *)m_localScriptBinds.back().get();
 	RegisterBindingAndSet(m_pFlowManager, CFlowManager);

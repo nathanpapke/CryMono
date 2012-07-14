@@ -377,6 +377,7 @@
     <ClInclude Include="Headers\IMonoScriptBind.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scriptbinds\ActorSystem.h" />
+    <ClInclude Include="Scriptbinds\AppDomain.h" />
     <ClInclude Include="Scriptbinds\Entity.h" />
     <ClInclude Include="Scriptbinds\ItemSystem.h" />
     <ClInclude Include="Scriptbinds\Console.h" />
@@ -412,6 +413,7 @@
     <ClCompile Include="MonoEntityClass.cpp" />
     <ClCompile Include="MonoEntityPropertyHandler.cpp" />
     <ClCompile Include="Scriptbinds\ActorSystem.cpp" />
+    <ClCompile Include="Scriptbinds\AppDomain.cpp" />
     <ClCompile Include="Scriptbinds\Entity.cpp" />
     <ClCompile Include="Scriptbinds\ItemSystem.cpp" />
     <ClCompile Include="Scriptbinds\Console.cpp" />

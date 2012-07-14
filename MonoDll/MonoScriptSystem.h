@@ -55,6 +55,7 @@ public:
 	virtual void RemoveScriptInstance(int id, EMonoScriptFlags scriptType = eScriptFlag_Any) override;
 	
 	virtual IMonoObject *GetScriptManager() { return m_pScriptManager; }
+	virtual void ReloadScriptManager() override;
 
 	virtual IMonoAssembly *GetCryBraryAssembly() override;
 	virtual IMonoAssembly *GetCorlibAssembly() override;
@@ -106,6 +107,7 @@ protected:
 	IMonoDomain *m_pRootDomain;
 
 	IMonoObject *m_pScriptManager;
+	IMonoObject *m_pAppDomainManager;
 
 	// Map containing all scripts and their id's for quick access.
 	TScripts m_scriptInstances;

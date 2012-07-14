@@ -57,8 +57,6 @@ namespace CryEngine.Initialization
 				AppDomain.Unload(ScriptDomain);
 			}
 
-			ScriptDomain = AppDomain.CreateDomain("ScriptDomain");
-
 			try
 			{
 				LoadPlugins();
