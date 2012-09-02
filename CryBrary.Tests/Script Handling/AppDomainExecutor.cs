@@ -16,5 +16,10 @@ namespace CryBrary.Tests.ScriptHandling
         {
             action(arg);
         }
+
+        public TResult Func<T, TResult>(Func<T, TResult> func, T arg)
+        {
+            return func(arg);
+        }
     }
 }
