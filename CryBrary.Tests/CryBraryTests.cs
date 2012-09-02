@@ -9,8 +9,10 @@ using System.Linq;
 
 namespace CryBrary.Tests
 {
+    [Serializable]
 	public abstract class CryBraryTests
 	{
+        [NonSerialized]
 	    protected List<Mock> _mocks;
 
         protected Mock<T> GetMock<T>() where T : class
@@ -25,7 +27,17 @@ namespace CryBrary.Tests
 		    InitializeMocks();
 		}
 
-        private void InitializeMocks()
+        protected virtual void ConfigureMocks()
+        {
+            var logMock = GetMock<INativeLoggingMethods>();
+            Action<string> loggingMethod = System.Console.WriteLine;
+
+            logMock.Setup(m => m.Log(It.IsAny<string>())).Callback(loggingMethod);
+            logMock.Setup(m => m.LogAlways(It.IsAny<string>())).Callback(loggingMethod);
+            logMock.Setup(m => m.Warning(It.IsAny<string>())).Callback(loggingMethod);
+        }
+
+        protected void InitializeMocks()
         {
             _mocks = new List<Mock>();
 
@@ -103,20 +115,14 @@ namespace CryBrary.Tests
             NativeMethods.View = viewMock.Object;
 
             var logMock = new Mock<INativeLoggingMethods>();
-            Action<string> loggingMethod = msg => System.Console.WriteLine(msg);
-
-            logMock.Setup(m => m.Log(It.IsAny<string>())).Callback(loggingMethod);
-            logMock.Setup(m => m.LogAlways(It.IsAny<string>())).Callback(loggingMethod);
-            logMock.Setup(m => m.Warning(It.IsAny<string>())).Callback(loggingMethod);
-            
+            _mocks.Add(logMock);
             NativeMethods.Log = logMock.Object;
-        }
 
-        private void InitializeCVarMethods()
-        {
-            var cvarMethodsMock = new Mock<INativeCVarMethods>();
+            var appDomainMock = new Mock<INativeAppDomainMethods>();
+            _mocks.Add(appDomainMock);
+            NativeMethods.AppDomain = appDomainMock.Object;
 
-            NativeMethods.CVar = cvarMethodsMock.Object;
+            ConfigureMocks();
         }
     }
 }

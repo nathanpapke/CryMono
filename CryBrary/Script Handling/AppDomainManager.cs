@@ -9,32 +9,52 @@ namespace CryEngine
     /// </summary>
     public class AppDomainManager
     {
+        /// <summary>
+        /// Event 
+        /// </summary>
+        public event EventHandler ScriptDomainCreated;
+
         private AppDomain _scriptAppDomain;
+        /// <summary>
+        /// Appdomain for scripts
+        /// </summary>
         public AppDomain ScriptAppDomain
         {
             get { return _scriptAppDomain; }
         }
 
-        public AppDomainManager()
+        private ScriptLoader _loader;
+        internal ScriptLoader Loader
         {
-            InitializeScriptDomain();
+            get { return _loader; }
         }
 
-        private void InitializeScriptDomain()
+        public void InitializeScriptDomain(string appDomainRootPath = null)
         {
             var appDomainSetup = new AppDomainSetup()
                                      {
-                                         ShadowCopyFiles =  "true"
+                                         ShadowCopyFiles =  "true",
+                                         ApplicationBase = appDomainRootPath
                                      };
 
-            var appDomain = AppDomain.CreateDomain("ScriptDomain", null, appDomainSetup);
+            _scriptAppDomain = AppDomain.CreateDomain("ScriptDomain", null, appDomainSetup);
 
-            var loader =
-                appDomain.CreateInstanceFromAndUnwrap(Assembly.GetExecutingAssembly().Location,
+            _loader =
+                _scriptAppDomain.CreateInstanceFromAndUnwrap(Assembly.GetExecutingAssembly().Location,
                                                       typeof (ScriptLoader).FullName) as ScriptLoader;
 
-            loader.Register();
-            loader.Initialize();
+            if (_loader == null)
+                throw new InvalidOperationException("Failed to initialize the scriptloader");
+
+            OnScriptDomainCreated();
+
+            _loader.Register();
+            _loader.Initialize();
+        }
+
+        private void OnScriptDomainCreated()
+        {
+            if (ScriptDomainCreated != null) ScriptDomainCreated(this, null);
         }
 
         /// <summary>

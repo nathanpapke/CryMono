@@ -29,6 +29,15 @@ namespace CryEngine
             return null;
         }
 
+        /// <summary>
+        /// Executes the action in the current appdomain
+        /// </summary>
+        /// <param name="action"></param>
+        public void Execute(Action action)
+        {
+            action();
+        }
+
         public bool Deserialize()
         {
             return false;
