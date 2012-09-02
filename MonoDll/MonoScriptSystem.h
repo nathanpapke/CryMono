@@ -24,6 +24,7 @@ struct IMonoScriptManager;
 struct IMonoEntityManager;
 
 struct SCVars;
+class CMonoConsoleCommands;
 
 class CScriptAssembly;
 
@@ -55,6 +56,7 @@ public:
 	virtual void RemoveScriptInstance(int id, EMonoScriptFlags scriptType = eScriptFlag_Any) override;
 	
 	virtual IMonoObject *GetScriptManager() { return m_pScriptManager; }
+	virtual IMonoObject *GetAppDomainManager() { return m_pAppDomainManager; }
 	virtual void ReloadScriptManager() override;
 
 	virtual IMonoAssembly *GetCryBraryAssembly() override;
@@ -121,6 +123,7 @@ protected:
 	IMonoAssembly *m_pPdb2MdbAssembly;
 
 	SCVars *m_pCVars;
+	CMonoConsoleCommands *m_pConsoleCommands;
 
 	// We temporarily store scriptbind methods here if developers attempt to register them prior to the script system has been initialized properly.
 	TMethodBindings m_methodBindings;

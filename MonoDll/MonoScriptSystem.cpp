@@ -47,6 +47,7 @@
 #include "MonoInput.h"
 
 #include "MonoCVars.h"
+#include "MonoConsoleCommands.h"
 
 SCVars *g_pMonoCVars = 0;
 
@@ -96,6 +97,7 @@ CScriptSystem::CScriptSystem()
 	gEnv->pMonoScriptSystem = this;
 
 	m_pCVars = new SCVars();
+	m_pConsoleCommands = new CMonoConsoleCommands();
 	g_pMonoCVars = m_pCVars;
 
 	if(!CompleteInit())
@@ -131,6 +133,7 @@ CScriptSystem::~CScriptSystem()
 	SAFE_DELETE(m_pCryBraryAssembly);
 
 	SAFE_DELETE(m_pCVars);
+	SAFE_DELETE(m_pConsoleCommands);
 
 	SAFE_RELEASE(m_pRootDomain);
 }

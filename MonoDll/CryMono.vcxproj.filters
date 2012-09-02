@@ -136,6 +136,9 @@
     <ClInclude Include="Scriptbinds\AppDomain.h">
       <Filter>ScriptBinds</Filter>
     </ClInclude>
+    <ClInclude Include="MonoConsoleCommands.h">
+      <Filter>Mono</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -230,6 +233,9 @@
     <ClCompile Include="Scriptbinds\Network.cpp" />
     <ClCompile Include="Scriptbinds\AppDomain.cpp">
       <Filter>ScriptBinds</Filter>
+    </ClCompile>
+    <ClCompile Include="MonoConsoleCommands.cpp">
+      <Filter>Mono</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

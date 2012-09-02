@@ -91,6 +91,7 @@ struct IMonoScriptSystem : ICryUnknown
 
 	virtual IMonoObject *GetScriptManager() = 0;
 	virtual void ReloadScriptManager() = 0;
+	virtual IMonoObject *GetAppDomainManager() = 0;
 
 	/// <summary>
 	/// Gets a pointer to the CryBrary assembly containing all default managed CryMono types.

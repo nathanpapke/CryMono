@@ -359,6 +359,7 @@
     <ClInclude Include="Headers\MonoAnyValue.h" />
     <ClInclude Include="Headers\MonoCommon.h" />
     <ClInclude Include="MonoArray.h" />
+    <ClInclude Include="MonoConsoleCommands.h" />
     <ClInclude Include="MonoConverter.h" />
     <ClInclude Include="MonoCVars.h" />
     <ClInclude Include="MonoDomain.h" />
@@ -398,6 +399,7 @@
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="FlowManager.cpp" />
+    <ClCompile Include="MonoConsoleCommands.cpp" />
     <ClCompile Include="MonoConverter.cpp" />
     <ClCompile Include="MonoCVars.cpp" />
     <ClCompile Include="MonoDomain.cpp" />

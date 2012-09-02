@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
+using CryEngine.Initialization;
 using CryEngine.Native;
 
 namespace CryEngine
@@ -15,7 +17,21 @@ namespace CryEngine
 
         public void Initialize()
         {
+            // Initialize creates the ScriptManager
             NativeMethods.AppDomain.Initialize();
+        }
+
+        public Stream Serialize()
+        {
+            if(ScriptManager.Instance == null)
+                throw new InvalidOperationException("Cannot serialize because the ScriptManager instance is null");
+
+            return null;
+        }
+
+        public bool Deserialize()
+        {
+            return false;
         }
     }
 }

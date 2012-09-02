@@ -37,6 +37,16 @@ namespace CryEngine
             loader.Initialize();
         }
 
+        /// <summary>
+        /// Reloads all assemblies loaded in the ScriptAppDomain
+        /// </summary>
+        /// <returns></returns>
+        public bool Reload()
+        {
+            Debug.LogAlways("Reloading");
+            return false;
+        }
+
 
     }
 }
