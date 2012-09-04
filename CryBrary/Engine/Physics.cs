@@ -13,29 +13,22 @@ namespace CryEngine
 			get { return CVar.Get(gravityCVar).FVal; }
 			set { CVar.Get(gravityCVar).FVal = value; }
 		}
-
-        // This seems out of place?
-        public static int RayWorldIntersection(Vec3 position, Vec3 direction, EntityQueryFlags objectTypes, RayWorldIntersectionFlags flags, ref RayHit internalRayHit, int maxHits, object[] skippedEntities)
-        {
-            return NativeMethods.Physics.RayWorldIntersection(position, direction, objectTypes, flags, ref internalRayHit,
-                                                             maxHits, skippedEntities);
-        }
     }
 
-	public struct RayHit
+	internal struct RayHit
 	{
-		internal float dist;
-		internal int colliderId;
-		internal int ipart;
-		internal int partid;
-		internal short surface_idx;
-		internal short idmatOrg;	// original material index, not mapped with material mapping
-		internal int foreignIdx;
-		internal int iNode; // BV tree node that had the intersection; can be used for "warm start" next time
-		internal Vec3 pt;
-		internal Vec3 n;	// surface normal
-		internal int bTerrain;	// global terrain hit
-		internal int iPrim; // hit triangle index
+		public float dist;
+		public int colliderId;
+		public int ipart;
+		public int partid;
+		public short surface_idx;
+		public short idmatOrg;	// original material index, not mapped with material mapping
+		public int foreignIdx;
+		public int iNode; // BV tree node that had the intersection; can be used for "warm start" next time
+		public Vec3 pt;
+		public Vec3 n;	// surface normal
+		public int bTerrain;	// global terrain hit
+		public int iPrim; // hit triangle index
 	}
 
 	public struct RaycastHit
