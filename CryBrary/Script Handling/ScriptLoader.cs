@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using CryEngine.Initialization;
 using CryEngine.Native;
@@ -23,10 +25,20 @@ namespace CryEngine
 
         public Stream Serialize()
         {
+            Debug.LogAlways("Serializing in " + AppDomain.CurrentDomain.FriendlyName);
             if(ScriptManager.Instance == null)
                 throw new InvalidOperationException("Cannot serialize because the ScriptManager instance is null");
+            
+            // What do we need to serialize here? :x
+            var i = 20;
 
-            return null;
+            var memoryStream = new MemoryStream();
+            IFormatter formatter = new BinaryFormatter();
+
+            formatter.Serialize(memoryStream,i);
+            memoryStream.Position = 0;
+
+            return memoryStream;
         }
 
         /// <summary>

@@ -21,6 +21,9 @@ namespace CryEngine.Initialization
 	{
 		public ScriptManager()
 		{
+		    bool isInitialLoad = Instance == null;
+
+            Debug.LogAlways("Initializing the script manager in {0} - Initial Load: {1}", AppDomain.CurrentDomain.FriendlyName, isInitialLoad);
 			Instance = this;
 
 			if (FlowNodes == null)
@@ -28,28 +31,17 @@ namespace CryEngine.Initialization
 			if (Scripts == null)
 				Scripts = new List<CryScript>();
 
-			if(!Directory.Exists(PathUtils.TempFolder))
-				Directory.CreateDirectory(PathUtils.TempFolder);
-			else
-			{
-				try
-				{
-					foreach(var file in Directory.GetFiles(PathUtils.TempFolder))
-						File.Delete(file);
-				}
-				catch(UnauthorizedAccessException) { }
-			}
+//            TestManager.Init();
 
-            TestManager.Init();
+			//InitializeScriptDomain(true);
 
-			InitializeScriptDomain(true);
+            Debug.LogAlways("Finished construction scriptmanager: " + (Instance != null));
 
-			Formatter = new CrySerializer();
 		}
 
 		void InitializeScriptDomain(bool initialLoad = false)
 		{
-			if (!initialLoad)
+			/*if (!initialLoad)
 			{
 				using (var stream = File.Create(Path.Combine(PathUtils.TempFolder, "ScriptManager.CompiledScripts.scriptdump")))
 					Formatter.Serialize(stream, Scripts);
@@ -85,7 +77,7 @@ namespace CryEngine.Initialization
 					// references to C# scripts. (We serialize intptr's now)
 					ForEach(ScriptType.CryScriptInstance, x => x.OnScriptReloadInternal());
 				}
-			}
+			}*/
 		}
 
 		public void PostInit()
@@ -492,7 +484,6 @@ namespace CryEngine.Initialization
 		internal List<CryScript> Scripts { get; set; }
 
 		AppDomain ScriptDomain { get; set; }
-		IFormatter Formatter { get; set; }
 
 		List<string> FlowNodes { get; set; }
 

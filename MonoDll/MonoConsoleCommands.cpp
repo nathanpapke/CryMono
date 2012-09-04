@@ -22,7 +22,6 @@ CMonoConsoleCommands::~CMonoConsoleCommands()
 
 void CMonoConsoleCommands::MonoReload(IConsoleCmdArgs* pCmdArgs)
 {
-	//gEnv->pMonoScriptSystem->ReloadScriptManager();
 	gEnv->pMonoScriptSystem->GetAppDomainManager()->CallMethod("Reload");
 
 }
