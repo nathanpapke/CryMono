@@ -4,6 +4,6 @@
     {
         void SetScriptAppDomain(int appDomainId);
 
-        void Initialize();
+        void Initialize(CryEngine.Initialization.ScriptManager scriptManager);
     }
 }

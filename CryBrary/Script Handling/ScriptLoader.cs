@@ -20,7 +20,9 @@ namespace CryEngine
         public void Initialize()
         {
             // Initialize creates the ScriptManager
-            NativeMethods.AppDomain.Initialize();
+			ScriptManager.Instance = new ScriptManager();
+
+			NativeMethods.AppDomain.Initialize(ScriptManager.Instance);
         }
 
         public Stream Serialize()

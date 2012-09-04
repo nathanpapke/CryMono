@@ -21,7 +21,7 @@ protected:
 	virtual const char *GetClassName() { return "NativeAppDomainMethods"; }
 
 	static void SetScriptAppDomain(int appDomainId);
-	static void Initialize();
+	static void Initialize(mono::object scriptManager);
 };
 
 #endif

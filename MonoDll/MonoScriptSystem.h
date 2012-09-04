@@ -86,6 +86,8 @@ public:
 	virtual void OnSystemEvent(ESystemEvent event,UINT_PTR wparam,UINT_PTR lparam);
 	// ~ISystemEventListener
 
+	void SetScriptManager(IMonoObject *pScriptManager) { m_pScriptManager = pScriptManager; }
+
 	IMonoAssembly *GetDebugDatabaseCreator() { return m_pPdb2MdbAssembly; }
 
 	CFlowManager *GetFlowManager() const { return m_pFlowManager; }

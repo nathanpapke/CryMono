@@ -24,7 +24,7 @@ namespace CryEngine.Initialization
 		    bool isInitialLoad = Instance == null;
 
             Debug.LogAlways("Initializing the script manager in {0} - Initial Load: {1}", AppDomain.CurrentDomain.FriendlyName, isInitialLoad);
-			Instance = this;
+			//Instance = this;
 
 			if (FlowNodes == null)
 				FlowNodes = new List<string>();

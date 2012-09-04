@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "AppDomain.h"
 
+#include "MonoScriptSystem.h"
 
 CAppDomain::CAppDomain()
 {
@@ -16,7 +17,7 @@ void CAppDomain::SetScriptAppDomain(int appDomainId)
 	currentDomain = mono_domain_get();
 }
 
-void CAppDomain::Initialize()
+void CAppDomain::Initialize(mono::object scriptManager)
 {
-	gEnv->pMonoScriptSystem->ReloadScriptManager();
+	static_cast<CScriptSystem *>(gEnv->pMonoScriptSystem)->SetScriptManager(*scriptManager);
 }
