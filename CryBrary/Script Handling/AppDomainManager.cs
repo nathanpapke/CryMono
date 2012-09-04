@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 
 namespace CryEngine
@@ -9,6 +10,8 @@ namespace CryEngine
     /// </summary>
     public class AppDomainManager
     {
+        private static int ScriptDomainCounter = 0;
+
         /// <summary>
         /// Event 
         /// </summary>
@@ -29,7 +32,12 @@ namespace CryEngine
             get { return _loader; }
         }
 
-        public void InitializeScriptDomain(string appDomainRootPath = null)
+        public void InitializeScriptDomain()
+        {
+            InitializeScriptDomain(null);
+        }
+
+        public void InitializeScriptDomain(string appDomainRootPath)
         {
             var appDomainSetup = new AppDomainSetup()
                                      {
@@ -37,7 +45,7 @@ namespace CryEngine
                                          ApplicationBase = appDomainRootPath
                                      };
 
-            _scriptAppDomain = AppDomain.CreateDomain("ScriptDomain", null, appDomainSetup);
+            _scriptAppDomain = AppDomain.CreateDomain("ScriptDomain_" + ++ScriptDomainCounter, null, appDomainSetup);
 
             _loader =
                 _scriptAppDomain.CreateInstanceFromAndUnwrap(Assembly.GetExecutingAssembly().Location,
@@ -59,11 +67,29 @@ namespace CryEngine
 
         /// <summary>
         /// Reloads all assemblies loaded in the ScriptAppDomain
+        /// 
+        /// Note: This is always executed from the main CryMono appdomain, and not from the script domain
         /// </summary>
         /// <returns></returns>
         public bool Reload()
         {
-            Debug.LogAlways("Reloading");
+            Debug.LogAlways("Reloading in appdomain " + AppDomain.CurrentDomain.FriendlyName);
+            Debug.LogAlways("Script domain: " + ScriptAppDomain.FriendlyName);
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                Stream serializationStream = _loader.Serialize();
+                serializationStream.CopyTo(ms);
+
+                AppDomain.Unload(_scriptAppDomain);
+            }
+
+            Debug.LogAlways("Unloaded script domain, creating new");
+
+            InitializeScriptDomain();
+
+            
+
             return false;
         }
 

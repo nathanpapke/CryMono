@@ -157,6 +157,7 @@ bool CScriptSystem::CompleteInit()
 	RegisterDefaultBindings();
 
 	m_pAppDomainManager = m_pCryBraryAssembly->GetClass("AppDomainManager")->CreateInstance();
+	m_pAppDomainManager->CallMethod("InitializeScriptDomain");
 
 	gEnv->pGameFramework->RegisterListener(this, "CryMono", eFLPriority_Game);
 
