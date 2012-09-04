@@ -20,6 +20,7 @@ namespace CryBrary.Tests.ScriptHandling
             var appDomainMock = GetMock<INativeAppDomainMethods>();
 
             appDomainMock.Setup(x => x.SetScriptAppDomain(It.IsAny<int>())).Callback<int>(x => _executor.Execute(SetValues, x));
+
         }
 
         private void SetValues(int x)
@@ -27,16 +28,23 @@ namespace CryBrary.Tests.ScriptHandling
             _storage.Values.Add("ScriptDomainId", x);
         }
 
-        [Test]
-        public void InitializeScriptDomain_InitialDomain_CreatedSuccesfully()
+        private CryEngine.AppDomainManager CreateAppDomainManager()
         {
-            // Arrange
             var appDomainManager = new CryEngine.AppDomainManager();
             _executor = new AppDomainExecutor();
             _storage = new CrossAppDomainStorage();
 
             // We need to reinitialize the mocks for each appdomain
             appDomainManager.ScriptDomainCreated += (s, e) => appDomainManager.Loader.Execute(InitializeMocks);
+
+            return appDomainManager;
+        }
+
+        [Test]
+        public void InitializeScriptDomain_InitialDomain_CreatedSuccesfully()
+        {
+            // Arrange
+            var appDomainManager = CreateAppDomainManager();
 
             // Act
             appDomainManager.InitializeScriptDomain(AppDomain.CurrentDomain.BaseDirectory);
@@ -46,6 +54,5 @@ namespace CryBrary.Tests.ScriptHandling
             Assert.AreNotEqual(AppDomain.CurrentDomain.Id, appDomainManager.ScriptAppDomain.Id);
             Assert.AreEqual(appDomainManager.ScriptAppDomain.Id, _storage.Values["ScriptDomainId"]);
         }
-
     }
 }
