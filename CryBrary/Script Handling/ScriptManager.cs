@@ -19,7 +19,7 @@ namespace CryEngine.Initialization
 {
     internal class ScriptManager : IScriptManagerCallback
 	{
-		public ScriptManager()
+		public ScriptManager(bool initialLoad)
 		{
 		    bool isInitialLoad = Instance == null;
 
@@ -33,10 +33,23 @@ namespace CryEngine.Initialization
 
 //            TestManager.Init();
 
-			//InitializeScriptDomain(true);
+            try
+            {
+                LoadPlugins();
+            }
+            catch (Exception ex)
+            {
+                var scriptReloadMessage = new ScriptReloadMessage(ex, !initialLoad);
+                scriptReloadMessage.ShowDialog();
+            } finally
+            {
+                if (!initialLoad)
+                {
+                    PostInit();
+                }
+            }
 
-            Debug.LogAlways("Finished construction scriptmanager: " + (Instance != null));
-
+		    //InitializeScriptDomain(true);
 		}
 
 		void InitializeScriptDomain(bool initialLoad = false)
@@ -137,7 +150,7 @@ namespace CryEngine.Initialization
 #endif
 		}
 
-		void LoadPlugins()
+		private void LoadPlugins()
 		{
             var pluginsDirectory = Path.Combine(PathUtils.ScriptsFolder, "Plugins");
             foreach (var directory in Directory.GetDirectories(pluginsDirectory))

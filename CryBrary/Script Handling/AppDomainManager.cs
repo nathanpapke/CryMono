@@ -39,6 +39,7 @@ namespace CryEngine
 
         public void InitializeScriptDomain(string appDomainRootPath)
         {
+            bool initialLoad = ScriptAppDomain == null;
             var appDomainSetup = new AppDomainSetup()
                                      {
                                          ShadowCopyFiles =  "true",
@@ -57,7 +58,7 @@ namespace CryEngine
             OnScriptDomainCreated();
 
             _loader.Register();
-            _loader.Initialize();
+            _loader.Initialize(initialLoad);
         }
 
         private void OnScriptDomainCreated()
@@ -73,15 +74,15 @@ namespace CryEngine
         /// <returns></returns>
         public bool Reload()
         {
-            Debug.LogAlways("Reloading in appdomain " + AppDomain.CurrentDomain.FriendlyName);
-            Debug.LogAlways("Script domain: " + ScriptAppDomain.FriendlyName);
-
+            Debug.LogAlways("TODO: Reload");
+            return true;
+            Debug.LogAlways("Serialize what we have now!");
             using (MemoryStream ms = new MemoryStream())
             {
                 Stream serializationStream = _loader.Serialize();
                 serializationStream.CopyTo(ms);
 
-                AppDomain.Unload(_scriptAppDomain);
+                //AppDomain.Unload(_scriptAppDomain);
             }
 
             Debug.LogAlways("Unloaded script domain, creating new");

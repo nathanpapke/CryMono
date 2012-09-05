@@ -17,10 +17,10 @@ namespace CryEngine
             NativeMethods.AppDomain.SetScriptAppDomain(appDomainId);
         }
 
-        public void Initialize()
+        public void Initialize(bool initialLoad)
         {
             // Initialize creates the ScriptManager
-			ScriptManager.Instance = new ScriptManager();
+			ScriptManager.Instance = new ScriptManager(initialLoad);
 
 			NativeMethods.AppDomain.Initialize(ScriptManager.Instance);
         }
