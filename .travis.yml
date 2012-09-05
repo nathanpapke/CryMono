@@ -10,4 +10,6 @@ script:
 notifications:
   email: false
   irc:
-  - "irc.gamesurge.net#crymono"
+    channels:
+    - "Gigenet.IL.US.GameSurge.net#crymono"
+
