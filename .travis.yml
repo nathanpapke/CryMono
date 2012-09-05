@@ -5,7 +5,9 @@ install:
 
 script:
 - xbuild CryBrary/CryBrary.csproj
+- xbuild CryBrary.Tests/CryBrary.Tests.csproj
 
 notifications:
+  email: false
   irc:
-    - "irc.gamesurge.net#crymono"
+  - "irc.gamesurge.net#crymono"
