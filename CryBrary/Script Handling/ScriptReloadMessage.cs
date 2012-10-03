@@ -16,6 +16,9 @@ namespace CryEngine.Initialization
 	{
 		public ScriptReloadMessage(Exception exception, bool canRevert)
 		{
+            if (!CryEngine.Utils.Settings.IsGuiSupported)
+                throw new InvalidOperationException("Tried to create a form while a Gui is not supported");
+
 			InitializeComponent();
 
 			tryAgainButton.Click += (s, a) => ScriptManager.Instance.OnReload();

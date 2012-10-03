@@ -24,6 +24,9 @@ namespace CryBrary.Tests
 		[SetUp]
 		public void Init()
 		{
+            // Don't show gui's when unit testing
+            CryEngine.Utils.Settings.IsGuiSupported = false;
+
 		    InitializeMocks();
 		}
 
