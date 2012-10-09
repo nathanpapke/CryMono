@@ -121,15 +121,69 @@ namespace CryEngine
 		/// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than four elements.</exception>
 		public Quat(float[] values)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if(values == null)
 				throw new ArgumentNullException("values");
 			if(values.Length != 4)
 				throw new ArgumentOutOfRangeException("values", "There must be four and only four input values for Quaternion.");
+#endif
 
 			V.X = values[0];
 			V.Y = values[1];
 			V.Z = values[2];
 			W = values[3];
+		}
+
+		public Quat(Matrix33 matrix)
+			: this(0)
+		{
+			float s, p, tr = matrix.M00 + matrix.M11 + matrix.M22;
+
+			//check the diagonal
+			if (tr > 0)
+			{
+				s = Math.Sqrt(tr + 1.0f); 
+				p = 0.5f / s;
+
+				V.X = s * 0.5f;
+				V.Y = (matrix.M21 - matrix.M12) * p;
+				V.Z = (matrix.M02 - matrix.M20) * p;
+				W = (matrix.M10 - matrix.M01) * p;
+			}
+			//diagonal is negative. now we have to find the biggest element on the diagonal
+			//check if "M00" is the biggest element
+			if ((matrix.M00 >= matrix.M11) && (matrix.M00 >= matrix.M22))
+			{
+				s = Math.Sqrt(matrix.M00 - matrix.M11 - matrix.M22 + 1.0f); 
+				p = 0.5f / s;
+
+				V.X = (matrix.M21 - matrix.M12) * p;
+				V.Y = s * 0.5f;
+				V.Z = (matrix.M10 + matrix.M01) * p;
+				W = (matrix.M20 + matrix.M02) * p;
+			}
+			//check if "M11" is the biggest element
+			if ((matrix.M11 >= matrix.M00) && (matrix.M11 >= matrix.M22))
+			{
+				s = Math.Sqrt(matrix.M11 - matrix.M22 - matrix.M00 + 1.0f); 
+				p = 0.5f / s;
+
+				V.X = (matrix.M02 - matrix.M20) * p;
+				V.Y = (matrix.M01 + matrix.M10) * p;
+				V.Z = s * 0.5f;
+				W = (matrix.M21 + matrix.M12) * p;
+			}
+			//check if "M22" is the biggest element
+			if ((matrix.M22 >= matrix.M00) && (matrix.M22 >= matrix.M11))
+			{
+				s = Math.Sqrt(matrix.M22 - matrix.M00 - matrix.M11 + 1.0f); 
+				p = 0.5f / s;
+
+				V.X = (matrix.M10 - matrix.M01) * p;
+				V.Y = (matrix.M02 + matrix.M20) * p;
+				V.Z = (matrix.M12 + matrix.M21) * p;
+				W = s * 0.5f;
+			}
 		}
 
 		public Vec3 Column0 { get { return new Vec3(2 * (V.X * V.X + W * W) - 1, 2 * (V.Y * V.X + V.Z * W), 2 * (V.Z * V.X - V.Y * W)); } }
@@ -294,6 +348,50 @@ namespace CryEngine
 			W = c; V.X = 0; V.Y = 0; V.Z = s;
 		}
 
+		public static Quat CreateRotationDir(Vec3 dir)
+		{
+			var q = new Quat();
+			q.SetRotationDir(dir);
+
+			return q;
+		}
+
+		public void SetRotationDir(Vec3 dir)
+		{
+			//set default initialisation for up-vector	
+			W = 0.70710676908493042f;
+			V.X = (dir.Z + dir.Z) * 0.35355338454246521f;
+			V.Y = 0; 
+			V.Z = 0;
+
+			var l = Math.Sqrt(dir.X * dir.X + dir.Y * dir.Y);
+			if (l > 0.00001)
+			{
+				//calculate LookAt quaternion
+				Vec3 hv = new Vec3(dir.X / l, dir.Y / l + 1.0f, l + 1.0f);
+				var r = Math.Sqrt(hv.X * hv.X + hv.Y * hv.Y);
+				var s = Math.Sqrt(hv.Z * hv.Z + dir.Z * dir.Z);
+				//generate the half-angle sine&cosine
+
+				var hacos0 = 0.0f; 
+				var hasin0 = -1.0f;
+
+				if (r > 0.00001)
+				{ 
+					hacos0 = hv.Y / r;
+					hasin0 = -hv.X / r; 
+				}	//yaw
+
+				var hacos1 = hv.Z / s; 
+				var hasin1 = dir.Z / s;					//pitch
+
+				W = hacos0 * hacos1;
+				V.X = hacos0 * hasin1;
+				V.Y = hasin0 * hasin1; 
+				V.Z = hasin0 * hacos1;
+			}
+		}
+
 		/// <summary>
 		/// Conjugates the quaternion.
 		/// </summary>
@@ -314,6 +412,17 @@ namespace CryEngine
 		public void Invert()
 		{
 			this = !this;
+		}
+
+		public Quat Inverted
+		{
+			get
+			{
+				var quat = this;
+				quat.Invert();
+
+				return quat;
+			}
 		}
 
 		/// <summary>
@@ -355,6 +464,17 @@ namespace CryEngine
 				V.Y *= inverse;
 				V.Z *= inverse;
 				W *= inverse;
+			}
+		}
+
+		public Quat Normalized
+		{
+			get
+			{
+				var quat = this;
+				quat.Normalize();
+
+				return quat;
 			}
 		}
 

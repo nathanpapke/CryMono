@@ -20,7 +20,7 @@ CActorSystem::CActorSystem()
 
 	REGISTER_METHOD(GetClientActorId);
 
-	REGISTER_METHOD(RegisterActorClass);
+	gEnv->pGameFramework->RegisterFactory("MonoActor", (CActor *)0, false, (CActor *)0);
 }
 
 SMonoActorInfo CActorSystem::GetActorInfoByChannelId(uint16 channelId)
@@ -39,12 +39,16 @@ SMonoActorInfo CActorSystem::GetActorInfoById(EntityId id)
 	return SMonoActorInfo();
 }
 
-SMonoActorInfo CActorSystem::CreateActor(int channelId, mono::string name, mono::string className, Vec3 pos, Vec3 angles, Vec3 scale)
+SMonoActorInfo CActorSystem::CreateActor(mono::object actor, int channelId, mono::string name, mono::string className, Vec3 pos, Vec3 angles, Vec3 scale)
 {
-	if(gEnv->bServer)
+	const char *sClassName = ToCryString(className);
+
+	if(IActor *pActor = gEnv->pGameFramework->GetIActorSystem()->CreateActor(channelId, ToCryString(name), sClassName, pos, Quat(Ang3(angles)), scale))
 	{
-		if(IActor *pActor = gEnv->pGameFramework->GetIActorSystem()->CreateActor(channelId, ToCryString(name), ToCryString(className), pos, Quat(Ang3(angles)), scale))
-			return SMonoActorInfo(pActor);
+		if(!strcmp(sClassName, "MonoActor"))
+			static_cast<CActor *>(pActor)->SetScript(*actor);
+
+		return SMonoActorInfo(pActor);
 	}
 
 	return SMonoActorInfo();
@@ -58,14 +62,6 @@ void CActorSystem::RemoveActor(EntityId id)
 EntityId CActorSystem::GetClientActorId()
 {
 	return gEnv->pGameFramework->GetClientActorId();
-}
-
-void CActorSystem::RegisterActorClass(mono::string className, bool isAI)
-{
-	if(gEnv->pGameFramework->GetIGameObjectSystem()->GetID(ToCryString(className)) != IGameObjectSystem::InvalidExtensionID)
-		return; // already registered
-
-	gEnv->pGameFramework->RegisterFactory(ToCryString(className), (CActor *)0, (isAI), (CActor *)0);
 }
 
 float CActorSystem::GetPlayerHealth(IActor *pActor)

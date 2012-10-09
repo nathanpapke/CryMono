@@ -16,17 +16,26 @@
 CEntity::CEntity()
 	: m_pScript(nullptr)
 	, m_bInitialized(false)
+	, m_pAnimatedCharacter(nullptr)
 {
 }
 
 CEntity::~CEntity()
 {
 	SAFE_RELEASE(m_pScript);
+
+	if (m_pAnimatedCharacter)
+	{
+		IGameObject *pGameObject = GetGameObject();
+		pGameObject->ReleaseExtension("AnimatedCharacter");
+	}
 }
 
 bool CEntity::Init(IGameObject *pGameObject)
 {
 	SetGameObject(pGameObject);
+
+	m_pAnimatedCharacter = static_cast<IAnimatedCharacter *>(pGameObject->AcquireExtension( "AnimatedCharacter" ));
 
 	pGameObject->EnablePrePhysicsUpdate( ePPU_Always );
 	pGameObject->EnablePhysicsEvent( true, eEPE_OnPostStepImmediate );
@@ -38,7 +47,10 @@ bool CEntity::Init(IGameObject *pGameObject)
 
 	IMonoClass *pEntityInfoClass = gEnv->pMonoScriptSystem->GetCryBraryAssembly()->GetClass("EntityInfo");
 
-	m_pScript->CallMethod("InternalSpawn", pEntityInfoClass->BoxObject(&SMonoEntityInfo(pEntity)));
+	SMonoEntityInfo entityInfo(pEntity);
+	entityInfo.pAnimatedCharacter = m_pAnimatedCharacter;
+
+	m_pScript->CallMethod("InternalSpawn", pEntityInfoClass->BoxObject(&entityInfo));
 
 	int numProperties;
 	auto pProperties = static_cast<CEntityPropertyHandler *>(pEntityClass->GetPropertyHandler())->GetQueuedProperties(pEntity->GetId(), numProperties);
@@ -61,6 +73,17 @@ bool CEntity::Init(IGameObject *pGameObject)
 	return true;
 }
 
+void CEntity::PostInit(IGameObject *pGameObject)
+{
+	Reset(false);
+}
+
+void CEntity::Reset(bool enteringGamemode)
+{
+	if(m_pAnimatedCharacter)
+		m_pAnimatedCharacter->ResetState();
+}
+
 void CEntity::ProcessEvent(SEntityEvent &event)
 {
 	switch(event.event)
@@ -69,7 +92,16 @@ void CEntity::ProcessEvent(SEntityEvent &event)
 		m_pScript->CallMethod("OnInit");
 		break;
 	case ENTITY_EVENT_RESET:
-		m_pScript->CallMethod("OnReset", event.nParam[0]==1);
+		{
+			bool enterGamemode = event.nParam[0]==1;
+
+			m_pScript->CallMethod("OnReset", enterGamemode);
+
+			if(!enterGamemode && GetEntity()->GetFlags() & ENTITY_FLAG_NO_SAVE)
+				gEnv->pEntitySystem->RemoveEntity(GetEntityId());
+
+			Reset(enterGamemode);
+		}
 		break;
 	case ENTITY_EVENT_COLLISION:
 		{
@@ -120,6 +152,9 @@ void CEntity::ProcessEvent(SEntityEvent &event)
 	case ENTITY_EVENT_DETACH_THIS:
 		m_pScript->CallMethod("OnDetachThis", (EntityId)event.nParam[0]);
 		break;
+	case ENTITY_EVENT_PREPHYSICSUPDATE:
+		m_pScript->CallMethod("OnPrePhysicsUpdate");
+		break;
 	}
 }
 
@@ -155,4 +190,74 @@ void CEntity::FullSerialize(TSerialize ser)
 void CEntity::SetPropertyValue(IEntityPropertyHandler::SPropertyInfo propertyInfo, const char *value)
 {
 	m_pScript->CallMethod("SetPropertyValue", propertyInfo.name, propertyInfo.type, value);
+}
+
+///////////////////////////////////////////////////
+// Entity RMI's
+///////////////////////////////////////////////////
+CEntity::RMIParams::RMIParams(IMonoArray *pArray, const char *funcName, int targetScript)
+	: methodName(funcName)
+	, scriptId(targetScript)
+{
+	length = pArray->GetSize();
+
+	if(length > 0)
+	{
+		anyValues = new MonoAnyValue[length];
+
+		for(int i = 0; i < length; i++)
+			anyValues[i] = pArray->GetItem(i)->GetAnyValue();
+	}
+}
+
+void CEntity::RMIParams::SerializeWith(TSerialize ser)
+{
+	ser.Value("length", length);
+	ser.Value("methodName", methodName);
+	ser.Value("scriptId", scriptId);
+
+	if(length > 0)
+	{
+		if(!anyValues)
+			anyValues = new MonoAnyValue[length];
+
+		for(int i = 0; i < length; i++)
+			anyValues[i].SerializeWith(ser);
+	}
+}
+
+IMPLEMENT_RMI(CEntity, SvScriptRMI)
+{
+	IMonoArray *pArgs = NULL;
+	if(params.length > 0)
+	{
+		pArgs = CreateMonoArray(params.length);
+
+		for(int i = 0; i < params.length; i++)
+			pArgs->Insert(params.anyValues[i]);
+	}
+
+	IMonoObject *pScriptInstance = gEnv->pMonoScriptSystem->GetScriptManager()->CallMethod("GetScriptInstanceById", params.scriptId, eScriptFlag_Any);
+
+	pScriptInstance->CallMethod(params.methodName.c_str(), pArgs);
+
+	return true;
+}
+
+IMPLEMENT_RMI(CEntity, ClScriptRMI)
+{
+	IMonoArray *pArgs = NULL;
+	if(params.length > 0)
+	{
+		pArgs = CreateMonoArray(params.length);
+
+		for(int i = 0; i < params.length; i++)
+			pArgs->Insert(params.anyValues[i]);
+	}
+
+	IMonoObject *pScriptInstance = gEnv->pMonoScriptSystem->GetScriptManager()->CallMethod("GetScriptInstanceById", params.scriptId, eScriptFlag_Any);
+
+	pScriptInstance->CallMethod(params.methodName.c_str(), pArgs);
+
+	return true;
 }

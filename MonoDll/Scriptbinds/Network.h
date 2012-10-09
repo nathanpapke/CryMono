@@ -12,6 +12,8 @@
 #include <MonoCommon.h>
 #include <IMonoScriptbind.h>
 
+#include <IGameObject.h>
+
 class CNetwork
 	: public IMonoScriptBind
 {
@@ -20,8 +22,14 @@ public:
 	~CNetwork();
 
 	// IMonoScriptbind
-	virtual const char *GetClassName() { return "Network"; }
+	virtual const char *GetClassName() { return "NativeNetworkMethods"; }
 	// ~IMonoScriptbind
+
+	static void RemoteInvocation(EntityId entityId, int targetScriptId, mono::string methodName, mono::object args, ERMInvocation target, int channelId);
+
+	static bool IsMultiplayer();
+	static bool IsServer();
+	static bool IsClient();
 };
 
 #endif __SCRIPTBIND_NETWORK_H__

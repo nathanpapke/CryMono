@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace CryEngine.Native
 {
@@ -31,6 +32,8 @@ namespace CryEngine.Native
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         extern internal static void _SetTimeOfDayVariableValueColor(int id, Vec3 value);
 
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		extern internal static void _ActivatePortal(Vec3 pos, bool activate, string entityName);
 
         public float GetTerrainElevation(float positionX, float positionY, bool includeOutdoorVoxels)
         {
@@ -87,5 +90,9 @@ namespace CryEngine.Native
             _SetTimeOfDayVariableValueColor(id, value);
         }
 
+		public void ActivatePortal(Vec3 pos, bool activate, string entityName)
+		{
+			_ActivatePortal(pos, activate, entityName);
+		}
     }
 }

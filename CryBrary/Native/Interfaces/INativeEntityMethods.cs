@@ -7,10 +7,10 @@ namespace CryEngine.Native
     {
 		void PlayAnimation(IntPtr ptr, string animationName, int slot, int layer, float blend, float speed, AnimationFlags flags);
 
-        bool SpawnEntity(EntitySpawnParams spawnParams, bool autoInit, out EntityInfo entityInfo);
-        void RemoveEntity(uint entityId);
+		EntityBase SpawnEntity(EntitySpawnParams spawnParams, bool autoInit, out EntityInfo entityInfo);
+		void RemoveEntity(EntityId entityId);
 
-        IntPtr GetEntity(uint entityId);
+		IntPtr GetEntity(EntityId entityId);
         uint FindEntity(string name);
         object[] GetEntitiesByClass(string className);
         object[] GetEntitiesInBox(BoundingBox bbox, EntityQueryFlags flags);
@@ -53,13 +53,32 @@ namespace CryEngine.Native
 
         void LoadCharacter(IntPtr ptr, string fileName, int slot);
 
-        int GetAttachmentCount(IntPtr entPtr);
-        IntPtr GetAttachmentMaterialByIndex(IntPtr entPtr, int index);
-        void SetAttachmentMaterialByIndex(IntPtr entPtr, int index, IntPtr materialPtr);
-
-        IntPtr GetAttachmentMaterial(IntPtr entPtr, string name);
-        int SetAttachmentMaterial(IntPtr entPtr, string name, IntPtr materialPtr);
-
         void RegisterClass(EntityRegistrationParams registrationParams);
+
+		bool AddEntityLink(IntPtr entPtr, string linkName, EntityId otherId, Quat relativeRot, Vec3 relativePos);
+		void RemoveEntityLink(IntPtr entPtr, EntityId otherId);
+
+		int LoadLight(IntPtr entPtr, int slot, LightParams lightParams);
+		void FreeSlot(IntPtr entPtr, int slot);
+
+		int GetAttachmentCount(IntPtr entPtr, int slot);
+		IntPtr GetAttachmentByIndex(IntPtr entPtr, int index, int slot);
+		IntPtr GetAttachmentByName(IntPtr entPtr, string name, int slot);
+
+		void LinkEntityToAttachment(IntPtr attachmentPtr, uint entityId);
+		string GetAttachmentObject(IntPtr attachmentPtr);
+
+		Quat GetAttachmentWorldRotation(IntPtr attachmentPtr);
+		Quat GetAttachmentLocalRotation(IntPtr attachmentPtr);
+		Vec3 GetAttachmentWorldPosition(IntPtr attachmentPtr);
+		Vec3 GetAttachmentLocalPosition(IntPtr attachmentPtr);
+
+		Quat GetAttachmentDefaultWorldRotation(IntPtr attachmentPtr);
+		Quat GetAttachmentDefaultLocalRotation(IntPtr attachmentPtr);
+		Vec3 GetAttachmentDefaultWorldPosition(IntPtr attachmentPtr);
+		Vec3 GetAttachmentDefaultLocalPosition(IntPtr attachmentPtr);
+
+		IntPtr GetAttachmentMaterial(IntPtr attachmentPtr);
+		void SetAttachmentMaterial(IntPtr attachmentPtr, IntPtr materialPtr);
     }
 }

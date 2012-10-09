@@ -20,9 +20,18 @@ CInput::CInput()
 
 CInput::~CInput()
 {
-	gEnv->pGameFramework->GetIActionMapManager()->RemoveExtraActionListener(this);
-	gEnv->pHardwareMouse->RemoveListener(this);
-	gEnv->pInput->RemoveEventListener(this);
+	// The code below currently crashes the Launcher at shutdown
+	/*if(gEnv->pGameFramework)
+	{
+		if(IActionMapManager *pActionmapManager = gEnv->pGameFramework->GetIActionMapManager())
+			pActionmapManager->RemoveExtraActionListener(this);
+	}*/
+
+	if(gEnv->pHardwareMouse)
+		gEnv->pHardwareMouse->RemoveListener(this);
+
+	if(gEnv->pInput)
+		gEnv->pInput->RemoveEventListener(this);
 }
 
 IMonoClass *CInput::GetClass()
@@ -38,7 +47,7 @@ void CInput::OnHardwareMouseEvent(int iX,int iY,EHARDWAREMOUSEEVENT eHardwareMou
 	pParams->Insert(eHardwareMouseEvent);
 	pParams->Insert(wheelDelta);
 
-	GetClass()->CallMethodWithArray("OnMouseEvent", pParams, true);
+	GetClass()->InvokeArray(NULL, "OnMouseEvent", pParams);
 	SAFE_RELEASE(pParams);
 }
 
@@ -48,7 +57,7 @@ bool CInput::OnInputEvent(const SInputEvent &event)
 	pParams->Insert(event.keyName.c_str());
 	pParams->Insert(event.value);
 
-	GetClass()->CallMethodWithArray("OnKeyEvent", pParams, true);
+	GetClass()->InvokeArray(NULL, "OnKeyEvent", pParams);
 	SAFE_RELEASE(pParams);
 
 	return false;
@@ -66,7 +75,7 @@ bool CInput::OnActionTriggered(EntityId entityId, const ActionId& actionId, int 
 	pParams->Insert(activationMode);
 	pParams->Insert(value);
 
-	GetClass()->CallMethodWithArray("OnActionTriggered", pParams, true);
+	GetClass()->InvokeArray(NULL, "OnActionTriggered", pParams);
 	SAFE_RELEASE(pParams);
 
 	return false;

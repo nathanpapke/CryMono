@@ -1,24 +1,32 @@
-﻿
+﻿using System.Runtime.InteropServices;
+
+using CryEngine.Native;
+
 namespace CryEngine
 {
 	/// <summary>
-	/// Used for non-CryMono actors.
+	/// Represents an actor with a custom IActor implementation outside of CryMono.dll.
 	/// </summary>
 	[ExcludeFromCompilation]
-	class NativeActor : Actor
+	public class NativeActor : Actor
 	{
 		public NativeActor() { }
 
-		public NativeActor(ActorInfo actorInfo)
+		internal NativeActor(ActorInfo actorInfo)
 		{
 			Id = new EntityId(actorInfo.Id);
-			EntityPointer = actorInfo.EntityPtr;
-			ActorPointer = actorInfo.ActorPtr;
+			this.SetEntityHandle(new HandleRef(this, actorInfo.EntityPtr));
+			this.SetActorHandle(new HandleRef(this, actorInfo.ActorPtr));
 		}
 
 		internal NativeActor(EntityId id)
 		{
 			Id = id;
+		}
+
+		public override void UpdateView(ref ViewParams viewParams)
+		{
+			throw new System.NotImplementedException();
 		}
 	}
 }

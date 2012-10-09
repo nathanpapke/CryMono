@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 using CryEngine.Initialization;
 using CryEngine.Extensions;
@@ -11,55 +12,17 @@ namespace CryEngine
 	/// This is the base GameRules interface. All game rules must implement this.
 	/// </summary>
 	/// <remarks>For most use cases, deriving from CryGameCode's BaseGameRules is a more efficient solution.</remarks>
-	public abstract class GameRules : CryScriptInstance
+	public abstract class GameRules : EntityBase
 	{
-        #region Statics
+		internal void InternalInitialize()
+		{
+			GameRules.Current = this;
+
+			Id = 1;
+			this.SetEntityHandle(new HandleRef(this, NativeMethods.Entity.GetEntity(Id)));
+		}
+
 		public static GameRules Current { get; internal set; }
-		#endregion
-
-		// Shared
-		public virtual void PrecacheLevel() { }
-		public virtual void RequestSpawnGroup(EntityId spawnGroupId) { }
-		public virtual void SetPlayerSpawnGroup(EntityId playerId, EntityId spawnGroupId) { }
-		public virtual EntityId GetPlayerSpawnGroup(EntityId actorId) { return new EntityId(System.Convert.ToUInt32(0)); }
-		public virtual void ShowScores(bool show) { }
-
-		public virtual void OnSetTeam(EntityId actorId, EntityId teamId) { }
-
-		public virtual void OnSpawn() { }
-
-		public virtual void OnClientConnect(int channelId, bool isReset = false, string playerName = "") { }
-		public virtual void OnClientDisconnect(int channelId) { }
-
-		public virtual void OnClientEnteredGame(int channelId, EntityId playerId, bool reset, bool loadingSaveGame) { }
-
-		public virtual void OnItemDropped(EntityId itemId, EntityId actorId) { }
-		public virtual void OnItemPickedUp(EntityId itemId, EntityId actorId) { }
-
-		public virtual void SvOnVehicleDestroyed(EntityId vehicleId) { }
-		public virtual void SvOnVehicleSubmerged(EntityId vehicleId, float ratio) { }
-
-		public virtual void OnAddTaggedEntity(EntityId shooterId, EntityId targetId) { }
-
-		public virtual void OnChangeSpectatorMode(EntityId actorId, byte mode, EntityId targetId, bool resetAll) { }
-		public virtual void RequestSpectatorTarget(EntityId playerId, int change) { }
-
-		public virtual void OnChangeTeam(EntityId actorId, int teamId) { }
-
-		public virtual void OnSpawnGroupInvalid(EntityId playerId, EntityId spawnGroupId) { }
-
-		public virtual void RestartGame(bool forceInGame) { }
-
-		// Client-only
-		public virtual void OnConnect() { }
-		public virtual void OnDisconnect(DisconnectionCause cause, string description) { }
-
-		public virtual void OnRevive(EntityId actorId, Vec3 pos, Vec3 rot, int teamId) { }
-		public virtual void OnReviveInVehicle(EntityId actorId, EntityId vehicleId, int seatId, int teamId) { }
-		public virtual void OnKill(EntityId actorId, EntityId shooterId, string weaponClassName, int damage, int material, int hitType) { }
-
-		public virtual void OnVehicleDestroyed(EntityId vehicleId) { }
-		public virtual void OnVehicleSubmerged(EntityId vehicleId, float ratio) { }
 	}
 
 	[AttributeUsage(AttributeTargets.Class)]

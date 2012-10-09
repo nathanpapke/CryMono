@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 using CryEngine.Initialization;
 using CryEngine.Extensions;
@@ -47,20 +48,24 @@ namespace CryEngine
 
 		public static T Get<T>(EntityId actorId) where T : Actor
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if(actorId == 0)
 				throw new ArgumentException("actorId cannot be 0!");
+#endif
 
 			return ScriptManager.Instance.Find<T>(ScriptType.Actor, x => x.Id == actorId);
 		}
 
 		internal static Actor CreateNativeActor(ActorInfo actorInfo)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if(actorInfo.Id == 0)
 				throw new ArgumentException("actorInfo.Id cannot be 0!");
 			if(actorInfo.ActorPtr == IntPtr.Zero)
 				throw new ArgumentException("actorInfo.ActorPtr cannot be 0!");
 			if(actorInfo.EntityPtr == IntPtr.Zero)
 				throw new ArgumentException("actorInfo.EntityPtr cannot be 0!");
+#endif
 
 			var nativeActor = new NativeActor(actorInfo);
 			ScriptManager.Instance.AddScriptInstance(nativeActor, ScriptType.Actor);
@@ -80,46 +85,39 @@ namespace CryEngine
 			} 
 		}
 
-		public static T Create<T>(int channelId, string name, string className,  Vec3 pos, Vec3 angles, Vec3 scale) where T : Actor, new()
+		public static T Create<T>(int channelId, string name = "Dude", Vec3? pos = null, Vec3? angles = null, Vec3? scale = null) where T : Actor, new()
 		{
+			string className = "MonoActor";
+			var actorType = typeof(T);
+
+			bool isNative = actorType.Implements(typeof(NativeActor));
+			if (isNative)
+				className = actorType.Name;
+
 			// just in case
 			Remove(channelId);
 
-            var info = NativeMethods.Actor.CreateActor(channelId, name, className, pos, angles, scale);
+			var actor = new T();
+
+			var info = NativeMethods.Actor.CreateActor(actor, channelId, name, className, pos ?? new Vec3(0, 0, 0), angles ?? new Vec3(0, 0, 0), scale ?? new Vec3(1, 1, 1));
 			if(info.Id == 0)
 			{
-				Debug.LogAlways("[Actor.Create] New entityId was invalid");
-				return null;
+				if (isNative)
+					throw new Exception("Actor creation failed, make sure your IActor implementation is registered with the same name as your managed actor class.");
+				else
+					throw new Exception("Actor creation failed");
 			}
 
-			var player = new T();
-			ScriptManager.Instance.AddScriptInstance(player, ScriptType.Actor);
-			player.InternalSpawn(info, channelId);
+			ScriptManager.Instance.AddScriptInstance(actor, ScriptType.Actor);
+			actor.InternalSpawn(info, channelId);
 
-			return player;
+			// actor must have physics
+			actor.Physics.Type = PhysicalizationType.Rigid;
+
+			return actor;
 		}
 
-		public static T Create<T>(int channelId, string name, Vec3 pos, Vec3 angles, Vec3 scale) where T : Actor, new()
-		{
-			return Create<T>(channelId, name, typeof(T).Name, pos, angles, scale);
-		}
-
-		public static T Create<T>(int channelId, string name, Vec3 pos, Vec3 angles) where T : Actor, new()
-		{
-			return Create<T>(channelId, name, pos, angles, new Vec3(1, 1, 1));
-		}
-
-		public static T Create<T>(int channelId, string name, Vec3 pos) where T : Actor, new()
-		{
-			return Create<T>(channelId, name, pos, Vec3.Zero, new Vec3(1, 1, 1));
-		}
-
-		public static T Create<T>(int channelId, string name) where T : Actor, new()
-		{
-			return Create<T>(channelId, name, Vec3.Zero, Vec3.Zero, new Vec3(1, 1, 1));
-		}
-
-		public static new void Remove(EntityId id)
+		public static void Remove(EntityId id)
 		{
             NativeMethods.Actor.RemoveActor(id);
 
@@ -150,16 +148,20 @@ namespace CryEngine
 		{
             System.Diagnostics.Contracts.Contract.Requires(channelId > 0);
 			Id = new EntityId(actorInfo.Id);
-			ActorPointer = actorInfo.ActorPtr;
-			EntityPointer = actorInfo.EntityPtr;
+			this.SetActorHandle(new HandleRef(this, actorInfo.ActorPtr));
+			this.SetEntityHandle(new HandleRef(this, actorInfo.EntityPtr));
 
 			ChannelId = channelId;
 
 			OnSpawn();
 		}
 
-        #region Overrides
-        public override int GetHashCode()
+		#region Callbacks
+		public virtual void UpdateView(ref ViewParams viewParams) { }
+		#endregion
+
+		#region Overrides
+		public override int GetHashCode()
         {
             unchecked // Overflow is fine, just wrap
             {
@@ -168,8 +170,8 @@ namespace CryEngine
                 hash = hash * 29 + ScriptId.GetHashCode();
                 hash = hash * 29 + Id.GetHashCode();
                 hash = hash * 29 + ChannelId.GetHashCode();
-                hash = hash * 29 + ActorPointer.GetHashCode();
-                hash = hash * 29 + EntityPointer.GetHashCode();
+				hash = hash * 29 + this.GetActorHandle().Handle.GetHashCode();
+                hash = hash * 29 + this.GetEntityHandle().Handle.GetHashCode();
 
                 return hash;
             }
@@ -177,41 +179,19 @@ namespace CryEngine
 
         internal override void OnScriptReloadInternal()
 		{
-            ActorPointer = NativeMethods.Actor.GetActorInfoById(Id).ActorPtr;
+            this.SetActorHandle(new HandleRef(this, NativeMethods.Actor.GetActorInfoById(Id).ActorPtr));
 
             base.OnScriptReloadInternal();
 		}
         #endregion
 
-        internal IntPtr ActorPointer { get; set; }
+		internal HandleRef ActorHandleRef { get; set; }
 		public int ChannelId { get; set; }
 
-        public float Health { get { return NativeMethods.Actor.GetPlayerHealth(ActorPointer); } set { NativeMethods.Actor.SetPlayerHealth(ActorPointer, value); } }
-        public float MaxHealth { get { return NativeMethods.Actor.GetPlayerMaxHealth(ActorPointer); } set { NativeMethods.Actor.SetPlayerMaxHealth(ActorPointer, value); } }
+		public float Health { get { return NativeMethods.Actor.GetPlayerHealth(this.GetActorHandle().Handle); } set { NativeMethods.Actor.SetPlayerHealth(this.GetActorHandle().Handle, value); } }
+		public float MaxHealth { get { return NativeMethods.Actor.GetPlayerMaxHealth(this.GetActorHandle().Handle); } set { NativeMethods.Actor.SetPlayerMaxHealth(this.GetActorHandle().Handle, value); } }
 
 		public bool IsDead() { return Health <= 0; }
-	}
-
-    [AttributeUsage(AttributeTargets.Class)]
-	public sealed class ActorAttribute : Attribute
-	{
-		public ActorAttribute(bool useMonoActor = true, bool isAI = false)
-		{
-			this.useMonoActor = useMonoActor;
-			this.isAI = isAI;
-		}
-
-		/// <summary>
-		/// Utilize the C++ Actor class contained within CryMono.dll
-		/// Otherwise the engine will require one created in the game dll. 
-		/// </summary>
-		public bool useMonoActor;
-
-		/// <summary>
-		/// Determines if this is an AI actor class.
-		/// Only applied when UseMonoActor is set to true.
-		/// </summary>
-		public bool isAI;
 	}
 
 	internal struct ActorInfo

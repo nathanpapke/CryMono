@@ -42,6 +42,7 @@
 #include "Scriptbinds\Network.h"
 #include "Scriptbinds\Time.h"
 #include "Scriptbinds\AppDomain.h"
+#include "Scriptbinds\ScriptTable.h" 
 
 #include "FlowManager.h"
 #include "MonoInput.h"
@@ -51,8 +52,6 @@
 
 SCVars *g_pMonoCVars = 0;
 
-CRYREGISTER_CLASS(CScriptSystem)
-
 CScriptSystem::CScriptSystem() 
 	: m_pRootDomain(nullptr)
 	, m_pCryBraryAssembly(nullptr)
@@ -60,9 +59,11 @@ CScriptSystem::CScriptSystem()
 	, m_pScriptManager(nullptr)
 	, m_pAppDomainManager(nullptr)
 	, m_pInput(nullptr)
-	, m_bHasPostInitialized(false)
 {
-	//CryLogAlways("Initializing Mono Script System");
+	CryLogAlways("Initializing Mono Script System");
+
+	m_pCVars = new SCVars();
+	g_pMonoCVars = m_pCVars;
 	
 	// We should look into storing mono binaries, configuration as well as scripts via CryPak.
 	mono_set_dirs(PathUtils::GetLibPath(), PathUtils::GetConfigPath());
@@ -70,9 +71,14 @@ CScriptSystem::CScriptSystem()
 	string monoCmdOptions = "";
 
 #ifndef _RELEASE
-	// Prevents managed null reference exceptions causing crashes in unmanaged code
-	// See: https://bugzilla.xamarin.com/show_bug.cgi?id=5963
-	monoCmdOptions.append("--soft-breakpoints");
+	if(g_pMonoCVars->mono_softBreakpoints)
+	{
+		CryLogAlways("		[Performance Warning] Mono soft breakpoints are enabled!");
+
+		// Prevents managed null reference exceptions causing crashes in unmanaged code
+		// See: https://bugzilla.xamarin.com/show_bug.cgi?id=5963
+		monoCmdOptions.append("--soft-breakpoints");
+	}
 #endif
 
 	// Commandline switch -DEBUG makes the process connect to the debugging server. Warning: Failure to connect to a debugging server WILL result in a crash.
@@ -112,6 +118,9 @@ CScriptSystem::~CScriptSystem()
 	for(auto it = m_assemblies.begin(); it != m_assemblies.end(); ++it)
 		SAFE_RELEASE(*it);
 
+	for(auto it = m_localScriptBinds.begin(); it != m_localScriptBinds.end(); ++it)
+		(*it).reset();
+
 	// Force garbage collection of all generations.
 	mono_gc_collect(mono_gc_max_generation());
 
@@ -140,7 +149,7 @@ CScriptSystem::~CScriptSystem()
 
 bool CScriptSystem::CompleteInit()
 {
-	CryLogAlways("		Initializing CryMono...");
+	CryLogAlways("		Initializing CryMono ...");
 	
 	// Create root domain and determine the runtime version we'll be using.
 	m_pRootDomain = new CScriptDomain(eRV_4_30319);
@@ -158,6 +167,14 @@ bool CScriptSystem::CompleteInit()
 
 	m_pAppDomainManager = m_pCryBraryAssembly->GetClass("AppDomainManager")->CreateInstance();
 	m_pAppDomainManager->CallMethod("InitializeScriptDomain");
+	
+	IMonoClass *pClass = m_pCryBraryAssembly->GetClass("Network");
+
+	IMonoArray *pArgs = CreateMonoArray(2);
+	pArgs->Insert(gEnv->IsEditor());
+	pArgs->Insert(gEnv->IsDedicated());
+	pClass->InvokeArray(NULL, "InitializeNetworkStatics", pArgs);
+	SAFE_RELEASE(pArgs);
 
 	gEnv->pGameFramework->RegisterListener(this, "CryMono", eFLPriority_Game);
 
@@ -167,7 +184,7 @@ bool CScriptSystem::CompleteInit()
 	CryModuleGetMemoryInfo(&memInfo);
 
 	IMonoClass *pCryStats = m_pCryBraryAssembly->GetClass("CryStats", "CryEngine.Utilities");
-	CryLogAlways("		Initializing CryMono done, MemUsage=%iKb", (memInfo.allocated + pCryStats->GetProperty("MemoryUsage")->Unbox<long>()) / 1024);
+	CryLogAlways("		Initializing CryMono done, MemUsage=%iKb", (memInfo.allocated + pCryStats->GetPropertyValue(NULL, "MemoryUsage")->Unbox<long>()) / 1024);
 
 	return true;
 }
@@ -183,11 +200,11 @@ void CScriptSystem::OnSystemEvent(ESystemEvent event,UINT_PTR wparam,UINT_PTR lp
 	{
 	case ESYSTEM_EVENT_GAME_POST_INIT:
 		{
-			if(!m_bHasPostInitialized && gEnv->pGameFramework->GetIFlowSystem())
+			if(gEnv->pGameFramework->GetIFlowSystem())
 			{
-				m_pScriptManager->CallMethod("PostInit");
+				gEnv->pSystem->GetISystemEventDispatcher()->RemoveListener(this);
 
-				m_bHasPostInitialized = true;
+				m_pScriptManager->CallMethod("RegisterFlownodes");
 			}
 		}
 		break;
@@ -221,6 +238,7 @@ void CScriptSystem::RegisterDefaultBindings()
 	RegisterBinding(CScriptbind_Entity);
 	RegisterBinding(CNetwork);
 	RegisterBinding(CAppDomain);
+	RegisterBinding(CScriptbind_ScriptTable);
 
 #define RegisterBindingAndSet(var, T) RegisterBinding(T); var = (T *)m_localScriptBinds.back().get();
 	RegisterBindingAndSet(m_pFlowManager, CFlowManager);
@@ -228,19 +246,6 @@ void CScriptSystem::RegisterDefaultBindings()
 
 #undef RegisterBindingAndSet
 #undef RegisterBinding
-}
-
-bool CScriptSystem::InitializeSystems()
-{
-	IMonoClass *pClass = m_pCryBraryAssembly->GetClass("Network");
-
-	IMonoArray *pArgs = CreateMonoArray(2);
-	pArgs->Insert(gEnv->IsEditor());
-	pArgs->Insert(gEnv->IsDedicated());
-	pClass->CallMethodWithArray("InitializeNetworkStatics", pArgs, true);
-	SAFE_RELEASE(pArgs);
-
-	return true;
 }
 
 void CScriptSystem::OnPostUpdate(float fDeltaTime)
@@ -274,7 +279,7 @@ IMonoObject *CScriptSystem::InstantiateScript(const char *scriptName, EMonoScrip
 	if(!pResult)
 		MonoWarning("Failed to instantiate script %s", scriptName);
 	else
-		RegisterScriptInstance(pResult, pResult->GetProperty("ScriptId")->Unbox<int>());
+		RegisterScriptInstance(pResult, pResult->GetPropertyValue("ScriptId")->Unbox<int>());
 
 	return pResult;
 }
@@ -349,7 +354,7 @@ IMonoAssembly *CScriptSystem::GetAssembly(const char *file, bool shadowCopy)
 			{
 				IMonoArray *pArgs = CreateMonoArray(1);
 				pArgs->Insert(file);
-				pDriverClass->CallMethodWithArray("Convert", pArgs, true);
+				pDriverClass->InvokeArray(NULL, "Convert", pArgs);
 				SAFE_RELEASE(pArgs);
 			}
 		}

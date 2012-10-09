@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Runtime.InteropServices;
+
+using CryEngine.Native;
 
 namespace CryEngine
 {
 	/// <summary>
-	/// Used for non-CryMono entities, i.e. Lua / C++ such.
+	/// Represents an entity registered outside of CryMono, e.g. in CryGame.dll.
 	/// </summary>
 	[ExcludeFromCompilation]
 	internal class NativeEntity : Entity
@@ -12,7 +15,7 @@ namespace CryEngine
 		public NativeEntity(EntityId id, IntPtr ptr)
 		{ 
 			Id = id;
-			EntityPointer = ptr;
+			this.SetEntityHandle(new HandleRef(this, ptr));
 		}
 	}
 }

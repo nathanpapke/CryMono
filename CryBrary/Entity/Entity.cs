@@ -4,8 +4,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using CryEngine.Extensions;
+using System.Runtime.InteropServices;
 
+using CryEngine.Extensions;
 using CryEngine.Initialization;
 using CryEngine.Native;
 
@@ -24,10 +25,9 @@ namespace CryEngine
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		internal virtual void InternalSpawn(EntityInfo entInfo)
 		{
-			EntityPointer = entInfo.IEntityPtr;
+			this.SetEntityHandle(new HandleRef(this, entInfo.IEntityPtr));
+			this.SetAnimatedCharacterHandle(new HandleRef(this, entInfo.IAnimatedCharacterPtr));
 			Id = entInfo.Id;
-
-			Spawned = true;
 
 			foreach(var property in GetType().GetProperties())
 			{
@@ -54,10 +54,6 @@ namespace CryEngine
 
 			return value != defaultVal;
 		}
-
-		#region NativeEntityMethods & Fields
-		internal bool Spawned;
-		#endregion
 
 		#region Callbacks
 		/// <summary>
@@ -146,15 +142,27 @@ namespace CryEngine
 		/// </summary>
 		/// <param name="parent"></param>
 		protected virtual void OnDetachThis(EntityId parent) { }
+
+		/// <summary>
+		/// Called when the user changes a property from within the Editor.
+		/// </summary>
+        /// <param name="memberInfo"></param>
+		/// <param name="propertyType"></param>
+		/// <param name="newValue"></param>
+		protected virtual void OnPropertyChanged(MemberInfo memberInfo, EntityPropertyType propertyType, object newValue) { }
+		
+		protected virtual void OnPrePhysicsUpdate() {}
 		#endregion
 
 		#region Base Logic
 		internal virtual string GetPropertyValue(string propertyName)
 		{
-			if(propertyName == null)
+#if !((RELEASE && RELEASE_DISABLE_CHECKS))
+			if (propertyName == null)
 				throw new ArgumentNullException("propertyName");
 			if(propertyName.Length < 1)
 				throw new ArgumentException("propertyName was empty!");
+#endif
 
 			var field = GetType().GetField(propertyName);
 			if(field != null)
@@ -169,6 +177,7 @@ namespace CryEngine
 
 		internal virtual void SetPropertyValue(string propertyName, EntityPropertyType propertyType, string valueString)
 		{
+#if !((RELEASE && RELEASE_DISABLE_CHECKS))
 			if(valueString == null)
 				throw new ArgumentNullException("valueString");
 			if(propertyName == null)
@@ -177,51 +186,20 @@ namespace CryEngine
 				throw new ArgumentException("value was empty!");
 			if(propertyName.Length < 1)
 				throw new ArgumentException("propertyName was empty!");
+#endif
 
 			var value = Convert.FromString(propertyType, valueString);
 
-			// Perhaps we should exclude properties entirely, and just utilize fields (including backing fields)
-			var property = GetType().GetProperty(propertyName);
-			if(property != null)
-			{
-				property.SetValue(this, value, null);
-
-				return;
-			}
-
-			var field = GetType().GetField(propertyName);
-			if(field != null)
-				field.SetValue(this, value);
-			else
+			var member = GetType().GetMember(propertyName).First(x => x.MemberType == MemberTypes.Field || x.MemberType == MemberTypes.Property);
+			if(member == null)
 				throw new ArgumentException(string.Format("member {0} could not be located", propertyName));
-		}
 
-		/// <summary>
-		/// Loads a mesh for this entity. Can optionally load multiple meshes using entity slots.
-		/// </summary>
-		/// <param name="name"></param>
-		/// <param name="slotNumber"></param>
-		/// <returns></returns>
-		public bool LoadObject(string name, int slotNumber = 0)
-		{
-			if(name.EndsWith("cgf"))
-                NativeMethods.Entity.LoadObject(EntityPointer, name, slotNumber);
-			else if (name.EndsWith("cdf") || name.EndsWith("cga") || name.EndsWith("chr"))
-				NativeMethods.Entity.LoadCharacter(EntityPointer, name, slotNumber);
+			if (member.MemberType == MemberTypes.Property)
+				(member as PropertyInfo).SetValue(this, value, null);
 			else
-				return false;
+				(member as FieldInfo).SetValue(this, value);
 
-			return true;
-		}
-
-		public void PlayAnimation(string animationName, AnimationFlags flags = 0, int slot = 0, int layer = 0, float blend = 0.175f, float speed = 1.0f)
-		{
-			NativeMethods.Entity.PlayAnimation(EntityPointer, animationName, slot, layer, blend, speed, flags);
-		}
-
-		protected string GetObjectFilePath(int slot = 0)
-		{
-            return NativeMethods.Entity.GetStaticObjectFilePath(EntityPointer, slot);
+			OnPropertyChanged(member, propertyType, value);
 		}
 
 		public static EntityPropertyType GetEditorType(Type type, EntityPropertyType propertyType)
@@ -280,13 +258,13 @@ namespace CryEngine
 
                 hash = hash * 29 + ScriptId.GetHashCode();
                 hash = hash * 29 + Id.GetHashCode();
-                hash = hash * 29 + EntityPointer.GetHashCode();
+				hash = hash * 29 + this.GetEntityHandle().Handle.GetHashCode();
 
                 return hash;
             }
         }
         #endregion
-    }
+	}
 
 	[Serializable]
 	public class EntityException : Exception

@@ -48,15 +48,9 @@ public:
 
 	// IMonoObject
 	virtual void Release() override { delete this; };
-
-	virtual IMonoObject *CallMethodWithArray(const char *methodName, IMonoArray *params = nullptr, bool bStatic = false) override { return CScriptObject::CallMethodWithArray(methodName, params, bStatic); }
-
-	virtual IMonoObject *GetProperty(const char *propertyName, bool bStatic = false) override { return CScriptObject::GetProperty(propertyName, bStatic); }
-	virtual void SetProperty(const char *propertyName, IMonoObject *pNewValue, bool bStatic = false) override { CScriptObject::SetProperty(propertyName, pNewValue, bStatic); }
-	virtual IMonoObject *GetField(const char *fieldName, bool bStatic = false) override { return CScriptObject::GetField(fieldName, bStatic); }
-	virtual void SetField(const char *fieldName, IMonoObject *pNewValue, bool bStatic = false) override { CScriptObject::SetField(fieldName, pNewValue, bStatic); }
-
+	
 	virtual EMonoAnyType GetType() override { return eMonoAnyType_Array; }
+	virtual MonoAnyValue GetAnyValue() override { return MonoAnyValue(); }
 
 	virtual mono::object GetManagedObject() override { return CScriptObject::GetManagedObject(); }
 

@@ -14,7 +14,6 @@
 
 #include <MonoCommon.h>
 
-#include <CryExtension/Impl/ClassWeaver.h>
 #include <IFileChangeMonitor.h>
 #include <IGameFramework.h>
 
@@ -37,16 +36,13 @@ class CScriptSystem
 	, public IGameFrameworkListener
 	, public ISystemEventListener
 {
-	// CryExtension
-	CRYINTERFACE_SIMPLE(IMonoScriptSystem);
-
-	CRYGENERATE_SINGLETONCLASS(CScriptSystem, "CryMono", 0xc37b8ad5d62f47de, 0xa8debe525ff0fc8a)
-	// ~CryExtension
-
 	typedef std::map<const void *, const char *> TMethodBindings;
 	typedef std::map<IMonoObject *, int> TScripts;
 
 public:
+	CScriptSystem();
+	~CScriptSystem();
+
 	// IMonoScriptSystem
 	virtual void Release() override { delete this; }
 
@@ -103,7 +99,6 @@ public:
 
 protected:
 	bool CompleteInit();
-	bool InitializeSystems();
 
 	void RegisterDefaultBindings();
 
@@ -132,8 +127,6 @@ protected:
 
 	// ScriptBinds declared in this project are stored here to make sure they are destructed on shutdown.
 	std::vector<std::shared_ptr<IMonoScriptBind>> m_localScriptBinds;
-
-	bool m_bHasPostInitialized;
 };
 
 #endif //__MONO_H__

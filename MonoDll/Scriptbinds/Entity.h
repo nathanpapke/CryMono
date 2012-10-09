@@ -66,6 +66,8 @@ struct SMonoEntityProperty
 	mono::string description;
 	mono::string editType;
 
+	mono::string folder;
+
 	IEntityPropertyHandler::EPropertyType type;
 	uint32 flags;
 
@@ -76,6 +78,7 @@ struct SMonoEntityInfo
 {
 	SMonoEntityInfo(IEntity *pEnt)
 		: pEntity(pEnt)
+		, pAnimatedCharacter(NULL)
 	{
 		if(pEnt != nullptr)
 			id = pEnt->GetId();
@@ -86,10 +89,12 @@ struct SMonoEntityInfo
 	SMonoEntityInfo(IEntity *pEnt, EntityId entId)
 		: pEntity(pEnt)
 		, id(entId)
+		, pAnimatedCharacter(NULL)
 	{
 	}
 
 	IEntity *pEntity;
+	IAnimatedCharacter *pAnimatedCharacter;
 	EntityId id;
 };
 
@@ -100,6 +105,50 @@ enum EAnimationFlags
 	EAnimFlag_RestartAnimation = 1 << 4,
 	EAnimFlag_RepeatLastFrame = 1 << 8,
 	EAnimFlag_Loop = 1 << 16,
+};
+
+struct SMonoLightParams
+{
+	 mono::string specularCubemap;
+	 mono::string diffuseCubemap;
+	 mono::string lightImage;
+	 mono::string lightAttenMap;
+
+	 ColorF color;
+	 Vec3 origin;
+
+	 float shadowBias;
+	 float shadowSlopeBias;
+
+	 float radius;
+	 float specularMultiplier;
+
+	 float hdrDynamic;
+
+	 float animSpeed;
+	 float coronaScale;
+	 float coronaIntensity;
+	 float coronaDistSizeFactor;
+	 float coronaDistIntensityFactor;
+
+	 float shaftSrcSize;
+	 float shaftLength;
+	 float shaftBrightness;
+	 float shaftBlendFactor;
+	 float shaftDecayFactor;
+
+	 float lightFrustumAngle;
+	 float projectNearPlane;
+
+	 float shadowUpdateMinRadius;
+	 int16 shadowUpdateRatio;
+
+	 int lightStyle;
+	 int lightPhase;
+	 int postEffect;
+	 int shadowChanMask;
+
+	 uint32 flags;
 };
 
 class CScriptbind_Entity 
@@ -129,7 +178,7 @@ protected:
 	bool IsMonoEntity(const char *className);
 
 	// Scriptbinds
-	static bool SpawnEntity(EntitySpawnParams, bool, SMonoEntityInfo &entityInfo);
+	static mono::object SpawnEntity(EntitySpawnParams, bool, SMonoEntityInfo &entityInfo);
 	static void RemoveEntity(EntityId);
 
 	static IEntity *GetEntity(EntityId id);
@@ -174,15 +223,36 @@ protected:
 	static EEntityFlags GetFlags(IEntity *pEnt);
 	static void SetFlags(IEntity *pEnt, EEntityFlags flags);
 
-	static int GetAttachmentCount(IEntity *pEnt);
-	static IMaterial *GetAttachmentMaterialByIndex(IEntity *pEnt, int index);
-	static void SetAttachmentMaterialByIndex(IEntity *pEnt, int index, IMaterial *pMaterial);
-
-	static IMaterial *GetAttachmentMaterial(IEntity *pEnt, mono::string name);
-	static void SetAttachmentMaterial(IEntity *pEnt, mono::string attachmentName, IMaterial *pMaterial);
-
 	static void SetVisionParams(IEntity *pEntity, float r, float g, float b, float a);
 	static void SetHUDSilhouettesParams(IEntity *pEntity, float r, float g, float b, float a);
+
+	static bool AddEntityLink(IEntity *pEntity, mono::string linkName, EntityId otherId, Quat relativeRot, Vec3 relativePos);
+	static void RemoveEntityLink(IEntity *pEntity, EntityId otherId);
+
+	static int LoadLight(IEntity *pEntity, int slot, SMonoLightParams light);
+	static void FreeSlot(IEntity *pEntity, int slot);
+
+	static void AddMovement(IAnimatedCharacter *pAnimatedCharacter, SCharacterMoveRequest& moveRequest);
+
+	static int GetAttachmentCount(IEntity *pEnt, int slot);
+	static IAttachment *GetAttachmentByIndex(IEntity *pEnt, int index, int slot);
+	static IAttachment *GetAttachmentByName(IEntity *pEnt, mono::string name, int slot);
+
+	static void LinkEntityToAttachment(IAttachment *pAttachment, EntityId id);
+	static mono::string GetAttachmentObject(IAttachment *pAttachment);
+
+	static Quat GetAttachmentWorldRotation(IAttachment *pAttachment);
+	static Quat GetAttachmentLocalRotation(IAttachment *pAttachment);
+	static Vec3 GetAttachmentWorldPosition(IAttachment *pAttachment);
+	static Vec3 GetAttachmentLocalPosition(IAttachment *pAttachment);
+
+	static Quat GetAttachmentDefaultWorldRotation(IAttachment *pAttachment);
+	static Quat GetAttachmentDefaultLocalRotation(IAttachment *pAttachment);
+	static Vec3 GetAttachmentDefaultWorldPosition(IAttachment *pAttachment);
+	static Vec3 GetAttachmentDefaultLocalPosition(IAttachment *pAttachment);
+
+	static IMaterial *GetAttachmentMaterial(IAttachment *pAttachment);
+	static void SetAttachmentMaterial(IAttachment *pAttachment, IMaterial *pMaterial);
 	// ~Scriptbinds
 
 	static std::vector<const char *> m_monoEntityClasses;

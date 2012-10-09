@@ -4,8 +4,12 @@
 #include <IGameRulesSystem.h>
 #include <IViewSystem.h>
 
+#include <IMonoAssembly.h>
+#include <IMonoClass.h>
+
 CActor::CActor()
 	: m_bClient(false)
+	, m_pScript(nullptr)
 {
 }
 
@@ -16,7 +20,7 @@ CActor::~CActor()
 		pActorSystem->RemoveActor(GetEntityId());
 }
 
-bool CActor::Init( IGameObject * pGameObject ) 
+bool CActor::Init(IGameObject *pGameObject)
 { 
 	SetGameObject(pGameObject);
 
@@ -32,12 +36,6 @@ bool CActor::Init( IGameObject * pGameObject )
 
 void CActor::PostInit(IGameObject *pGameObject)
 {
-	if(IViewSystem *pViewSystem = gEnv->pGameFramework->GetIViewSystem())
-	{
-		if(IView *pView = pViewSystem->GetViewByEntityId(GetEntityId(), true))
-		{
-		}
-	}
 }
 
 void CActor::HandleEvent(const SGameObjectEvent &event)
@@ -60,9 +58,8 @@ void CActor::HandleEvent(const SGameObjectEvent &event)
 
 void CActor::UpdateView(SViewParams &viewParams)
 {
-	if(IViewSystem *pViewSystem = gEnv->pGameFramework->GetIViewSystem())
-	{
-		if(IView *pView = pViewSystem->GetViewByEntityId(GetEntityId()))
-			viewParams = *pView->GetCurrentParams();
-	}
+	void *args[1];
+	args[0] = &viewParams;
+
+	m_pScript->GetClass()->Invoke(m_pScript, "UpdateView", args, 1);
 }

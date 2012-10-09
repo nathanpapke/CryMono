@@ -17,20 +17,18 @@ namespace CryEngine
 		/// <param name="pos"></param>
 		/// <param name="rot"></param>
 		/// <param name="scale"></param>
-		/// <param name="autoInit"></param>
-		/// <returns></returns>
-		public static T Spawn<T>(string name, Vec3 pos, Vec3? rot = null, Vec3? scale = null, bool autoInit = true, EntityFlags flags = EntityFlags.CastShadow) where T : Entity, new()
+        /// <param name="autoInit"></param>
+        /// <param name="flags"></param>
+        /// <returns></returns>
+		public static T Spawn<T>(string name, Vec3? pos = null, Vec3? rot = null, Vec3? scale = null, bool autoInit = true, EntityFlags flags = EntityFlags.CastShadow) where T : Entity, new()
 		{
 			EntityInfo info;
-            if (NativeMethods.Entity.SpawnEntity(new EntitySpawnParams { Name = name, Class = typeof(T).Name, Pos = pos, Rot = rot ?? Vec3.Zero, Scale = scale ?? new Vec3(1, 1, 1), Flags = flags }, autoInit, out info))
-			{
-				var ent = new T();
 
-				ScriptManager.Instance.AddScriptInstance(ent, ScriptType.Entity);
-				ent.InternalSpawn(info);
-
+			var ent = NativeMethods.Entity.SpawnEntity(new EntitySpawnParams { Name = name, Class = typeof(T).Name, Pos = pos ?? new Vec3(1, 1, 1), Rot = rot ?? Vec3.Zero, Scale = scale ?? new Vec3(1, 1, 1), Flags = flags }, autoInit, out info) as T;
+			if (ent != null)
 				return ent;
-			}
+			else if (info.Id != 0)
+				return CreateNativeEntity(info.Id, info.IEntityPtr) as T;
 
 			Debug.LogAlways("[Entity.Spawn] Failed to spawn entity of class {0} with name {1}", typeof(T).Name, name);
 			return null;
@@ -38,8 +36,10 @@ namespace CryEngine
 
 		public static void Remove(EntityId id)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if(id == 0)
 				throw new ArgumentException("entityId cannot be 0!");
+#endif
 
             NativeMethods.Entity.RemoveEntity(id);
 		}
@@ -54,10 +54,14 @@ namespace CryEngine
 			int numRemoved = ScriptManager.Instance.RemoveInstances(ScriptType.Entity, instance =>
 				{
 					var entity = instance as Entity;
-							if(entity != null && entity.Id == id && entity.OnRemove())
-								return true;
+					if (entity != null && entity.Id == id && entity.OnRemove())
+					{
+						entity.IsDestroyed = true;
 
-							return false;
+						return true;
+					}
+
+					return false;
 				});
 
 			return numRemoved > 0;
@@ -72,8 +76,10 @@ namespace CryEngine
 		/// a C++ entity with the specified ID></remarks>
 		public static T Get<T>(EntityId entityId) where T : EntityBase
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if(entityId == 0)
 				throw new ArgumentException("entityId cannot be 0!");
+#endif
 
 			return ScriptManager.Instance.Find<T>(ScriptType.Entity, x => x.Id == entityId);
 		}
@@ -87,8 +93,10 @@ namespace CryEngine
 		/// a C++ entity with the specified ID></remarks>
 		public static EntityBase Get(EntityId entityId)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if(entityId == 0)
 				throw new ArgumentException("entityId cannot be 0!");
+#endif
 
 			var ent = Get<EntityBase>(entityId);
 			if(ent != null)
@@ -138,8 +146,10 @@ namespace CryEngine
 		/// <returns>An array of entities.</returns>
 		public static IEnumerable<Entity> GetByClass(string className)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if(String.IsNullOrEmpty(className))
 				throw new ArgumentException("className should not be null or empty", "className");
+#endif
 
             return GetEntitiesCommon<Entity>(NativeMethods.Entity.GetEntitiesByClass(className));
 		}
@@ -184,9 +194,11 @@ namespace CryEngine
 		{
 			IEntityPtr = ptr;
 			Id = id;
+			IAnimatedCharacterPtr = IntPtr.Zero;
 		}
 
 		public IntPtr IEntityPtr;
+		public IntPtr IAnimatedCharacterPtr;
 		public uint Id;
 	}
 

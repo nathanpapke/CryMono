@@ -26,7 +26,7 @@ IPhysicalEntity *CScriptbind_Physics::GetPhysicalEntity(IEntity *pEntity)
 	return pEntity->GetPhysics();
 }
 
-void CScriptbind_Physics::Physicalize(IEntity *pEntity, SMonoPhysicalizeParams params)
+void CScriptbind_Physics::Physicalize(IEntity *pEntity, SMonoPhysicalizeParams params, SMonoPlayerPhysicalizeParams playerParams)
 {
 	// Unphysicalize
 	{
@@ -55,6 +55,29 @@ void CScriptbind_Physics::Physicalize(IEntity *pEntity, SMonoPhysicalizeParams p
 	{
 		if(IPhysicalEntity *pPhysEnt = gEnv->pPhysicalWorld->GetPhysicalEntityById(params.attachToEntity.id))
 			pp.pAttachToEntity = pPhysEnt;
+	}
+
+	if(pp.type == PE_LIVING)
+	{
+		pe_player_dimensions playerDim;
+		pp.pPlayerDimensions = &playerDim;
+
+		pe_player_dynamics playerDyn;
+		pp.pPlayerDynamics = &playerDyn;
+
+		playerDyn.mass = params.mass;
+
+		playerDim.heightCollider = playerParams.heightCollider;
+		playerDim.sizeCollider = playerParams.sizeCollider;
+		playerDim.heightPivot = playerParams.heightPivot;
+		playerDim.bUseCapsule = playerParams.useCapsule;
+
+		playerDyn.gravity = playerParams.gravity;
+		playerDyn.kAirControl = playerParams.airControl;
+		playerDyn.minSlideAngle = playerParams.minSlideAngle;
+		playerDyn.maxClimbAngle = playerParams.maxClimbAngle;
+		playerDyn.minFallAngle = playerParams.minFallAngle;
+		playerDyn.maxVelGround = playerParams.maxVelGround;
 	}
 
 	pEntity->Physicalize(pp);

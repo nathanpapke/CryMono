@@ -78,8 +78,6 @@ namespace CryEngine.Initialization
 			{
 				if (!initialLoad)
 				{
-					PostInit();
-
 					using (var stream = File.Open(Path.Combine(PathUtils.TempFolder, "ScriptManager.CompiledScripts.scriptdump"), FileMode.Open))
 						Scripts = Formatter.Deserialize(stream) as List<CryScript>;
 
@@ -96,9 +94,13 @@ namespace CryEngine.Initialization
 			}*/
 		}
 
-		public void PostInit()
+		/// <summary>
+		/// Called from GameDll
+		/// </summary>
+		public void RegisterFlownodes()
 		{
 			// These have to be registered later on due to the flow system being initialized late.
+			// Note: Flow nodes have to be registered from IGame::CompleteInit in order to be usable from within UI graphs. (Use IMonoScriptSystem::RegisterFlownodes)
 			foreach (var node in FlowNodes)
 				FlowNode.Register(node);
 		}
@@ -156,6 +158,10 @@ namespace CryEngine.Initialization
 		private void LoadPlugins()
 		{
             var pluginsDirectory = Path.Combine(PathUtils.ScriptsFolder, "Plugins");
+			if (!Directory.Exists(pluginsDirectory))
+				return;
+
+			bool hasDefaultGameRules = false;
             foreach (var directory in Directory.GetDirectories(pluginsDirectory))
             {
                 var compilerDll = Path.Combine(directory, "Compiler.dll");
@@ -181,12 +187,14 @@ namespace CryEngine.Initialization
                     {
                         var script = unprocessedScript;
 
-                        if (script.RegistrationParams is ActorRegistrationParams)
+						if (script.RegistrationParams == null)
+							continue;
+						else if (script.RegistrationParams is ActorRegistrationParams)
                         {
                             var registrationParams = (ActorRegistrationParams)script.RegistrationParams;
 
-                            if (registrationParams.useMonoActor)
-                                NativeMethods.Actor.RegisterClass(script.ScriptName, registrationParams.isAI);
+                            //if (registrationParams.useMonoActor)
+                                //NativeMethods.Actor.RegisterClass(script.ScriptName, registrationParams.isAI);
                         }
                         else if (script.RegistrationParams is EntityRegistrationParams)
                         {
@@ -206,8 +214,12 @@ namespace CryEngine.Initialization
 
                             NativeMethods.GameRules.RegisterGameMode(registrationParams.name);
 
-                            if (registrationParams.defaultGamemode)
-                                NativeMethods.GameRules.SetDefaultGameMode(registrationParams.name);
+							if (registrationParams.defaultGamemode || !hasDefaultGameRules)
+							{
+								NativeMethods.GameRules.SetDefaultGameMode(registrationParams.name);
+
+								hasDefaultGameRules = true;
+							}
                         }
                         else if (script.RegistrationParams is FlowNodeRegistrationParams)
                         {
@@ -235,10 +247,12 @@ namespace CryEngine.Initialization
 		/// <param name="assemblyPath"></param>
 		public Assembly LoadAssembly(string assemblyPath)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if(assemblyPath == null)
 				throw new ArgumentNullException("assemblyPath");
 			if(assemblyPath.Length < 1)
 				throw new ArgumentException("string cannot be empty!", "assemblyPath");
+#endif
 
 			var newPath = Path.Combine(PathUtils.TempFolder, Path.GetFileName(assemblyPath));
 
@@ -283,10 +297,12 @@ namespace CryEngine.Initialization
 
 		public void GenerateDebugDatabaseForAssembly(string assemblyPath)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if(assemblyPath == null)
 				throw new ArgumentNullException("assemblyPath");
 			if(assemblyPath.Length < 1)
 				throw new ArgumentException("string cannot be empty!", "assemblyPath");
+#endif
 
 			if(File.Exists(Path.ChangeExtension(assemblyPath, "pdb")))
 			{
@@ -324,28 +340,37 @@ namespace CryEngine.Initialization
 		/// <summary>
 		/// Instantiates a script using its name and interface.
 		/// </summary>
-		/// <param name="scriptName"></param>
-		/// <param name="constructorParams"></param>
+        /// <param name="scriptName"></param>
+        /// <param name="scriptType"></param>
+        /// <param name="constructorParams"></param>
 		/// <returns>New instance scriptId or -1 if instantiation failed.</returns>
 		public CryScriptInstance CreateScriptInstance(string scriptName, ScriptType scriptType, object[] constructorParams = null)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if (scriptName == null)
 				throw new ArgumentNullException("scriptName");
 			if (scriptName.Length < 1)
 				throw new ArgumentException("string cannot be empty!", "scriptName");
 			if (!Enum.IsDefined(typeof(ScriptType), scriptType))
 				throw new ArgumentException(string.Format("scriptType: value {0} was not defined in the enum", scriptType));
+#endif
 
 			var script = Scripts.FirstOrDefault(x => x.ScriptType.ContainsFlag(scriptType) && x.ScriptName.Equals(scriptName));
+
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if (script == default(CryScript))
 				throw new ScriptNotFoundException(string.Format("Script {0} of ScriptType {1} could not be found.", scriptName, scriptType));
+#endif
 
 			var scriptInstance = Activator.CreateInstance(script.Type, constructorParams) as CryScriptInstance;
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
+
 			if (scriptInstance == null)
 				throw new ArgumentException("Failed to create instance, make sure type derives from CryScriptInstance", "scriptName");
+#endif
 
 			if (scriptType == ScriptType.GameRules)
-				GameRules.Current = scriptInstance as GameRules;
+				(scriptInstance as GameRules).InternalInitialize();
 
 			AddScriptInstance(script, scriptInstance);
 
@@ -354,10 +379,12 @@ namespace CryEngine.Initialization
 
 		public void AddScriptInstance(CryScriptInstance instance, ScriptType scriptType)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if (instance == null)
 				throw new ArgumentNullException("instance");
 			if (!Enum.IsDefined(typeof(ScriptType), scriptType))
 				throw new ArgumentException(string.Format("scriptType: value {0} was not defined in the enum", scriptType));
+#endif
 
 			var script = FindScript(scriptType, x => x.Type == instance.GetType());
 			if (script == default(CryScript))
@@ -373,12 +400,17 @@ namespace CryEngine.Initialization
 
 		void AddScriptInstance(CryScript script, CryScriptInstance instance)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if (script == default(CryScript))
 				throw new ArgumentException("script");
+#endif
 
 			var index = Scripts.IndexOf(script);
+
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if (index == -1)
 				throw new ArgumentException("Provided CryScript object was not present in the script collection", "script");
+#endif
 
 			instance.ScriptId = LastScriptId++;
 
@@ -400,8 +432,10 @@ namespace CryEngine.Initialization
 		/// </summary>
 		public int RemoveInstances<T>(ScriptType scriptType, Predicate<T> match) where T : CryScriptInstance
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if (!Enum.IsDefined(typeof(ScriptType), scriptType))
 				throw new ArgumentException(string.Format("scriptType: value {0} was not defined in the enum", scriptType));
+#endif
 
 			int numRemoved = 0;
 			for (int i = 0; i < Scripts.Count; i++)
@@ -427,8 +461,10 @@ namespace CryEngine.Initialization
 
 		public CryScriptInstance GetScriptInstanceById(int id, ScriptType scriptType)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if (id == 0)
 				throw new ArgumentException("instance id cannot be 0!");
+#endif
 
 			return Find<CryScriptInstance>(scriptType, x => x.ScriptId == id);
 		}
@@ -436,16 +472,20 @@ namespace CryEngine.Initialization
 		#region Linq statements
 		public CryScript FindScript(ScriptType scriptType, Func<CryScript, bool> predicate)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if (!Enum.IsDefined(typeof(ScriptType), scriptType))
 				throw new ArgumentException(string.Format("scriptType: value {0} was not defined in the enum", scriptType));
+#endif
 
 			return Scripts.FirstOrDefault(x => x.ScriptType.ContainsFlag(scriptType) && predicate(x));
 		}
 
 		public void ForEachScript(ScriptType scriptType, Action<CryScript> action)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if (!Enum.IsDefined(typeof(ScriptType), scriptType))
 				throw new ArgumentException(string.Format("scriptType: value {0} was not defined in the enum", scriptType));
+#endif
 
 			Scripts.ForEach(x =>
 			{
@@ -456,8 +496,10 @@ namespace CryEngine.Initialization
 
 		public void ForEach(ScriptType scriptType, Action<CryScriptInstance> action)
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if (!Enum.IsDefined(typeof(ScriptType), scriptType))
 				throw new ArgumentException(string.Format("scriptType: value {0} was not defined in the enum", scriptType));
+#endif
 
 			ForEachScript(scriptType, script =>
 			{
@@ -468,8 +510,10 @@ namespace CryEngine.Initialization
 
 		public T Find<T>(ScriptType scriptType, Func<T, bool> predicate) where T : CryScriptInstance
 		{
+#if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if (!Enum.IsDefined(typeof(ScriptType), scriptType))
 				throw new ArgumentException(string.Format("scriptType: value {0} was not defined in the enum", scriptType));
+#endif
 
 			T scriptInstance = null;
 

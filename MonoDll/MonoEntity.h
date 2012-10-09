@@ -10,9 +10,13 @@
 #ifndef __MONO_ENTITY__
 #define __MONO_ENTITY__
 
+#include <MonoCommon.h>
+
 #include <IGameObject.h>
+#include <IAnimatedCharacter.h>
 
 struct IMonoObject;
+struct IMonoArray;
 
 struct SQueuedProperty
 {
@@ -36,7 +40,7 @@ public:
 	// IGameObjectExtension
 	virtual bool Init(IGameObject *pGameObject);
 	virtual void InitClient( int channelId ) {}
-	virtual void PostInit(IGameObject *pGameObject) {}
+	virtual void PostInit(IGameObject *pGameObject);
 	virtual void PostInitClient( int channelId ) {}
 	virtual bool ReloadExtension( IGameObject* pGameObject, const SEntitySpawnParams& params ) { return false; }
 	virtual void PostReloadExtension( IGameObject* pGameObject, const SEntitySpawnParams& params ) {}
@@ -57,14 +61,34 @@ public:
 	virtual void GetMemoryUsage( ICrySizer* s ) const { s->Add( *this ); }
 	// ~IGameObjectExtension
 
+	struct RMIParams
+	{
+		RMIParams() : anyValues(NULL) {}
+		RMIParams(IMonoArray *pArray, const char *funcName, int targetScript);
+
+		void SerializeWith(TSerialize ser);
+
+		MonoAnyValue *anyValues;
+		int length;
+		string methodName;
+		int scriptId;
+	};
+
+	DECLARE_SERVER_RMI_NOATTACH(SvScriptRMI, RMIParams, eNRT_ReliableUnordered);
+	DECLARE_CLIENT_RMI_NOATTACH(ClScriptRMI, RMIParams, eNRT_ReliableUnordered);
+
 	IMonoObject *GetScript() { return m_pScript; }
 
 	void SetPropertyValue(IEntityPropertyHandler::SPropertyInfo propertyInfo, const char *value);
 
 	bool IsInitialized() { return m_bInitialized; }
 
+	void Reset(bool enteringGamemode);
+
 protected:
 	IMonoObject *m_pScript;
+
+	IAnimatedCharacter *m_pAnimatedCharacter;
 
 	bool m_bInitialized;
 };

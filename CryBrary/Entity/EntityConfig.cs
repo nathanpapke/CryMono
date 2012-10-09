@@ -68,9 +68,11 @@ namespace CryEngine
 		public string Description { get; set; }
 	}
 
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+	public sealed class EditorPropertyFolderAttribute : Attribute { }
+
 	/// <summary>
 	/// Defines the list of supported editor types.
-	/// Bool is not currently functioning.
 	/// </summary>
 	public enum EntityPropertyType
 	{
@@ -125,6 +127,7 @@ namespace CryEngine
 		{
 			name = Name;
 			description = Desc;
+
 			type = Type;
 		}
 
@@ -135,6 +138,9 @@ namespace CryEngine
 		private string editType;
 #pragma warning restore 414
 
+		public string folder;
+
+		private EntityPropertyType _type;
 		public EntityPropertyType type
 		{
 			get
@@ -145,12 +151,12 @@ namespace CryEngine
 			{
 				_type = value;
 
-				switch(value)
+				switch (value)
 				{
 					//VALUE TYPES
 					case EntityPropertyType.Bool:
 						{
-							editType = "b"; // Start automagically working right now or I'll roundhouse kick you to the Pegasus galaxy >:(
+							editType = "b";
 						}
 						break;
 					case EntityPropertyType.Int:
@@ -202,6 +208,7 @@ namespace CryEngine
 					case EntityPropertyType.Color:
 						{
 							editType = "color";
+							_type = EntityPropertyType.Vec3;
 						}
 						break;
 					case EntityPropertyType.Vec3:
@@ -222,7 +229,6 @@ namespace CryEngine
 			}
 		}
 
-		private EntityPropertyType _type;
 		public int flags;
 
 		public EntityPropertyLimits limits;

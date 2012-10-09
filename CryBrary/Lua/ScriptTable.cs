@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
 using CryEngine.Native;
 
 namespace CryEngine.Lua
@@ -13,17 +15,21 @@ namespace CryEngine.Lua
 	public class ScriptTable
 	{
 		#region Statics
-		public static ScriptTable Get(EntityId entityId)
+		internal static ScriptTable Get(IntPtr entityPtr)
 		{
-			var scriptTable = ScriptTables.Find(x => x.EntityId == entityId);
-			if(scriptTable != default(ScriptTable))
-				return scriptTable;
+			if (ScriptTables == null)
+				ScriptTables = new List<ScriptTable>();
 
-            var scriptPtr = NativeMethods.ScriptTable.GetScriptTable(entityId);
-			if(scriptPtr != IntPtr.Zero)
+			var scriptPtr = NativeMethods.ScriptTable.GetScriptTable(entityPtr);
+			if (scriptPtr != IntPtr.Zero)
 			{
-				ScriptTables.Add(new ScriptTable(scriptPtr));
-				return ScriptTables.Last();
+				var scriptTable = ScriptTables.FirstOrDefault(x => x.HandleRef.Handle == scriptPtr);
+				if (scriptTable != default(ScriptTable))
+					return scriptTable;
+
+				scriptTable = new ScriptTable(scriptPtr);
+				ScriptTables.Add(scriptTable);
+				return scriptTable;
 			}
 
 			return null;
@@ -34,54 +40,22 @@ namespace CryEngine.Lua
 
 		internal ScriptTable(IntPtr scriptPtr)
 		{
-			ScriptPointer = scriptPtr;
-
-			IsSubtable = false;
+			HandleRef = new HandleRef(this, scriptPtr);
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <typeparam name="T">Boolean, Integer, Float or String.</typeparam>
-		/// <param name="methodName"></param>
-		/// <param name="args"></param>
-		/// <returns></returns>
-		public T CallMethod<T>(string methodName, object[] args = null)
+		public object CallMethod(string methodName, params object[] args)
 		{
-			Type retType = typeof(T);
-			LuaVariableType variableType = LuaVariableType.None;
-
-			if(retType.IsPrimitive)
-			{
-				if(retType == typeof(bool))
-					variableType = LuaVariableType.Boolean;
-				else if(retType == typeof(int))
-					variableType = LuaVariableType.Integer;
-				else if(retType == typeof(float))
-					variableType = LuaVariableType.Float;
-			}
-			else if(retType == typeof(string))
-				variableType = LuaVariableType.String;
-			else
-				throw new NotSupportedException("Lua methods can only return Boolean, Integer, Float, Vector or String.");
-
-            return (T)NativeMethods.ScriptTable.CallMethod(ScriptPointer, methodName, variableType, args);
-		}
-
-		public void CallMethod(string methodName, object[] args = null)
-		{
-            NativeMethods.ScriptTable.CallMethodVoid(ScriptPointer, methodName, args);
+			return NativeMethods.ScriptTable.CallMethod(HandleRef.Handle, methodName, args);
 		}
 
 		/// <summary>
 		/// Gets a value within the table.
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public T GetValue<T>(string name)
+		public object GetValue(string name)
 		{
-			return default(T);
+			return NativeMethods.ScriptTable.GetValue(HandleRef.Handle, name);
 		}
 
 		/// <summary>
@@ -91,16 +65,25 @@ namespace CryEngine.Lua
 		/// <returns></returns>
 		public ScriptTable GetTable(string name)
 		{
+			var scriptPtr = NativeMethods.ScriptTable.GetSubScriptTable(HandleRef.Handle, name);
+			if (scriptPtr != IntPtr.Zero)
+			{
+				var scriptTable = ScriptTables.FirstOrDefault(x => x.HandleRef.Handle == scriptPtr);
+				if (scriptTable != default(ScriptTable))
+					return scriptTable;
+
+				scriptTable = new ScriptTable(scriptPtr);
+				ScriptTables.Add(scriptTable);
+				return scriptTable;
+			}
+
 			return null;
 		}
 
-		public EntityId EntityId { get; set; }
-
 		/// <summary>
-		/// Determines if this is a SmartScriptTable, retrieved from a ScriptTable.
+		/// Handle to the native IScriptTable object
 		/// </summary>
-		internal bool IsSubtable { get; set; }
-		internal IntPtr ScriptPointer { get; set; }
+		public HandleRef HandleRef { get; set; }
 	}
 
 	enum LuaVariableType

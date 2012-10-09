@@ -10,12 +10,12 @@ namespace CryEngine.Native
 		extern internal static void _PlayAnimation(IntPtr ptr, string animationName, int slot, int layer, float blend, float speed, AnimationFlags flags);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static bool _SpawnEntity(EntitySpawnParams spawnParams, bool autoInit, out EntityInfo entityInfo);
+		extern internal static EntityBase _SpawnEntity(EntitySpawnParams spawnParams, bool autoInit, out EntityInfo entityInfo);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         extern internal static void _RemoveEntity(uint entityId);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr _GetEntity(uint entityId);
+		extern internal static IntPtr _GetEntity(uint entityId);
         [MethodImpl(MethodImplOptions.InternalCall)]
         extern internal static uint _FindEntity(string name);
         [MethodImpl(MethodImplOptions.InternalCall)]
@@ -40,7 +40,7 @@ namespace CryEngine.Native
         extern internal static void _SetFlags(IntPtr ptr, EntityFlags name);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static void _AddMovement(IntPtr ptr, ref EntityMovementRequest request);
+		extern internal static void _AddMovement(IntPtr animatedCharacterPtr, ref EntityMovementRequest request);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         extern internal static void _SetWorldTM(IntPtr ptr, Matrix34 tm);
@@ -87,34 +87,68 @@ namespace CryEngine.Native
         [MethodImpl(MethodImplOptions.InternalCall)]
         extern internal static void _LoadCharacter(IntPtr ptr, string fileName, int slot);
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static int _GetAttachmentCount(IntPtr entPtr);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr _GetAttachmentMaterialByIndex(IntPtr entPtr, int index);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static void _SetAttachmentMaterialByIndex(IntPtr entPtr, int index, IntPtr materialPtr);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static bool _AddEntityLink(IntPtr entPtr, string linkName, uint otherId, Quat relativeRot, Vec3 relativePos);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static void _RemoveEntityLink(IntPtr entPtr, uint otherId);
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr _GetAttachmentMaterial(IntPtr entPtr, string name);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static int _SetAttachmentMaterial(IntPtr entPtr, string name, IntPtr materialPtr);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static int _LoadLight(IntPtr entPtr, int slot, LightParams lightParams);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static void _FreeSlot(IntPtr entPtr, int slot);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static int _GetAttachmentCount(IntPtr entPtr, int slot);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static IntPtr _GetAttachmentByIndex(IntPtr entPtr, int index, int slot);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static IntPtr _GetAttachmentByName(IntPtr entPtr, string name, int slot);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static void _LinkEntityToAttachment(IntPtr attachmentPtr, uint entityId);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static string _GetAttachmentObject(IntPtr attachmentPtr);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static Quat _GetAttachmentWorldRotation(IntPtr attachmentPtr);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static Quat _GetAttachmentLocalRotation(IntPtr attachmentPtr);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static Vec3 _GetAttachmentWorldPosition(IntPtr attachmentPtr);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static Vec3 _GetAttachmentLocalPosition(IntPtr attachmentPtr);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static Quat _GetAttachmentDefaultWorldRotation(IntPtr attachmentPtr);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static Quat _GetAttachmentDefaultLocalRotation(IntPtr attachmentPtr);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static Vec3 _GetAttachmentDefaultWorldPosition(IntPtr attachmentPtr);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static Vec3 _GetAttachmentDefaultLocalPosition(IntPtr attachmentPtr);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static IntPtr _GetAttachmentMaterial(IntPtr attachmentPtr);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static void _SetAttachmentMaterial(IntPtr attachmentPtr, IntPtr materialPtr);
 
 		public void PlayAnimation(IntPtr ptr, string animationName, int slot, int layer, float blend, float speed, AnimationFlags flags)
 		{
 			_PlayAnimation(ptr, animationName, slot, layer, blend, speed, flags);
 		}
 
-        public bool SpawnEntity(EntitySpawnParams spawnParams, bool autoInit, out EntityInfo entityInfo)
+		public EntityBase SpawnEntity(EntitySpawnParams spawnParams, bool autoInit, out EntityInfo entityInfo)
         {
             return _SpawnEntity(spawnParams, autoInit, out entityInfo);
         }
 
-        public void RemoveEntity(uint entityId)
+        public void RemoveEntity(EntityId entityId)
         {
             _RemoveEntity(entityId);
         }
 
-        public IntPtr GetEntity(uint entityId)
+		public IntPtr GetEntity(EntityId entityId)
         {
             return _GetEntity(entityId);
         }
@@ -166,7 +200,7 @@ namespace CryEngine.Native
 
         public void AddMovement(IntPtr ptr, ref EntityMovementRequest request)
         {
-            _AddMovement(ptr,ref request);
+            _AddMovement(ptr, ref request);
         }
 
         public void SetWorldTM(IntPtr ptr, Matrix34 tm)
@@ -264,35 +298,104 @@ namespace CryEngine.Native
             _LoadCharacter(ptr,fileName,slot);
         }
 
-        public int GetAttachmentCount(IntPtr entPtr)
-        {
-            return _GetAttachmentCount(entPtr);
-        }
-
-        public IntPtr GetAttachmentMaterialByIndex(IntPtr entPtr, int index)
-        {
-            return _GetAttachmentMaterialByIndex(entPtr, index);
-        }
-
-        public void SetAttachmentMaterialByIndex(IntPtr entPtr, int index, IntPtr materialPtr)
-        {
-            _SetAttachmentMaterialByIndex(entPtr,index,materialPtr);
-        }
-
-        public IntPtr GetAttachmentMaterial(IntPtr entPtr, string name)
-        {
-            return _GetAttachmentMaterial(entPtr, name);
-        }
-
-        public int SetAttachmentMaterial(IntPtr entPtr, string name, IntPtr materialPtr)
-        {
-            return _SetAttachmentMaterial(entPtr, name, materialPtr);
-        }
-
-
         public void RegisterClass(EntityRegistrationParams registrationParams)
         {
             _RegisterEntityClass(registrationParams);
         }
+
+		public bool AddEntityLink(IntPtr entPtr, string linkName, EntityId otherId, Quat relativeRot, Vec3 relativePos)
+		{
+			return _AddEntityLink(entPtr, linkName, otherId, relativeRot, relativePos);
+		}
+
+		public void RemoveEntityLink(IntPtr entPtr, EntityId otherId)
+		{
+			_RemoveEntityLink(entPtr, otherId);
+		}
+
+		public int LoadLight(IntPtr entPtr, int slot, LightParams lightParams)
+		{
+			return _LoadLight(entPtr, slot, lightParams);
+		}
+
+		public void FreeSlot(IntPtr entPtr, int slot)
+		{
+			_FreeSlot(entPtr, slot);
+		}
+
+		public int GetAttachmentCount(IntPtr entPtr, int slot)
+		{
+			return _GetAttachmentCount(entPtr, slot);
+		}
+
+		public IntPtr GetAttachmentByIndex(IntPtr entPtr, int index, int slot)
+		{
+			return _GetAttachmentByIndex(entPtr, index, slot);
+		}
+
+		public IntPtr GetAttachmentByName(IntPtr entPtr, string name, int slot)
+		{
+			return _GetAttachmentByName(entPtr, name, slot);
+		}
+
+		public void LinkEntityToAttachment(IntPtr attachmentPtr, uint entityId)
+		{
+			_LinkEntityToAttachment(attachmentPtr, entityId);
+		}
+
+		public string GetAttachmentObject(IntPtr attachmentPtr)
+		{
+			return _GetAttachmentObject(attachmentPtr);
+		}
+
+		public Quat GetAttachmentWorldRotation(IntPtr attachmentPtr)
+		{
+			return _GetAttachmentWorldRotation(attachmentPtr);
+		}
+
+		public Quat GetAttachmentLocalRotation(IntPtr attachmentPtr)
+		{
+			return _GetAttachmentLocalRotation(attachmentPtr);
+		}
+
+		public Vec3 GetAttachmentWorldPosition(IntPtr attachmentPtr)
+		{
+			return _GetAttachmentWorldPosition(attachmentPtr);
+		}
+
+		public Vec3 GetAttachmentLocalPosition(IntPtr attachmentPtr)
+		{
+			return GetAttachmentLocalPosition(attachmentPtr);
+		}
+
+		public Quat GetAttachmentDefaultWorldRotation(IntPtr attachmentPtr)
+		{
+			return _GetAttachmentDefaultWorldRotation(attachmentPtr);
+		}
+
+		public Quat GetAttachmentDefaultLocalRotation(IntPtr attachmentPtr)
+		{
+			return _GetAttachmentDefaultLocalRotation(attachmentPtr);
+		}
+
+		public Vec3 GetAttachmentDefaultWorldPosition(IntPtr attachmentPtr)
+		{
+			return _GetAttachmentDefaultWorldPosition(attachmentPtr);
+		}
+
+		public Vec3 GetAttachmentDefaultLocalPosition(IntPtr attachmentPtr)
+		{
+			return _GetAttachmentDefaultLocalPosition(attachmentPtr);
+		}
+
+		public IntPtr GetAttachmentMaterial(IntPtr attachmentPtr)
+		{
+			return _GetAttachmentMaterial(attachmentPtr); 
+		}
+
+		public void SetAttachmentMaterial(IntPtr attachmentPtr, IntPtr materialPtr)
+		{
+			_SetAttachmentMaterial(attachmentPtr, materialPtr);
+		}
     }
 }

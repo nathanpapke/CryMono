@@ -66,17 +66,40 @@ CScriptbind_Entity::CScriptbind_Entity()
 	REGISTER_METHOD(GetFlags);
 	REGISTER_METHOD(SetFlags);
 
-	REGISTER_METHOD(GetAttachmentCount);
-	REGISTER_METHOD(GetAttachmentMaterialByIndex);
-	REGISTER_METHOD(SetAttachmentMaterialByIndex);
-
-	REGISTER_METHOD(SetAttachmentMaterial);
-	REGISTER_METHOD(GetAttachmentMaterial);
-
 	REGISTER_METHOD(SetVisionParams);
 	REGISTER_METHOD(SetHUDSilhouettesParams);
 
 	REGISTER_METHOD(PlayAnimation);
+
+	REGISTER_METHOD(AddEntityLink);
+	REGISTER_METHOD(RemoveEntityLink);
+
+	REGISTER_METHOD(LoadLight);
+
+	REGISTER_METHOD(FreeSlot);
+
+	REGISTER_METHOD(AddMovement);
+
+	// Attachments
+	REGISTER_METHOD(GetAttachmentCount);
+	REGISTER_METHOD(GetAttachmentByIndex);
+	REGISTER_METHOD(GetAttachmentByName);
+
+	REGISTER_METHOD(LinkEntityToAttachment);
+	REGISTER_METHOD(GetAttachmentObject);
+
+	REGISTER_METHOD(GetAttachmentWorldRotation);
+	REGISTER_METHOD(GetAttachmentLocalRotation);
+	REGISTER_METHOD(GetAttachmentWorldPosition);
+	REGISTER_METHOD(GetAttachmentLocalPosition);
+
+	REGISTER_METHOD(GetAttachmentDefaultWorldRotation);
+	REGISTER_METHOD(GetAttachmentDefaultLocalRotation);
+	REGISTER_METHOD(GetAttachmentDefaultWorldPosition);
+	REGISTER_METHOD(GetAttachmentDefaultLocalPosition);
+
+	REGISTER_METHOD(GetAttachmentMaterial);
+	REGISTER_METHOD(SetAttachmentMaterial);
 
 	gEnv->pEntitySystem->AddSink(this, IEntitySystem::OnSpawn | IEntitySystem::OnRemove, 0);
 }
@@ -143,16 +166,12 @@ void CScriptbind_Entity::OnSpawn(IEntity *pEntity,SEntitySpawnParams &params)
 
 bool CScriptbind_Entity::OnRemove(IEntity *pIEntity)
 {
-	const char *className = pIEntity->GetClass()->GetName();
-	if(!IsMonoEntity(className))
-		return true;
-
 	if(IMonoClass *pEntityClass = gEnv->pMonoScriptSystem->GetCryBraryAssembly()->GetClass("Entity"))
 	{
 		IMonoArray *pArgs = CreateMonoArray(1);
 		pArgs->Insert(pIEntity->GetId());
 
-		auto result = pEntityClass->CallMethodWithArray("InternalRemove", pArgs, true)->Unbox<bool>();
+		auto result = pEntityClass->InvokeArray(NULL, "InternalRemove", pArgs)->Unbox<bool>();
 
 		SAFE_RELEASE(pArgs);
 
@@ -186,12 +205,30 @@ bool CScriptbind_Entity::RegisterEntityClass(SEntityRegistrationParams params)
 
 		int numProperties = propertiesArray->GetSize();
 	
+		const char *currentFolder = NULL;
 		for	(int i = 0; i < numProperties; ++i)
 		{
 			IMonoObject *pItem = propertiesArray->GetItem(i);
 			CRY_ASSERT(pItem);
 
 			SMonoEntityProperty monoProperty = pItem->Unbox<SMonoEntityProperty>();
+
+			if(monoProperty.folder)
+			{
+				currentFolder = ToCryString(monoProperty.folder);
+				if(currentFolder && strcmp(currentFolder, ""))
+				{
+					IEntityPropertyHandler::SPropertyInfo groupInfo;
+					groupInfo.name = currentFolder;
+					groupInfo.type = IEntityPropertyHandler::FolderBegin;
+
+					properties.push_back(groupInfo);
+				}
+				else
+					currentFolder = NULL;
+			}
+			else
+				currentFolder = NULL;
 
 			IEntityPropertyHandler::SPropertyInfo propertyInfo;
 
@@ -203,6 +240,15 @@ bool CScriptbind_Entity::RegisterEntityClass(SEntityRegistrationParams params)
 			propertyInfo.limits.max = monoProperty.limits.max;
 
 			properties.push_back(propertyInfo);
+
+			if(currentFolder)
+			{
+				IEntityPropertyHandler::SPropertyInfo groupInfo;
+				groupInfo.name = currentFolder;
+				groupInfo.type = IEntityPropertyHandler::FolderEnd;
+
+				properties.push_back(groupInfo);
+			}
 		}
 	}
 
@@ -226,16 +272,17 @@ bool CScriptbind_Entity::RegisterEntityClass(SEntityRegistrationParams params)
 	return result;
 }
 
-bool CScriptbind_Entity::SpawnEntity(EntitySpawnParams monoParams, bool bAutoInit, SMonoEntityInfo &entityInfo)
+mono::object CScriptbind_Entity::SpawnEntity(EntitySpawnParams monoParams, bool bAutoInit, SMonoEntityInfo &entityInfo)
 {
-	IEntityClass *pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(ToCryString(monoParams.sClass));
-	if(pClass != nullptr)
+	const char *className = ToCryString(monoParams.sClass);
+
+	if(IEntityClass *pClass = gEnv->pEntitySystem->GetClassRegistry()->FindClass(className))
 	{
 		SEntitySpawnParams spawnParams;
 		spawnParams.pClass = pClass;
 		spawnParams.sName = ToCryString(monoParams.sName);
 
-		spawnParams.nFlags = monoParams.flags;
+		spawnParams.nFlags = monoParams.flags | ENTITY_FLAG_NO_SAVE;
 		spawnParams.vPosition = monoParams.pos;
 		spawnParams.qRotation = Quat(Ang3(monoParams.rot));
 		spawnParams.vScale = monoParams.scale;
@@ -245,11 +292,15 @@ bool CScriptbind_Entity::SpawnEntity(EntitySpawnParams monoParams, bool bAutoIni
 			entityInfo.pEntity = pEntity;
 			entityInfo.id = pEntity->GetId();
 
-			return true;
+			if(IGameObject *pGameObject = gEnv->pGameFramework->GetGameObject(spawnParams.id))
+			{
+				if(CEntity *pEntity = static_cast<CEntity *>(pGameObject->QueryExtension(className)))
+					return pEntity->GetScript()->GetManagedObject();
+			}
 		}
 	}
 
-	return false;
+	return nullptr;
 }
 
 void CScriptbind_Entity::RemoveEntity(EntityId id)
@@ -457,68 +508,6 @@ void CScriptbind_Entity::SetFlags(IEntity *pEntity, EEntityFlags flags)
 	pEntity->SetFlags(flags);
 }
 
-int CScriptbind_Entity::GetAttachmentCount(IEntity *pEnt)
-{
-	if(auto pCharacter = pEnt->GetCharacter(0))
-	{
-		if(auto pAttachmentManager = pCharacter->GetIAttachmentManager())
-			return pAttachmentManager->GetAttachmentCount();
-	}
-
-	return 0;
-}
-
-IAttachmentManager *GetAttachmentManager(IEntity *pEntity)
-{
-	if(auto pCharacter = pEntity->GetCharacter(0))
-		return pCharacter->GetIAttachmentManager();
-
-	return nullptr;
-}
-
-IMaterial *CScriptbind_Entity::GetAttachmentMaterialByIndex(IEntity *pEnt, int index)
-{
-	if(auto pAttachmentManager = GetAttachmentManager(pEnt))
-	{
-		if(auto pAttachment = pAttachmentManager->GetInterfaceByIndex(index))
-			return pAttachment->GetIAttachmentObject()->GetMaterial();
-	}
-
-	return nullptr;
-}
-
-IMaterial *CScriptbind_Entity::GetAttachmentMaterial(IEntity *pEnt, mono::string attachmentName)
-{
-	if(auto pAttachmentManager = GetAttachmentManager(pEnt))
-	{
-		if(auto pAttachment = pAttachmentManager->GetInterfaceByName(ToCryString(attachmentName)))
-		{
-			if(auto pAttachmentObject = pAttachment->GetIAttachmentObject())
-				return pAttachmentObject->GetMaterial();
-		}
-	}
-
-	return nullptr;
-}
-
-void CScriptbind_Entity::SetAttachmentMaterialByIndex(IEntity *pEnt, int index, IMaterial *pMaterial)
-{
-	if(auto pAttachmentManager = GetAttachmentManager(pEnt))
-	{
-		if(auto pAttachment = pAttachmentManager->GetInterfaceByIndex(index))
-			pAttachment->GetIAttachmentObject()->SetMaterial(pMaterial);
-	}
-}
-
-void CScriptbind_Entity::SetAttachmentMaterial(IEntity *pEnt, mono::string attachmentName, IMaterial *pMaterial)
-{
-	if(auto pAttachmentManager = GetAttachmentManager(pEnt))
-	{
-		if(auto pAttachment = pAttachmentManager->GetInterfaceByName(ToCryString(attachmentName)))
-			return pAttachment->GetIAttachmentObject()->SetMaterial(pMaterial);;
-	}
-}
-
 void CScriptbind_Entity::SetVisionParams(IEntity *pEntity, float r, float g, float b, float a)
 {
 	IEntityRenderProxy *pRenderProxy = static_cast<IEntityRenderProxy *>(pEntity->GetProxy(ENTITY_PROXY_RENDER));
@@ -535,4 +524,217 @@ void CScriptbind_Entity::SetHUDSilhouettesParams(IEntity *pEntity, float r, floa
 		return;
 
 	pRenderProxy->SetVisionParams(r, g, b, a);
+}
+
+bool CScriptbind_Entity::AddEntityLink(IEntity *pEntity, mono::string linkName, EntityId otherId, Quat relativeRot, Vec3 relativePos)
+{
+	return pEntity->AddEntityLink(ToCryString(linkName), otherId, relativeRot, relativePos) != nullptr;
+}
+
+void CScriptbind_Entity::RemoveEntityLink(IEntity *pEntity, EntityId otherId)
+{
+	for (IEntityLink *pLink = pEntity->GetEntityLinks();; pLink = pLink->next)
+    {
+		if(pLink->entityId == otherId)
+		{
+			pEntity->RemoveEntityLink(pLink);
+			break;
+		}
+	}
+}
+
+int CScriptbind_Entity::LoadLight(IEntity *pEntity, int slot, SMonoLightParams params)
+{
+	CDLight light;
+
+	if(const char *spec = ToCryString(params.specularCubemap))
+	{
+		if(strcmp(spec, ""))
+			light.SetSpecularCubemap(gEnv->pRenderer->EF_LoadTexture(spec));
+	}
+	if(const char *diff = ToCryString(params.diffuseCubemap))
+	{
+		if(strcmp(diff, ""))
+			light.SetDiffuseCubemap(gEnv->pRenderer->EF_LoadTexture(diff));
+	}
+	if(const char *lightImage = ToCryString(params.lightImage))
+	{
+		if(strcmp(lightImage, ""))
+			light.m_pLightImage = gEnv->pRenderer->EF_LoadTexture(lightImage);
+	}
+	if(const char *lightAttenMap = ToCryString(params.lightAttenMap))
+	{
+		if(strcmp(lightAttenMap, ""))
+			light.SetLightAttenMap(gEnv->pRenderer->EF_LoadTexture(lightAttenMap));
+	}
+
+	light.SetLightColor(params.color);
+	light.SetPosition(params.origin);
+
+	light.SetShadowBiasParams(params.shadowBias, params.shadowSlopeBias);
+
+	light.m_fRadius = params.radius;
+	light.SetSpecularMult(params.specularMultiplier);
+
+	light.m_fHDRDynamic = params.hdrDynamic;
+
+	light.m_fAnimSpeed = params.animSpeed;
+	light.m_fCoronaScale = params.coronaScale;
+	light.m_fCoronaIntensity = params.coronaIntensity;
+	light.m_fCoronaDistSizeFactor = params.coronaDistSizeFactor;
+	light.m_fCoronaDistIntensityFactor = params.coronaDistIntensityFactor;
+
+	light.m_fShaftSrcSize = params.shaftSrcSize;
+	light.m_fShaftLength = params.shaftLength;
+	light.m_fShaftBrightness = params.shaftBrightness;
+	light.m_fShaftBlendFactor = params.shaftBlendFactor;
+	light.m_fShaftDecayFactor = params.shaftDecayFactor;
+
+	light.m_fLightFrustumAngle = params.lightFrustumAngle;
+
+	light.m_fShadowUpdateMinRadius = params.shadowUpdateMinRadius;
+	light.m_nShadowUpdateRatio = params.shadowUpdateRatio;
+
+
+	light.m_nLightStyle = params.lightStyle;
+	light.m_nLightPhase = params.lightPhase;
+	light.m_nPostEffect = params.postEffect;
+	light.m_ShadowChanMask = params.shadowChanMask;
+
+	return pEntity->LoadLight(slot, &light);
+}
+
+void CScriptbind_Entity::FreeSlot(IEntity *pEntity, int slot)
+{
+	pEntity->FreeSlot(slot);
+}
+
+void CScriptbind_Entity::AddMovement(IAnimatedCharacter *pAnimatedCharacter, SCharacterMoveRequest &moveRequest)
+{
+	if(pAnimatedCharacter)
+		pAnimatedCharacter->AddMovement(moveRequest);
+}
+
+////////////////////////////////////////////////////
+// Attachments
+////////////////////////////////////////////////////
+IAttachmentManager *GetAttachmentManager(IEntity *pEntity, int slot)
+{
+	if(auto pCharacter = pEntity->GetCharacter(slot))
+		return pCharacter->GetIAttachmentManager();
+
+	return nullptr;
+}
+
+int CScriptbind_Entity::GetAttachmentCount(IEntity *pEnt, int slot)
+{
+	if(auto pAttachmentManager = GetAttachmentManager(pEnt, slot))
+		return pAttachmentManager->GetAttachmentCount();
+
+	return 0;
+}
+
+IAttachment *CScriptbind_Entity::GetAttachmentByIndex(IEntity *pEnt, int index, int slot)
+{
+	if(auto pAttachmentManager = GetAttachmentManager(pEnt, slot))
+		return pAttachmentManager->GetInterfaceByIndex(index);
+
+	return nullptr;
+}
+
+IAttachment *CScriptbind_Entity::GetAttachmentByName(IEntity *pEnt, mono::string name, int slot)
+{
+	if(auto pAttachmentManager = GetAttachmentManager(pEnt, slot))
+		return pAttachmentManager->GetInterfaceByName(ToCryString(name));
+
+	return nullptr;
+}
+
+class CMonoEntityAttachment : public CEntityAttachment
+{
+	virtual void UpdateAttachment(IAttachment *pIAttachment,const QuatT &m, float fZoomAdjustedDistanceFromCamera, uint32 OnRender ) override
+	{
+		const QuatT& quatT = pIAttachment->GetAttWorldAbsolute();
+
+		IEntity *pEntity = gEnv->pEntitySystem->GetEntity(GetEntityId());
+		if(pEntity)
+			pEntity->SetPosRotScale(quatT.t, pEntity->GetRotation(), pEntity->GetScale(), ENTITY_XFORM_NO_PROPOGATE);
+	}
+};
+
+void CScriptbind_Entity::LinkEntityToAttachment(IAttachment *pAttachment, EntityId id)
+{
+	pAttachment->ClearBinding();
+
+	CMonoEntityAttachment *pEntityAttachment = new CMonoEntityAttachment();
+	pEntityAttachment->SetEntityId(id);
+
+	pAttachment->AddBinding(pEntityAttachment);
+}
+
+mono::string CScriptbind_Entity::GetAttachmentObject(IAttachment *pAttachment)
+{
+	if(IAttachmentObject *pObject = pAttachment->GetIAttachmentObject())
+	{
+		if(ICharacterInstance *pCharacterInstance = pObject->GetICharacterInstance())
+			return ToMonoString(pCharacterInstance->GetFilePath());
+		else if(IStatObj *pStatObj = pObject->GetIStatObj())
+			return ToMonoString(pStatObj->GetFilePath());
+	}
+
+	return nullptr;
+}
+
+Quat CScriptbind_Entity::GetAttachmentWorldRotation(IAttachment *pAttachment)
+{
+	return pAttachment->GetAttWorldAbsolute().q;
+}
+
+Quat CScriptbind_Entity::GetAttachmentLocalRotation(IAttachment *pAttachment)
+{
+	return pAttachment->GetAttModelRelative().q;
+}
+
+Vec3 CScriptbind_Entity::GetAttachmentWorldPosition(IAttachment *pAttachment)
+{
+	return pAttachment->GetAttWorldAbsolute().t;
+}
+
+Vec3 CScriptbind_Entity::GetAttachmentLocalPosition(IAttachment *pAttachment)
+{
+	return pAttachment->GetAttModelRelative().t;
+}
+
+Quat CScriptbind_Entity::GetAttachmentDefaultWorldRotation(IAttachment *pAttachment)
+{
+	return pAttachment->GetAttAbsoluteDefault().q;
+}
+	
+Quat CScriptbind_Entity::GetAttachmentDefaultLocalRotation(IAttachment *pAttachment)
+{
+	return pAttachment->GetAttRelativeDefault().q;
+}
+	 
+Vec3 CScriptbind_Entity::GetAttachmentDefaultWorldPosition(IAttachment *pAttachment)
+{
+	return pAttachment->GetAttAbsoluteDefault().t;
+}
+
+Vec3 CScriptbind_Entity::GetAttachmentDefaultLocalPosition(IAttachment *pAttachment)
+{
+	return pAttachment->GetAttRelativeDefault().t;
+}
+
+IMaterial *CScriptbind_Entity::GetAttachmentMaterial(IAttachment *pAttachment)
+{
+	if(IAttachmentObject *pObject = pAttachment->GetIAttachmentObject())
+		return pObject->GetMaterial();
+
+	return nullptr;
+}
+
+void CScriptbind_Entity::SetAttachmentMaterial(IAttachment *pAttachment, IMaterial *pMaterial)
+{
+	if(IAttachmentObject *pObject = pAttachment->GetIAttachmentObject())
+		pObject->SetMaterial(pMaterial);
 }
