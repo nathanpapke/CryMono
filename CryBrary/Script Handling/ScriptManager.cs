@@ -48,7 +48,7 @@ namespace CryEngine.Initialization
             {
                 if (!initialLoad)
                 {
-                    PostInit();
+                    //PostInit();
                 }
             }
 

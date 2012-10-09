@@ -7,7 +7,6 @@ namespace CryEngine
     /// </summary>
     internal interface IScriptManagerCallback
     {
-        void PostInit();
         void OnUpdate(float frameTime, float frameStartTime, float asyncTime, float frameRate, float timeScale);
         void OnReload();
         void RemoveInstance(int instanceId, ScriptType scriptType);
