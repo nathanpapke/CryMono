@@ -41,7 +41,7 @@ struct EntitySpawnParams
 	mono::string sClass;
 
 	Vec3 pos;
-	Vec3 rot;
+	Quat rot;
 	Vec3 scale;
 
 	EEntityFlags flags;
@@ -151,6 +151,8 @@ struct SMonoLightParams
 	 uint32 flags;
 };
 
+class CMonoEntityAttachment;
+
 class CScriptbind_Entity 
 	: public IMonoScriptBind
 	, public IEntitySystemSink
@@ -177,9 +179,11 @@ protected:
 
 	bool IsMonoEntity(const char *className);
 
+	void RegisterNativeEntityClass();
+
 	// Scriptbinds
 	static mono::object SpawnEntity(EntitySpawnParams, bool, SMonoEntityInfo &entityInfo);
-	static void RemoveEntity(EntityId);
+	static void RemoveEntity(EntityId, bool removeNow);
 
 	static IEntity *GetEntity(EntityId id);
 
@@ -238,21 +242,33 @@ protected:
 	static IAttachment *GetAttachmentByIndex(IEntity *pEnt, int index, int slot);
 	static IAttachment *GetAttachmentByName(IEntity *pEnt, mono::string name, int slot);
 
-	static void LinkEntityToAttachment(IAttachment *pAttachment, EntityId id);
+	static void AttachmentUseEntityPosition(CMonoEntityAttachment *pEntityAttachment, bool use);
+	static void AttachmentUseEntityRotation(CMonoEntityAttachment *pEntityAttachment, bool use);
+
+	static CMonoEntityAttachment *LinkEntityToAttachment(IAttachment *pAttachment, EntityId id);
 	static mono::string GetAttachmentObject(IAttachment *pAttachment);
 
-	static Quat GetAttachmentWorldRotation(IAttachment *pAttachment);
-	static Quat GetAttachmentLocalRotation(IAttachment *pAttachment);
-	static Vec3 GetAttachmentWorldPosition(IAttachment *pAttachment);
-	static Vec3 GetAttachmentLocalPosition(IAttachment *pAttachment);
+	static QuatT GetAttachmentAbsolute(IAttachment *pAttachment);
+	static QuatT GetAttachmentRelative(IAttachment *pAttachment);
 
-	static Quat GetAttachmentDefaultWorldRotation(IAttachment *pAttachment);
-	static Quat GetAttachmentDefaultLocalRotation(IAttachment *pAttachment);
-	static Vec3 GetAttachmentDefaultWorldPosition(IAttachment *pAttachment);
-	static Vec3 GetAttachmentDefaultLocalPosition(IAttachment *pAttachment);
+	static QuatT GetAttachmentDefaultAbsolute(IAttachment *pAttachment);
+	static QuatT GetAttachmentDefaultRelative(IAttachment *pAttachment);
 
 	static IMaterial *GetAttachmentMaterial(IAttachment *pAttachment);
 	static void SetAttachmentMaterial(IAttachment *pAttachment, IMaterial *pMaterial);
+
+	static QuatT GetJointAbsolute(IEntity *pEntity, mono::string jointName, int characterSlot);
+	static QuatT GetJointAbsoluteDefault(IEntity *pEntity, mono::string jointName, int characterSlot);
+	static QuatT GetJointRelative(IEntity *pEntity, mono::string jointName, int characterSlot);
+	static QuatT GetJointRelativeDefault(IEntity *pEntity, mono::string jointName, int characterSlot);
+
+	static void SetJointAbsolute(IEntity *pEntity, mono::string jointName, int characterSlot, QuatT absolute);
+
+	static void SetTriggerBBox(IEntity *pEntity, AABB bounds);
+	static AABB GetTriggerBBox(IEntity *pEntity);
+	static void InvalidateTrigger(IEntity *pEntity);
+
+	static IAnimatedCharacter *AcquireAnimatedCharacter(EntityId id);
 	// ~Scriptbinds
 
 	static std::vector<const char *> m_monoEntityClasses;

@@ -19,6 +19,12 @@ CScriptbind_Physics::CScriptbind_Physics()
 	REGISTER_METHOD(SetVelocity);
 
 	REGISTER_METHOD(RayWorldIntersection);
+
+	REGISTER_METHOD(GetLivingEntityStatus);
+
+	REGISTER_METHOD(GetImpulseStruct);
+	REGISTER_METHOD(GetPlayerDimensionsStruct);
+	REGISTER_METHOD(GetPlayerDynamicsStruct);
 }
 
 IPhysicalEntity *CScriptbind_Physics::GetPhysicalEntity(IEntity *pEntity)
@@ -26,7 +32,7 @@ IPhysicalEntity *CScriptbind_Physics::GetPhysicalEntity(IEntity *pEntity)
 	return pEntity->GetPhysics();
 }
 
-void CScriptbind_Physics::Physicalize(IEntity *pEntity, SMonoPhysicalizeParams params, SMonoPlayerPhysicalizeParams playerParams)
+void CScriptbind_Physics::Physicalize(IEntity *pEntity, SMonoPhysicalizeParams params)
 {
 	// Unphysicalize
 	{
@@ -51,47 +57,22 @@ void CScriptbind_Physics::Physicalize(IEntity *pEntity, SMonoPhysicalizeParams p
 	pp.nSlot = params.slot;
 	pp.type = params.type;
 
-	if(params.attachToEntity.id != 0)
+	pp.nFlagsOR = params.flagsOR;
+	pp.nFlagsAND = params.flagsAND;
+
+	if(params.attachToEntity != 0)
 	{
-		if(IPhysicalEntity *pPhysEnt = gEnv->pPhysicalWorld->GetPhysicalEntityById(params.attachToEntity.id))
+		if(IPhysicalEntity *pPhysEnt = gEnv->pPhysicalWorld->GetPhysicalEntityById(params.attachToEntity))
 			pp.pAttachToEntity = pPhysEnt;
 	}
 
 	if(pp.type == PE_LIVING)
 	{
-		pe_player_dimensions playerDim;
-		pp.pPlayerDimensions = &playerDim;
-
-		pe_player_dynamics playerDyn;
-		pp.pPlayerDynamics = &playerDyn;
-
-		playerDyn.mass = params.mass;
-
-		playerDim.heightCollider = playerParams.heightCollider;
-		playerDim.sizeCollider = playerParams.sizeCollider;
-		playerDim.heightPivot = playerParams.heightPivot;
-		playerDim.bUseCapsule = playerParams.useCapsule;
-
-		playerDyn.gravity = playerParams.gravity;
-		playerDyn.kAirControl = playerParams.airControl;
-		playerDyn.minSlideAngle = playerParams.minSlideAngle;
-		playerDyn.maxClimbAngle = playerParams.maxClimbAngle;
-		playerDyn.minFallAngle = playerParams.minFallAngle;
-		playerDyn.maxVelGround = playerParams.maxVelGround;
+		pp.pPlayerDimensions = &params.playerDim;
+		pp.pPlayerDynamics = &params.playerDyn;
 	}
 
 	pEntity->Physicalize(pp);
-
-	if(IPhysicalEntity *pPhysicalEntity = pEntity->GetPhysics())
-	{
-		pe_action_awake awake;
-		awake.bAwake = false;
-		pPhysicalEntity->Action(&awake);
-
-		pe_action_move actionMove;
-		actionMove.dir = Vec3(0,0,0);
-		pPhysicalEntity->Action(&actionMove);
-	}
 }
 
 void CScriptbind_Physics::Sleep(IEntity *pEntity, bool sleep)
@@ -106,7 +87,7 @@ void CScriptbind_Physics::Sleep(IEntity *pEntity, bool sleep)
 	pPhysicalEntity->Action(&awake);
 }
 
-void CScriptbind_Physics::AddImpulse(IEntity *pEntity, SMonoActionImpulse actionImpulse)
+void CScriptbind_Physics::AddImpulse(IEntity *pEntity, pe_action_impulse actionImpulse)
 {
 	pe_action_impulse impulse;
 
@@ -196,4 +177,13 @@ int CScriptbind_Physics::RayWorldIntersection(Vec3 origin, Vec3 dir, int objFlag
 	monoHit.surface_idx = hit.surface_idx;
 
 	return numHits;
+}
+
+pe_status_living CScriptbind_Physics::GetLivingEntityStatus(IEntity *pEntity)
+{
+	pe_status_living status;
+	if(IPhysicalEntity *pPhysEnt = pEntity->GetPhysics())
+		pEntity->GetPhysics()->GetStatus(&status);
+
+	return status;
 }

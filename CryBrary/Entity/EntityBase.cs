@@ -19,6 +19,11 @@ namespace CryEngine
 		public virtual void OnSpawn() { }
 		#endregion
 
+		public virtual void Remove(bool forceRemoveNow = false)
+		{
+			Entity.Remove(Id, forceRemoveNow);
+		}
+
 		public EntitySlotFlags GetSlotFlags(int slot = 0)
 		{
 			return NativeMethods.Entity.GetSlotFlags(this.GetEntityHandle().Handle, slot);
@@ -58,14 +63,14 @@ namespace CryEngine
 			if (ptr == IntPtr.Zero)
 				return null;
 
-			return Attachment.TryAdd(ptr);
+			return Attachment.TryAdd(ptr, this);
 		}
 
 		public Attachment GetAttachment(string name, int characterSlot = 0)
 		{
 			var ptr = NativeMethods.Entity.GetAttachmentByName(this.GetEntityHandle().Handle, name, characterSlot);
 
-			return Attachment.TryAdd(ptr);
+			return Attachment.TryAdd(ptr, this);
 		}
 
         public int GetAttachmentCount(int characterSlot = 0)
@@ -148,6 +153,31 @@ namespace CryEngine
 			NativeMethods.Entity.AddMovement(this.GetAnimatedCharacterHandle().Handle, ref request);
 		}
 
+		public QuatT GetJointAbsolute(string jointName, int characterSlot = 0)
+		{
+			return NativeMethods.Entity.GetJointAbsolute(this.GetEntityHandle().Handle, jointName, characterSlot);
+		}
+
+		public QuatT GetJointAbsoluteDefault(string jointName, int characterSlot = 0)
+		{
+			return NativeMethods.Entity.GetJointAbsoluteDefault(this.GetEntityHandle().Handle, jointName, characterSlot);
+		}
+
+		public void SetJointAbsolute(string jointName, QuatT absolute, int characterSlot = 0)
+		{
+			NativeMethods.Entity.SetJointAbsolute(this.GetEntityHandle().Handle, jointName, characterSlot, absolute);
+		}
+
+		public QuatT GetJointRelative(string jointName, int characterSlot = 0)
+		{
+			return NativeMethods.Entity.GetJointRelative(this.GetEntityHandle().Handle, jointName, characterSlot);
+		}
+
+		public QuatT GetJointRelativeDefault(string jointName, int characterSlot = 0)
+		{
+			return NativeMethods.Entity.GetJointRelativeDefault(this.GetEntityHandle().Handle, jointName, characterSlot);
+		}
+
 		public Lua.ScriptTable ScriptTable { get { return Lua.ScriptTable.Get(this.GetEntityHandle().Handle); } }
 
 		/// <summary>
@@ -196,11 +226,6 @@ namespace CryEngine
 		public EntityFlags Flags { get { return NativeMethods.Entity.GetFlags(this.GetEntityHandle().Handle); } set { NativeMethods.Entity.SetFlags(this.GetEntityHandle().Handle, value); } }
 
 		public Material Material { get { return Material.Get(this); } set { Material.Set(this, value); } }
-
-		/// <summary>
-		/// Set to true when the entity has been removed from the CryENGINE world.
-		/// </summary>
-		public bool IsDestroyed { get; internal set; }
 
 		public EntityId Id { get; set; }
 

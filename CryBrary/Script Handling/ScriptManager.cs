@@ -118,16 +118,15 @@ namespace CryEngine.Initialization
 		void PopulateAssemblyLookup()
 		{
 #if !RELEASE
-			var monoDir = Path.Combine(PathUtils.EngineFolder, "Mono");
 			// Doesn't exist when unit testing
-			if(Directory.Exists(monoDir))
+			if(Directory.Exists(PathUtils.MonoFolder))
 			{
-				using(XmlWriter writer = XmlWriter.Create(Path.Combine(monoDir, "assemblylookup.xml")))
+				using (XmlWriter writer = XmlWriter.Create(Path.Combine(PathUtils.MonoFolder, "assemblylookup.xml")))
 				{
 					writer.WriteStartDocument();
 					writer.WriteStartElement("AssemblyLookupTable");
 
-					var gacFolder = Path.Combine(monoDir, "lib", "mono", "gac");
+					var gacFolder = Path.Combine(PathUtils.MonoFolder, "lib", "mono", "gac");
 					foreach(var assemblyLocation in Directory.GetFiles(gacFolder, "*.dll", SearchOption.AllDirectories))
 					{
 						var separator = new [] { "__" };
@@ -157,7 +156,7 @@ namespace CryEngine.Initialization
 
 		private void LoadPlugins()
 		{
-            var pluginsDirectory = Path.Combine(PathUtils.ScriptsFolder, "Plugins");
+			var pluginsDirectory = PathUtils.PluginsFolder;
 			if (!Directory.Exists(pluginsDirectory))
 				return;
 
@@ -306,7 +305,7 @@ namespace CryEngine.Initialization
 
 			if(File.Exists(Path.ChangeExtension(assemblyPath, "pdb")))
 			{
-				var assembly = Assembly.LoadFrom(Path.Combine(PathUtils.EngineFolder, "Mono", "bin", "pdb2mdb.dll"));
+				var assembly = Assembly.LoadFrom(Path.Combine(PathUtils.MonoFolder, "bin", "pdb2mdb.dll"));
 				var driver = assembly.GetType("Driver");
 				var convertMethod = driver.GetMethod("Convert", BindingFlags.Static | BindingFlags.Public);
 
@@ -428,7 +427,7 @@ namespace CryEngine.Initialization
 		}
 
 		/// <summary>
-		/// Locates and destructs the script with the assigned scriptId.
+		/// Locates and removes the script with the assigned scriptId.
 		/// </summary>
 		public int RemoveInstances<T>(ScriptType scriptType, Predicate<T> match) where T : CryScriptInstance
 		{
@@ -445,7 +444,18 @@ namespace CryEngine.Initialization
 				if (script.ScriptType.ContainsFlag(scriptType))
 				{
 					if (script.ScriptInstances != null)
-						numRemoved += script.ScriptInstances.RemoveAll(x => match(x as T));
+					{
+						numRemoved += script.ScriptInstances.RemoveAll(x =>
+							{
+								if (match(x as T))
+								{
+									x.OnDestroyedInternal();
+									return true;
+								}
+
+								return false;
+							});
+					}
 				}
 
 				Scripts[i] = script;
@@ -521,7 +531,7 @@ namespace CryEngine.Initialization
 			{
 				if (script.ScriptInstances != null && script.Type.ImplementsOrEquals<T>())
 				{
-					var instance = script.ScriptInstances.Find(x => predicate(x as T)) as T;
+					var instance = script.ScriptInstances.Find(x => !x.IsDestroyed && predicate(x as T)) as T;
 					if (instance != null)
 					{
 						scriptInstance = instance;

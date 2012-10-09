@@ -97,29 +97,29 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)..\..\..\Bin32\Plugins</OutDir>
+    <OutDir>$(SolutionDir)..\..\..\Bin32\Plugins\CryMono</OutDir>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)..\..\..\Bin64\Plugins</OutDir>
+    <OutDir>$(SolutionDir)..\..\..\Bin64\Plugins\CryMono</OutDir>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)..\..\..\Bin32\Plugins</OutDir>
+    <OutDir>$(SolutionDir)..\..\..\Bin32\Plugins\CryMono</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)..\..\..\Bin32\Plugins</OutDir>
+    <OutDir>$(SolutionDir)..\..\..\Bin32\Plugins\CryMono</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)..\..\..\Bin64\Plugins</OutDir>
+    <OutDir>$(SolutionDir)..\..\..\Bin64\Plugins\CryMono</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)..\..\..\Bin64\Plugins</OutDir>
+    <OutDir>$(SolutionDir)..\..\..\Bin64\Plugins\CryMono</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -367,6 +367,7 @@
     <ClInclude Include="MonoEntity.h" />
     <ClInclude Include="MonoFlowNode.h" />
     <ClInclude Include="MonoInput.h" />
+    <ClInclude Include="NativeEntity.h" />
     <ClInclude Include="PathUtils.h" />
     <ClInclude Include="MonoScriptSystem.h" />
     <ClInclude Include="MonoAssembly.h" />
@@ -416,6 +417,7 @@
     <ClCompile Include="MonoClass.cpp" />
     <ClCompile Include="MonoEntityClass.cpp" />
     <ClCompile Include="MonoEntityPropertyHandler.cpp" />
+    <ClCompile Include="NativeEntity.cpp" />
     <ClCompile Include="Scriptbinds\ActorSystem.cpp" />
     <ClCompile Include="Scriptbinds\AppDomain.cpp" />
     <ClCompile Include="Scriptbinds\Entity.cpp" />

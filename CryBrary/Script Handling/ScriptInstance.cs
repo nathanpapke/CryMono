@@ -1,5 +1,9 @@
-﻿namespace CryEngine
+﻿using System;
+
+namespace CryEngine
 {
+	public delegate void OnCryScriptInstanceDestroyedDelegate(CryScriptInstance scriptInstance);
+
 	/// <summary>
 	/// This interface permits derived classes to be used for script compilation recognition.
 	/// </summary>
@@ -32,6 +36,14 @@
         internal virtual void OnScriptReloadInternal() { OnScriptReload(); }
 		public virtual void OnScriptReload() { }
 
+		internal virtual void OnDestroyedInternal()
+		{
+			IsDestroyed = true;
+
+			if(OnDestroyed != null)
+				OnDestroyed(this);
+		}
+
 		/// <summary>
 		/// Called each frame if script has been set to be regularly updated (See Updated property)
 		/// </summary>
@@ -43,5 +55,12 @@
 		/// Controls whether the entity receives an update per frame.
 		/// </summary>
 		public bool ReceiveUpdates { get; set; }
+
+		/// <summary>
+		/// Set to true when the script instance is removed via ScriptManager.RemoveInstances.
+		/// </summary>
+		public bool IsDestroyed { get; private set; }
+
+		public event OnCryScriptInstanceDestroyedDelegate OnDestroyed;
 	}
 }

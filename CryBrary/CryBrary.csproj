@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\Bin32\Plugins\</OutputPath>
+    <OutputPath>..\..\..\Bin32\Plugins\CryMono\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>3</WarningLevel>
@@ -31,7 +31,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\Bin32\Plugins\</OutputPath>
+    <OutputPath>..\..\..\Bin32\Plugins\CryMono\</OutputPath>
     <DefineConstants>TRACE;RELEASE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>3</WarningLevel>
@@ -42,7 +42,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\..\..\Bin64\Plugins\</OutputPath>
+    <OutputPath>..\..\..\Bin64\Plugins\CryMono\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -55,7 +55,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>..\..\..\Bin64\Plugins\</OutputPath>
+    <OutputPath>..\..\..\Bin64\Plugins\CryMono\</OutputPath>
     <DefineConstants>TRACE;RELEASE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -67,7 +67,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Profile|AnyCPU'">
-    <OutputPath>..\..\..\Bin32\Plugins\</OutputPath>
+    <OutputPath>..\..\..\Bin32\Plugins\CryMono\</OutputPath>
     <DefineConstants>
     </DefineConstants>
     <Optimize>false</Optimize>
@@ -80,7 +80,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Profile|x64'">
-    <OutputPath>..\..\..\Bin64\Plugins\</OutputPath>
+    <OutputPath>..\..\..\Bin64\Plugins\CryMono\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -100,14 +100,15 @@
     <Compile Include="Entity\Attachment.cs" />
     <Compile Include="Entity\EntityDestroyedException.cs" />
     <Compile Include="Math\Angle.cs" />
+    <Compile Include="Math\QuatT.cs" />
     <Compile Include="Misc\MissingAttributeException.cs" />
-    <Compile Include="Native\Extensions\NativeActorExtensions.cs" />
-    <Compile Include="Native\Extensions\NativeAttachmentExtensions.cs" />
-    <Compile Include="Native\Extensions\NativeEntityExtensions.cs" />
+    <Compile Include="Extensions\NativeActorExtensions.cs" />
+    <Compile Include="Extensions\NativeAttachmentExtensions.cs" />
+    <Compile Include="Extensions\NativeEntityExtensions.cs" />
     <Compile Include="Native\Interfaces\INativeNetworkMethods.cs" />
     <Compile Include="Native\NativeNetworkMethods.cs" />
     <Compile Include="Network\RemoteInvocationException.cs" />
-    <Compile Include="ProjectSettings.cs" />
+    <Compile Include="Utils\ProjectSettings.cs" />
     <Compile Include="Engine\Texture.cs" />
     <Compile Include="Entity\AnimationFlags.cs" />
     <Compile Include="Entity\EntityLight.cs" />
@@ -262,6 +263,7 @@
     <Compile Include="Utils\PathUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Script Handling\ScriptManager.cs" />
+    <Compile Include="Utils\UnusedMarker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

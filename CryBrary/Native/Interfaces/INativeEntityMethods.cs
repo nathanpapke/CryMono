@@ -8,7 +8,7 @@ namespace CryEngine.Native
 		void PlayAnimation(IntPtr ptr, string animationName, int slot, int layer, float blend, float speed, AnimationFlags flags);
 
 		EntityBase SpawnEntity(EntitySpawnParams spawnParams, bool autoInit, out EntityInfo entityInfo);
-		void RemoveEntity(EntityId entityId);
+		void RemoveEntity(EntityId entityId, bool forceRemoveNow = false);
 
 		IntPtr GetEntity(EntityId entityId);
         uint FindEntity(string name);
@@ -65,20 +65,31 @@ namespace CryEngine.Native
 		IntPtr GetAttachmentByIndex(IntPtr entPtr, int index, int slot);
 		IntPtr GetAttachmentByName(IntPtr entPtr, string name, int slot);
 
-		void LinkEntityToAttachment(IntPtr attachmentPtr, uint entityId);
+		void AttachmentUseEntityPosition(IntPtr entityAttachmentPtr, bool use);
+		void AttachmentUseEntityRotation(IntPtr entityAttachmentPtr, bool use);
+
+		IntPtr LinkEntityToAttachment(IntPtr attachmentPtr, uint entityId);
 		string GetAttachmentObject(IntPtr attachmentPtr);
 
-		Quat GetAttachmentWorldRotation(IntPtr attachmentPtr);
-		Quat GetAttachmentLocalRotation(IntPtr attachmentPtr);
-		Vec3 GetAttachmentWorldPosition(IntPtr attachmentPtr);
-		Vec3 GetAttachmentLocalPosition(IntPtr attachmentPtr);
-
-		Quat GetAttachmentDefaultWorldRotation(IntPtr attachmentPtr);
-		Quat GetAttachmentDefaultLocalRotation(IntPtr attachmentPtr);
-		Vec3 GetAttachmentDefaultWorldPosition(IntPtr attachmentPtr);
-		Vec3 GetAttachmentDefaultLocalPosition(IntPtr attachmentPtr);
+		QuatT GetAttachmentAbsolute(IntPtr attachmentPtr);
+		QuatT GetAttachmentRelative(IntPtr attachmentPtr);
+		QuatT GetAttachmentDefaultAbsolute(IntPtr attachmentPtr);
+		QuatT GetAttachmentDefaultRelative(IntPtr attachmentPtr);
 
 		IntPtr GetAttachmentMaterial(IntPtr attachmentPtr);
 		void SetAttachmentMaterial(IntPtr attachmentPtr, IntPtr materialPtr);
+
+		QuatT GetJointAbsolute(IntPtr entPtr, string jointName, int characterSlot);
+		QuatT GetJointAbsoluteDefault(IntPtr entPtr, string jointName, int characterSlot);
+		QuatT GetJointRelative(IntPtr entPtr, string jointName, int characterSlot);
+		QuatT GetJointRelativeDefault(IntPtr entPtr, string jointName, int characterSlot);
+
+		void SetJointAbsolute(IntPtr entPtr, string jointName, int characterSlot, QuatT absolute);
+
+		void SetTriggerBBox(IntPtr entPtr, BoundingBox bounds);
+		BoundingBox GetTriggerBBox(IntPtr entPtr);
+		void InvalidateTrigger(IntPtr entPtr);
+
+		IntPtr AcquireAnimatedCharacter(uint entId);
     }
 }

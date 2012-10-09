@@ -107,21 +107,6 @@ namespace CryEngine
 			Z = values[2];
 		}
 
-		public Vec3(Quat q)
-		{
-			Y = Math.Asin(Math.Max(-1.0f, Math.Min(1.0f, -(q.Axis.X * q.Axis.Z - q.Angle * q.Axis.Y) * 2.0f)));
-			if(Math.Abs(Math.Abs(Y) - (Math.PI * 0.5)) < 0.01)
-			{
-				X = 0;
-				Z = Math.Atan2(-2 * (q.Axis.X * q.Axis.Y - q.Angle * q.Axis.Z), 1 - (q.Axis.X * q.Axis.X + q.Axis.Z * q.Axis.Z) * 2);
-			}
-			else
-			{
-				X = Math.Atan2((q.Axis.Y * q.Axis.Z + q.Angle * q.Axis.X) * 2, 1 - (q.Axis.X * q.Axis.X + q.Axis.Y * q.Axis.Y) * 2);
-				Z = Math.Atan2((q.Axis.X * q.Axis.Y + q.Angle * q.Axis.Z) * 2, 1 - (q.Axis.Z * q.Axis.Z + q.Axis.Y * q.Axis.Y) * 2);
-			}
-		}
-
 		/// <summary>
 		/// Gets a value indicting whether this instance is normalized.
 		/// </summary>
@@ -163,6 +148,16 @@ namespace CryEngine
 			}
 		}
 
+		public void ClampLength(float maxLength)
+		{
+			var sqrLength = LengthSquared;
+			if (sqrLength > (maxLength * maxLength))
+			{
+				var scale = maxLength * Math.ISqrt(sqrLength);
+				X *= scale; Y *= scale; Z *= scale;
+			}
+		}
+
 		/// <summary>
 		/// Calculates the length of the vector.
 		/// </summary>
@@ -184,10 +179,12 @@ namespace CryEngine
 		/// This method may be preferred to <see cref="CryEngine.Vec3.Length"/> when only a relative length is needed
 		/// and speed is of the essence.
 		/// </remarks>
-		public float LengthSquared()
+		public float LengthSquared
 		{
-			return (X * X) + (Y * Y) + (Z * Z);
+			get { return (X * X) + (Y * Y) + (Z * Z); }
 		}
+
+		public bool IsZero { get { return X == 0 && Y == 0 && Z == 0; } }
 
 		/// <summary>
 		/// Converts the vector into a unit vector.
@@ -212,6 +209,18 @@ namespace CryEngine
 				Vec3.Normalize();
 
 				return Vec3;
+			}
+		}
+
+		public Vec3 NormalizedSafe
+		{
+			get
+			{
+				var fLen2 = X*X+Y*Y+Z*Z;	
+				if(fLen2 > 1.192092896e-07F)
+					return this * Math.ISqrt(fLen2);
+				else
+					return new Vec3(1, 0, 0);
 			}
 		}
 
@@ -603,17 +612,6 @@ namespace CryEngine
 		{
 			result = value;
 			result.Normalize();
-		}
-
-		/// <summary>
-		/// Converts the vector into a unit vector.
-		/// </summary>
-		/// <param name="value">The vector to normalize.</param>
-		/// <returns>The normalized vector.</returns>
-		public static Vec3 Normalize(Vec3 value)
-		{
-			value.Normalize();
-			return value;
 		}
 
 		/// <summary>
@@ -1202,11 +1200,6 @@ namespace CryEngine
 		public static explicit operator Vec4(Vec3 value)
 		{
 			return new Vec4(value, 0.0f);
-		}
-
-		public static explicit operator Vec3(Quat q)
-		{
-			return new Vec3(q);
 		}
 
 		/// <summary>

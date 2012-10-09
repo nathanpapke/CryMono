@@ -12,7 +12,7 @@ namespace CryEngine.Native
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
 		extern internal static EntityBase _SpawnEntity(EntitySpawnParams spawnParams, bool autoInit, out EntityInfo entityInfo);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void _RemoveEntity(uint entityId);
+		extern internal static void _RemoveEntity(uint entityId, bool forceRemoveNow = false);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
 		extern internal static IntPtr _GetEntity(uint entityId);
@@ -106,32 +106,51 @@ namespace CryEngine.Native
 		extern internal static IntPtr _GetAttachmentByName(IntPtr entPtr, string name, int slot);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern internal static void _LinkEntityToAttachment(IntPtr attachmentPtr, uint entityId);
+		extern internal static void _AttachmentUseEntityPosition(IntPtr entityAttachmentPtr, bool use);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static void _AttachmentUseEntityRotation(IntPtr entityAttachmentPtr, bool use);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static IntPtr _LinkEntityToAttachment(IntPtr attachmentPtr, uint entityId);
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		extern internal static string _GetAttachmentObject(IntPtr attachmentPtr);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern internal static Quat _GetAttachmentWorldRotation(IntPtr attachmentPtr);
+		extern internal static QuatT _GetAttachmentAbsolute(IntPtr attachmentPtr);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern internal static Quat _GetAttachmentLocalRotation(IntPtr attachmentPtr);
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern internal static Vec3 _GetAttachmentWorldPosition(IntPtr attachmentPtr);
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern internal static Vec3 _GetAttachmentLocalPosition(IntPtr attachmentPtr);
+		extern internal static QuatT _GetAttachmentRelative(IntPtr attachmentPtr);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern internal static Quat _GetAttachmentDefaultWorldRotation(IntPtr attachmentPtr);
+		extern internal static QuatT _GetAttachmentDefaultAbsolute(IntPtr attachmentPtr);
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern internal static Quat _GetAttachmentDefaultLocalRotation(IntPtr attachmentPtr);
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern internal static Vec3 _GetAttachmentDefaultWorldPosition(IntPtr attachmentPtr);
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern internal static Vec3 _GetAttachmentDefaultLocalPosition(IntPtr attachmentPtr);
+		extern internal static QuatT _GetAttachmentDefaultRelative(IntPtr attachmentPtr);
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		extern internal static IntPtr _GetAttachmentMaterial(IntPtr attachmentPtr);
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		extern internal static void _SetAttachmentMaterial(IntPtr attachmentPtr, IntPtr materialPtr);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static QuatT _GetJointAbsolute(IntPtr entPtr, string jointName, int characterSlot);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static QuatT _GetJointAbsoluteDefault(IntPtr entPtr, string jointName, int characterSlot);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static QuatT _GetJointRelative(IntPtr entPtr, string jointName, int characterSlot);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static QuatT _GetJointRelativeDefault(IntPtr entPtr, string jointName, int characterSlot);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static void _SetJointAbsolute(IntPtr entPtr, string jointName, int characterSlot, QuatT absolute);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static void _SetTriggerBBox(IntPtr entPtr, BoundingBox bounds);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static BoundingBox _GetTriggerBBox(IntPtr entPtr);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static void _InvalidateTrigger(IntPtr entPtr);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static IntPtr _AcquireAnimatedCharacter(uint entId);
 
 		public void PlayAnimation(IntPtr ptr, string animationName, int slot, int layer, float blend, float speed, AnimationFlags flags)
 		{
@@ -143,9 +162,9 @@ namespace CryEngine.Native
             return _SpawnEntity(spawnParams, autoInit, out entityInfo);
         }
 
-        public void RemoveEntity(EntityId entityId)
+		public void RemoveEntity(EntityId entityId, bool forceRemoveNow = false)
         {
-            _RemoveEntity(entityId);
+			_RemoveEntity(entityId, forceRemoveNow);
         }
 
 		public IntPtr GetEntity(EntityId entityId)
@@ -338,9 +357,19 @@ namespace CryEngine.Native
 			return _GetAttachmentByName(entPtr, name, slot);
 		}
 
-		public void LinkEntityToAttachment(IntPtr attachmentPtr, uint entityId)
+		public void AttachmentUseEntityPosition(IntPtr entityAttachmentPtr, bool use)
 		{
-			_LinkEntityToAttachment(attachmentPtr, entityId);
+			AttachmentUseEntityPosition(entityAttachmentPtr, use);
+		}
+
+		public void AttachmentUseEntityRotation(IntPtr entityAttachmentPtr, bool use)
+		{
+			_AttachmentUseEntityRotation(entityAttachmentPtr, use);
+		}
+
+		public IntPtr LinkEntityToAttachment(IntPtr attachmentPtr, uint entityId)
+		{
+			return _LinkEntityToAttachment(attachmentPtr, entityId);
 		}
 
 		public string GetAttachmentObject(IntPtr attachmentPtr)
@@ -348,44 +377,24 @@ namespace CryEngine.Native
 			return _GetAttachmentObject(attachmentPtr);
 		}
 
-		public Quat GetAttachmentWorldRotation(IntPtr attachmentPtr)
+		public QuatT GetAttachmentAbsolute(IntPtr attachmentPtr)
 		{
-			return _GetAttachmentWorldRotation(attachmentPtr);
+			return _GetAttachmentAbsolute(attachmentPtr);
 		}
 
-		public Quat GetAttachmentLocalRotation(IntPtr attachmentPtr)
+		public QuatT GetAttachmentRelative(IntPtr attachmentPtr)
 		{
-			return _GetAttachmentLocalRotation(attachmentPtr);
+			return _GetAttachmentRelative(attachmentPtr);
 		}
 
-		public Vec3 GetAttachmentWorldPosition(IntPtr attachmentPtr)
+		public QuatT GetAttachmentDefaultAbsolute(IntPtr attachmentPtr)
 		{
-			return _GetAttachmentWorldPosition(attachmentPtr);
+			return _GetAttachmentDefaultAbsolute(attachmentPtr);
 		}
 
-		public Vec3 GetAttachmentLocalPosition(IntPtr attachmentPtr)
+		public QuatT GetAttachmentDefaultRelative(IntPtr attachmentPtr)
 		{
-			return GetAttachmentLocalPosition(attachmentPtr);
-		}
-
-		public Quat GetAttachmentDefaultWorldRotation(IntPtr attachmentPtr)
-		{
-			return _GetAttachmentDefaultWorldRotation(attachmentPtr);
-		}
-
-		public Quat GetAttachmentDefaultLocalRotation(IntPtr attachmentPtr)
-		{
-			return _GetAttachmentDefaultLocalRotation(attachmentPtr);
-		}
-
-		public Vec3 GetAttachmentDefaultWorldPosition(IntPtr attachmentPtr)
-		{
-			return _GetAttachmentDefaultWorldPosition(attachmentPtr);
-		}
-
-		public Vec3 GetAttachmentDefaultLocalPosition(IntPtr attachmentPtr)
-		{
-			return _GetAttachmentDefaultLocalPosition(attachmentPtr);
+			return _GetAttachmentDefaultRelative(attachmentPtr);
 		}
 
 		public IntPtr GetAttachmentMaterial(IntPtr attachmentPtr)
@@ -396,6 +405,51 @@ namespace CryEngine.Native
 		public void SetAttachmentMaterial(IntPtr attachmentPtr, IntPtr materialPtr)
 		{
 			_SetAttachmentMaterial(attachmentPtr, materialPtr);
+		}
+
+		public QuatT GetJointAbsolute(IntPtr entPtr, string jointName, int characterSlot)
+		{
+			return _GetJointAbsolute(entPtr, jointName, characterSlot);
+		}
+
+		public QuatT GetJointAbsoluteDefault(IntPtr entPtr, string jointName, int characterSlot)
+		{
+			return _GetJointAbsoluteDefault(entPtr, jointName, characterSlot);
+		}
+
+		public QuatT GetJointRelative(IntPtr entPtr, string jointName, int characterSlot)
+		{
+			return _GetJointRelative(entPtr, jointName, characterSlot);
+		}
+
+		public QuatT GetJointRelativeDefault(IntPtr entPtr, string jointName, int characterSlot)
+		{
+			return _GetJointRelativeDefault(entPtr, jointName, characterSlot);
+		}
+
+		public void SetJointAbsolute(IntPtr entPtr, string jointName, int characterSlot, QuatT absolute)
+		{
+			_SetJointAbsolute(entPtr, jointName, characterSlot, absolute);
+		}
+
+		public void SetTriggerBBox(IntPtr entPtr, BoundingBox bounds)
+		{
+			_SetTriggerBBox(entPtr, bounds);
+		}
+
+		public BoundingBox GetTriggerBBox(IntPtr entPtr)
+		{
+			return _GetTriggerBBox(entPtr);
+		}
+
+		public void InvalidateTrigger(IntPtr entPtr)
+		{
+			_InvalidateTrigger(entPtr);
+		}
+
+		public IntPtr AcquireAnimatedCharacter(uint entId)
+		{
+			return _AcquireAnimatedCharacter(entId);
 		}
     }
 }

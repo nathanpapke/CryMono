@@ -35,20 +35,20 @@ bool CEntity::Init(IGameObject *pGameObject)
 {
 	SetGameObject(pGameObject);
 
-	m_pAnimatedCharacter = static_cast<IAnimatedCharacter *>(pGameObject->AcquireExtension( "AnimatedCharacter" ));
-
 	pGameObject->EnablePrePhysicsUpdate( ePPU_Always );
 	pGameObject->EnablePhysicsEvent( true, eEPE_OnPostStepImmediate );
 
 	IEntity *pEntity = GetEntity();
 	IEntityClass *pEntityClass = pEntity->GetClass();
 
+	//if(!strcmp(pEntityClass->GetName(), "HeavyTank"))
+		//m_pAnimatedCharacter = static_cast<IAnimatedCharacter *>(pGameObject->AcquireExtension( "AnimatedCharacter" ));
+
 	m_pScript = gEnv->pMonoScriptSystem->InstantiateScript(pEntityClass->GetName(), eScriptFlag_Entity);
 
 	IMonoClass *pEntityInfoClass = gEnv->pMonoScriptSystem->GetCryBraryAssembly()->GetClass("EntityInfo");
 
 	SMonoEntityInfo entityInfo(pEntity);
-	entityInfo.pAnimatedCharacter = m_pAnimatedCharacter;
 
 	m_pScript->CallMethod("InternalSpawn", pEntityInfoClass->BoxObject(&entityInfo));
 
@@ -82,6 +82,8 @@ void CEntity::Reset(bool enteringGamemode)
 {
 	if(m_pAnimatedCharacter)
 		m_pAnimatedCharacter->ResetState();
+	else if(m_pAnimatedCharacter = static_cast<IAnimatedCharacter *>(GetGameObject()->QueryExtension("AnimatedCharacter")))
+		m_pAnimatedCharacter->ResetState();
 }
 
 void CEntity::ProcessEvent(SEntityEvent &event)
@@ -109,7 +111,7 @@ void CEntity::ProcessEvent(SEntityEvent &event)
 
 			EntityId targetId = 0;
 
-			IEntity *pTarget = pCollision->iForeignData[0]==PHYS_FOREIGN_ID_ENTITY ? (IEntity*)pCollision->pForeignData[0]:0;
+			IEntity *pTarget = pCollision->iForeignData[1]==PHYS_FOREIGN_ID_ENTITY ? (IEntity*)pCollision->pForeignData[1]:0;
 			if(pTarget)
 				targetId = pTarget->GetId();
 

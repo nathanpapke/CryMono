@@ -147,6 +147,9 @@
     <ClInclude Include="CryMonoPlugin.h">
       <Filter>Startup</Filter>
     </ClInclude>
+    <ClInclude Include="NativeEntity.h">
+      <Filter>EntitySystem\Native</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -254,6 +257,9 @@
       <Filter>Startup</Filter>
 >>>>>>> master
     </ClCompile>
+    <ClCompile Include="NativeEntity.cpp">
+      <Filter>EntitySystem\Native</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ScriptBinds">
@@ -297,6 +303,9 @@
     </Filter>
     <Filter Include="Startup">
       <UniqueIdentifier>{4e363826-3e0d-4ab5-a8ca-b9ff90942058}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EntitySystem\Native">
+      <UniqueIdentifier>{688b9b2f-020f-49e4-ad34-bd78bb1927e2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -1,7 +1,8 @@
 #include "StdAfx.h"
 #include "Scriptbinds\Entity.h"
 
-#include <MonoEntity.h>
+#include "MonoEntity.h"
+#include "NativeEntity.h"
 #include "MonoEntityClass.h"
 
 #include "MonoScriptSystem.h"
@@ -85,21 +86,35 @@ CScriptbind_Entity::CScriptbind_Entity()
 	REGISTER_METHOD(GetAttachmentByIndex);
 	REGISTER_METHOD(GetAttachmentByName);
 
+	REGISTER_METHOD(AttachmentUseEntityPosition);
+	REGISTER_METHOD(AttachmentUseEntityRotation);
+
 	REGISTER_METHOD(LinkEntityToAttachment);
 	REGISTER_METHOD(GetAttachmentObject);
 
-	REGISTER_METHOD(GetAttachmentWorldRotation);
-	REGISTER_METHOD(GetAttachmentLocalRotation);
-	REGISTER_METHOD(GetAttachmentWorldPosition);
-	REGISTER_METHOD(GetAttachmentLocalPosition);
-
-	REGISTER_METHOD(GetAttachmentDefaultWorldRotation);
-	REGISTER_METHOD(GetAttachmentDefaultLocalRotation);
-	REGISTER_METHOD(GetAttachmentDefaultWorldPosition);
-	REGISTER_METHOD(GetAttachmentDefaultLocalPosition);
+	REGISTER_METHOD(GetAttachmentAbsolute);
+	REGISTER_METHOD(GetAttachmentRelative);
+	REGISTER_METHOD(GetAttachmentDefaultAbsolute);
+	REGISTER_METHOD(GetAttachmentDefaultRelative);
 
 	REGISTER_METHOD(GetAttachmentMaterial);
 	REGISTER_METHOD(SetAttachmentMaterial);
+	// ~Attachment
+
+	REGISTER_METHOD(GetJointAbsolute);
+	REGISTER_METHOD(GetJointAbsoluteDefault);
+	REGISTER_METHOD(GetJointRelative);
+	REGISTER_METHOD(GetJointRelativeDefault);
+
+	REGISTER_METHOD(SetJointAbsolute);
+
+	REGISTER_METHOD(SetTriggerBBox);
+	REGISTER_METHOD(GetTriggerBBox);
+	REGISTER_METHOD(InvalidateTrigger);
+
+	REGISTER_METHOD(AcquireAnimatedCharacter);
+
+	//RegisterNativeEntityClass();
 
 	gEnv->pEntitySystem->AddSink(this, IEntitySystem::OnSpawn | IEntitySystem::OnRemove, 0);
 }
@@ -157,7 +172,7 @@ bool CScriptbind_Entity::IsMonoEntity(const char *className)
 void CScriptbind_Entity::OnSpawn(IEntity *pEntity,SEntitySpawnParams &params)
 {
 	const char *className = params.pClass->GetName();
-	if(!IsMonoEntity(className))
+	if(!IsMonoEntity(className))// && strcmp(className, "[NativeEntity]"))
 		return;
 
 	auto gameObject = gEnv->pGameFramework->GetIGameObjectSystem()->CreateGameObjectForEntity(pEntity->GetId());
@@ -272,6 +287,30 @@ bool CScriptbind_Entity::RegisterEntityClass(SEntityRegistrationParams params)
 	return result;
 }
 
+struct SMonoNativeEntityCreator
+	: public IGameObjectExtensionCreatorBase
+{
+	virtual IGameObjectExtension *Create() { return new CNativeEntity(); }
+	virtual void GetGameObjectExtensionRMIData(void **ppRMI, size_t *nCount) { return CNativeEntity::GetGameObjectExtensionRMIData(ppRMI, nCount); }
+};
+
+void CScriptbind_Entity::RegisterNativeEntityClass()
+{
+	const char *className = "[NativeEntity]";
+
+	IEntityClassRegistry::SEntityClassDesc entityClassDesc;
+	entityClassDesc.flags = 0;
+	entityClassDesc.sName = className;
+	entityClassDesc.editorClassInfo.sCategory = "Default";
+
+	std::vector<IEntityPropertyHandler::SPropertyInfo> properties;
+
+	bool result = gEnv->pEntitySystem->GetClassRegistry()->RegisterClass(new CEntityClass(entityClassDesc, properties));
+
+	static SMonoNativeEntityCreator creator;
+	gEnv->pGameFramework->GetIGameObjectSystem()->RegisterExtension(className, &creator, nullptr);
+}
+
 mono::object CScriptbind_Entity::SpawnEntity(EntitySpawnParams monoParams, bool bAutoInit, SMonoEntityInfo &entityInfo)
 {
 	const char *className = ToCryString(monoParams.sClass);
@@ -284,7 +323,7 @@ mono::object CScriptbind_Entity::SpawnEntity(EntitySpawnParams monoParams, bool 
 
 		spawnParams.nFlags = monoParams.flags | ENTITY_FLAG_NO_SAVE;
 		spawnParams.vPosition = monoParams.pos;
-		spawnParams.qRotation = Quat(Ang3(monoParams.rot));
+		spawnParams.qRotation = monoParams.rot;
 		spawnParams.vScale = monoParams.scale;
 
 		if(IEntity *pEntity = gEnv->pEntitySystem->SpawnEntity(spawnParams, bAutoInit))
@@ -303,9 +342,9 @@ mono::object CScriptbind_Entity::SpawnEntity(EntitySpawnParams monoParams, bool 
 	return nullptr;
 }
 
-void CScriptbind_Entity::RemoveEntity(EntityId id)
+void CScriptbind_Entity::RemoveEntity(EntityId id, bool removeNow)
 {
-	gEnv->pEntitySystem->RemoveEntity(id);
+	gEnv->pEntitySystem->RemoveEntity(id, removeNow);
 }
 
 IEntity *CScriptbind_Entity::GetEntity(EntityId id)
@@ -457,7 +496,7 @@ Quat CScriptbind_Entity::GetWorldRotation(IEntity *pEntity)
 
 void CScriptbind_Entity::LoadObject(IEntity *pEntity, mono::string fileName, int slot)
 {
-	pEntity->SetStatObj(gEnv->p3DEngine->LoadStatObj(ToCryString(fileName)), slot, true);
+	pEntity->LoadGeometry(slot, ToCryString(fileName));
 }
 
 void CScriptbind_Entity::LoadCharacter(IEntity *pEntity, mono::string fileName, int slot)
@@ -484,6 +523,8 @@ mono::string CScriptbind_Entity::GetStaticObjectFilePath(IEntity *pEntity, int s
 {
 	if(IStatObj *pStatObj = pEntity->GetStatObj(slot))
 		return ToMonoString(pStatObj->GetFilePath());
+	else if(ICharacterInstance *pCharacter = pEntity->GetCharacter(0))
+		return ToMonoString(pCharacter->GetFilePath());
 
 	return ToMonoString("");
 }
@@ -613,6 +654,7 @@ void CScriptbind_Entity::AddMovement(IAnimatedCharacter *pAnimatedCharacter, SCh
 {
 	if(pAnimatedCharacter)
 		pAnimatedCharacter->AddMovement(moveRequest);
+
 }
 
 ////////////////////////////////////////////////////
@@ -652,17 +694,41 @@ IAttachment *CScriptbind_Entity::GetAttachmentByName(IEntity *pEnt, mono::string
 
 class CMonoEntityAttachment : public CEntityAttachment
 {
+public:
+	CMonoEntityAttachment()
+		: m_bUseEntityPosition(false)
+		, m_bUseEntityRotation(false)
+	{
+	}
+
+	void UseEntityPosition(bool use) { m_bUseEntityPosition = use; }
+	void UseEntityRotation(bool use) { m_bUseEntityRotation = use; }
+
 	virtual void UpdateAttachment(IAttachment *pIAttachment,const QuatT &m, float fZoomAdjustedDistanceFromCamera, uint32 OnRender ) override
 	{
 		const QuatT& quatT = pIAttachment->GetAttWorldAbsolute();
 
 		IEntity *pEntity = gEnv->pEntitySystem->GetEntity(GetEntityId());
 		if(pEntity)
-			pEntity->SetPosRotScale(quatT.t, pEntity->GetRotation(), pEntity->GetScale(), ENTITY_XFORM_NO_PROPOGATE);
+			pEntity->SetPosRotScale((m_bUseEntityPosition ? pEntity->GetPos() : quatT.t), (m_bUseEntityRotation ? pEntity->GetRotation() : quatT.q), pEntity->GetScale(), ENTITY_XFORM_NO_PROPOGATE);
 	}
+
+private:
+	bool m_bUseEntityPosition;
+	bool m_bUseEntityRotation;
 };
 
-void CScriptbind_Entity::LinkEntityToAttachment(IAttachment *pAttachment, EntityId id)
+void CScriptbind_Entity::AttachmentUseEntityPosition(CMonoEntityAttachment *pEntityAttachment, bool use)
+{
+	pEntityAttachment->UseEntityPosition(use);
+}
+
+void CScriptbind_Entity::AttachmentUseEntityRotation(CMonoEntityAttachment *pEntityAttachment, bool use)
+{
+	pEntityAttachment->UseEntityRotation(use);
+}
+
+CMonoEntityAttachment *CScriptbind_Entity::LinkEntityToAttachment(IAttachment *pAttachment, EntityId id)
 {
 	pAttachment->ClearBinding();
 
@@ -670,6 +736,8 @@ void CScriptbind_Entity::LinkEntityToAttachment(IAttachment *pAttachment, Entity
 	pEntityAttachment->SetEntityId(id);
 
 	pAttachment->AddBinding(pEntityAttachment);
+
+	return pEntityAttachment;
 }
 
 mono::string CScriptbind_Entity::GetAttachmentObject(IAttachment *pAttachment)
@@ -685,44 +753,24 @@ mono::string CScriptbind_Entity::GetAttachmentObject(IAttachment *pAttachment)
 	return nullptr;
 }
 
-Quat CScriptbind_Entity::GetAttachmentWorldRotation(IAttachment *pAttachment)
+QuatT CScriptbind_Entity::GetAttachmentAbsolute(IAttachment *pAttachment)
 {
-	return pAttachment->GetAttWorldAbsolute().q;
+	return pAttachment->GetAttWorldAbsolute();
 }
 
-Quat CScriptbind_Entity::GetAttachmentLocalRotation(IAttachment *pAttachment)
+QuatT CScriptbind_Entity::GetAttachmentRelative(IAttachment *pAttachment)
 {
-	return pAttachment->GetAttModelRelative().q;
-}
-
-Vec3 CScriptbind_Entity::GetAttachmentWorldPosition(IAttachment *pAttachment)
-{
-	return pAttachment->GetAttWorldAbsolute().t;
-}
-
-Vec3 CScriptbind_Entity::GetAttachmentLocalPosition(IAttachment *pAttachment)
-{
-	return pAttachment->GetAttModelRelative().t;
-}
-
-Quat CScriptbind_Entity::GetAttachmentDefaultWorldRotation(IAttachment *pAttachment)
-{
-	return pAttachment->GetAttAbsoluteDefault().q;
+	return pAttachment->GetAttModelRelative();
 }
 	
-Quat CScriptbind_Entity::GetAttachmentDefaultLocalRotation(IAttachment *pAttachment)
+QuatT CScriptbind_Entity::GetAttachmentDefaultAbsolute(IAttachment *pAttachment)
 {
-	return pAttachment->GetAttRelativeDefault().q;
-}
-	 
-Vec3 CScriptbind_Entity::GetAttachmentDefaultWorldPosition(IAttachment *pAttachment)
-{
-	return pAttachment->GetAttAbsoluteDefault().t;
+	return pAttachment->GetAttAbsoluteDefault();
 }
 
-Vec3 CScriptbind_Entity::GetAttachmentDefaultLocalPosition(IAttachment *pAttachment)
+QuatT CScriptbind_Entity::GetAttachmentDefaultRelative(IAttachment *pAttachment)
 {
-	return pAttachment->GetAttRelativeDefault().t;
+	return pAttachment->GetAttRelativeDefault();
 }
 
 IMaterial *CScriptbind_Entity::GetAttachmentMaterial(IAttachment *pAttachment)
@@ -737,4 +785,113 @@ void CScriptbind_Entity::SetAttachmentMaterial(IAttachment *pAttachment, IMateri
 {
 	if(IAttachmentObject *pObject = pAttachment->GetIAttachmentObject())
 		pObject->SetMaterial(pMaterial);
+}
+
+QuatT CScriptbind_Entity::GetJointAbsolute(IEntity *pEntity, mono::string jointName, int characterSlot)
+{
+	if(ICharacterInstance *pCharacter = pEntity->GetCharacter(characterSlot))
+	{
+		if(ISkeletonPose *pSkeletonPose = pCharacter->GetISkeletonPose())
+		{
+			int16 id = pSkeletonPose->GetJointIDByName(ToCryString(jointName));
+			if(id > -1)
+				return pSkeletonPose->GetAbsJointByID(id);
+		}
+	}
+
+	return QuatT();
+}
+
+QuatT CScriptbind_Entity::GetJointAbsoluteDefault(IEntity *pEntity, mono::string jointName, int characterSlot)
+{
+	if(ICharacterInstance *pCharacter = pEntity->GetCharacter(characterSlot))
+	{
+		if(ISkeletonPose *pSkeletonPose = pCharacter->GetISkeletonPose())
+		{
+			int16 id = pSkeletonPose->GetJointIDByName(ToCryString(jointName));
+			if(id > -1)
+				return pSkeletonPose->GetDefaultAbsJointByID(id);
+		}
+	}
+
+	return QuatT();
+}
+
+QuatT CScriptbind_Entity::GetJointRelative(IEntity *pEntity, mono::string jointName, int characterSlot)
+{
+	if(ICharacterInstance *pCharacter = pEntity->GetCharacter(characterSlot))
+	{
+		if(ISkeletonPose *pSkeletonPose = pCharacter->GetISkeletonPose())
+		{
+			int16 id = pSkeletonPose->GetJointIDByName(ToCryString(jointName));
+			if(id > -1)
+				return pSkeletonPose->GetRelJointByID(id);
+		}
+	}
+
+	return QuatT();
+}
+
+QuatT CScriptbind_Entity::GetJointRelativeDefault(IEntity *pEntity, mono::string jointName, int characterSlot)
+{
+	if(ICharacterInstance *pCharacter = pEntity->GetCharacter(characterSlot))
+	{
+		if(ISkeletonPose *pSkeletonPose = pCharacter->GetISkeletonPose())
+		{
+			int16 id = pSkeletonPose->GetJointIDByName(ToCryString(jointName));
+			if(id > -1)
+				return pSkeletonPose->GetDefaultRelJointByID(id);
+		}
+	}
+
+	return QuatT();
+}
+
+void CScriptbind_Entity::SetJointAbsolute(IEntity *pEntity, mono::string jointName, int characterSlot, QuatT absolute)
+{
+	if(ICharacterInstance *pCharacter = pEntity->GetCharacter(characterSlot))
+	{
+		if(ISkeletonPose *pSkeletonPose = pCharacter->GetISkeletonPose())
+		{
+			int16 id = pSkeletonPose->GetJointIDByName(ToCryString(jointName));
+			if(id > -1)
+				pSkeletonPose->SetAbsJointByID(id, absolute);
+		}
+	}
+}
+
+void CScriptbind_Entity::SetTriggerBBox(IEntity *pEntity, AABB bounds)
+{
+	IEntityTriggerProxy *pTriggerProxy = static_cast<IEntityTriggerProxy *>(pEntity->GetProxy(ENTITY_PROXY_TRIGGER));
+	if(!pTriggerProxy)
+	{
+		pEntity->CreateProxy(ENTITY_PROXY_TRIGGER);
+		pTriggerProxy = static_cast<IEntityTriggerProxy *>(pEntity->GetProxy(ENTITY_PROXY_TRIGGER));
+	}
+
+	if (pTriggerProxy)
+		pTriggerProxy->SetTriggerBounds(bounds);
+}
+
+AABB CScriptbind_Entity::GetTriggerBBox(IEntity *pEntity)
+{
+	AABB bbox;
+	if(IEntityTriggerProxy *pTriggerProxy = static_cast<IEntityTriggerProxy *>(pEntity->GetProxy(ENTITY_PROXY_TRIGGER)))
+		pTriggerProxy->GetTriggerBounds(bbox);
+
+	return bbox;
+}
+
+void CScriptbind_Entity::InvalidateTrigger(IEntity *pEntity)
+{
+	if(IEntityTriggerProxy *pTriggerProxy = static_cast<IEntityTriggerProxy *>(pEntity->GetProxy(ENTITY_PROXY_TRIGGER)))
+		pTriggerProxy->InvalidateTrigger();
+}
+
+IAnimatedCharacter *CScriptbind_Entity::AcquireAnimatedCharacter(EntityId id)
+{
+	if(IGameObject *pGameObject = gEnv->pGameFramework->GetGameObject(id))
+		return static_cast<IAnimatedCharacter *>(pGameObject->AcquireExtension("AnimatedCharacter"));
+
+	return nullptr;
 }

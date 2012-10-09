@@ -3,17 +3,35 @@ namespace CryEngine
 {
 	public struct Matrix33
 	{
-		public float M00 { get; set; }
-		public float M01 { get; set; }
-		public float M02 { get; set; }
+		public float M00;
+		public float M01;
+		public float M02;
 
-		public float M10 { get; set; }
-		public float M11 { get; set; }
-		public float M12 { get; set; }
+		public float M10;
+		public float M11;
+		public float M12;
 
-		public float M20 { get; set; }
-		public float M21 { get; set; }
-		public float M22 { get; set; }
+		public float M20;
+		public float M21;
+		public float M22;
+
+		public Matrix33(Matrix34 m)
+		{
+			M00 = m.M00; M01 = m.M01; M02 = m.M02;
+			M10 = m.M10; M11 = m.M11; M12 = m.M12;
+			M20 = m.M20; M21 = m.M21; M22 = m.M22;
+		}
+
+		public Matrix33(Quat q)
+		{
+			var v2 = q.V + q.V;
+			var xx = 1 - v2.X * q.V.X; var yy = v2.Y * q.V.Y; var xw = v2.X * q.W;
+			var xy = v2.Y * q.V.X; var yz = v2.Z * q.V.Y; var yw = v2.Y * q.W;
+			var xz = v2.Z * q.V.X; var zz = v2.Z * q.V.Z; var zw = v2.Z * q.W;
+			M00 = 1 - yy - zz; M01 = xy - zw; M02 = xz + yw;
+			M10 = xy + zw; M11 = xx - zz; M12 = yz - xw;
+			M20 = xz - yw; M21 = yz + xw; M22 = xx - yy;
+		}
 
 		public void SetIdentity()
 		{
@@ -177,6 +195,42 @@ namespace CryEngine
 
 			return matrix;
 		}
+
+		#region Operators
+		public static Matrix33 operator *(Matrix33 left, float op)
+		{
+			var m33 = left;
+			m33.M00 *= op; m33.M01 *= op; m33.M02 *= op;
+			m33.M10 *= op; m33.M11 *= op; m33.M12 *= op;
+			m33.M20 *= op; m33.M21 *= op; m33.M22 *= op;
+			return m33;
+		}
+
+		public static Matrix33 operator /(Matrix33 left, float op)
+		{
+			var m33 = left;
+			var iop = 1.0f / op;
+			m33.M00 *= iop; m33.M01 *= iop; m33.M02 *= iop;
+			m33.M10 *= iop; m33.M11 *= iop; m33.M12 *= iop;
+			m33.M20 *= iop; m33.M21 *= iop; m33.M22 *= iop;
+			return m33;
+		}
+
+		public static Matrix33 operator *(Matrix33 left, Matrix33 right)
+		{
+			var m = new Matrix33();
+			m.M00 = left.M00 * right.M00 + left.M01 * right.M10 + left.M02 * right.M20;
+			m.M01 = left.M00 * right.M01 + left.M01 * right.M11 + left.M02 * right.M21;
+			m.M02 = left.M00 * right.M02 + left.M01 * right.M12 + left.M02 * right.M22;
+			m.M10 = left.M10 * right.M00 + left.M11 * right.M10 + left.M12 * right.M20;
+			m.M11 = left.M10 * right.M01 + left.M11 * right.M11 + left.M12 * right.M21;
+			m.M12 = left.M10 * right.M02 + left.M11 * right.M12 + left.M12 * right.M22;
+			m.M20 = left.M20 * right.M00 + left.M21 * right.M10 + left.M22 * right.M20;
+			m.M21 = left.M20 * right.M01 + left.M21 * right.M11 + left.M22 * right.M21;
+			m.M22 = left.M20 * right.M02 + left.M21 * right.M12 + left.M22 * right.M22;
+			return m;
+		}
+		#endregion
 	}
 
 	public struct Matrix34
@@ -412,9 +466,9 @@ namespace CryEngine
 
 		public void Set(Vec3 s, Quat q, Vec3 t = default(Vec3))
 		{
-			float vxvx = q.Axis.X * q.Axis.X; float vzvz = q.Axis.Z * q.Axis.Z; float vyvy = q.Axis.Y * q.Axis.Y;
-			float vxvy = q.Axis.X * q.Axis.Y; float vxvz = q.Axis.X * q.Axis.Z; float vyvz = q.Axis.Y * q.Axis.Z;
-			float svx = q.Angle * q.Axis.X; float svy = q.Angle * q.Axis.Y; float svz = q.Angle * q.Axis.Z;
+			float vxvx = q.V.X * q.V.X; float vzvz = q.V.Z * q.V.Z; float vyvy = q.V.Y * q.V.Y;
+			float vxvy = q.V.X * q.V.Y; float vxvz = q.V.X * q.V.Z; float vyvz = q.V.Y * q.V.Z;
+			float svx = q.W * q.V.X; float svy = q.W * q.V.Y; float svz = q.W * q.V.Z;
 			M00 = (1 - (vyvy + vzvz) * 2) * s.X; M01 = (vxvy - svz) * 2 * s.Y; M02 = (vxvz + svy) * 2 * s.Z; M03 = t.X;
 			M10 = (vxvy + svz) * 2 * s.X; M11 = (1 - (vxvx + vzvz) * 2) * s.Y; M12 = (vyvz - svx) * 2 * s.Z; M13 = t.Y;
 			M20 = (vxvz - svy) * 2 * s.X; M21 = (vyvz + svx) * 2 * s.Y; M22 = (1 - (vxvx + vyvy) * 2) * s.Z; M23 = t.Z;
@@ -697,6 +751,13 @@ namespace CryEngine
 			(Math.Abs(M10 - m.M10) <= e) && (Math.Abs(M11 - m.M11) <= e) && (Math.Abs(M12 - m.M12) <= e) && (Math.Abs(M13 - m.M13) <= e) &&
 			(Math.Abs(M20 - m.M20) <= e) && (Math.Abs(M21 - m.M21) <= e) && (Math.Abs(M22 - m.M22) <= e) && (Math.Abs(M23 - m.M23) <= e)
 			);
+		}
+		#endregion
+
+		#region Operators
+		public static explicit operator Matrix33(Matrix34 m)
+		{
+			return new Matrix33(m);
 		}
 		#endregion
 	}
