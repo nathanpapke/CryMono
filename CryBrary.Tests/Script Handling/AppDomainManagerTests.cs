@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using CryEngine.Native;
 using Moq;
 using NUnit.Framework;
@@ -9,7 +9,6 @@ namespace CryBrary.Tests.ScriptHandling
     [Serializable]
     public class AppDomainManagerTests : CryBraryTests
     {
-
         private AppDomainExecutor _executor;
         private CrossAppDomainStorage _storage;
 
@@ -20,7 +19,6 @@ namespace CryBrary.Tests.ScriptHandling
             var appDomainMock = GetMock<INativeAppDomainMethods>();
 
             appDomainMock.Setup(x => x.SetScriptAppDomain(It.IsAny<int>())).Callback<int>(x => _executor.Execute(SetValues, x));
-
         }
 
         private void SetValues(int x)
