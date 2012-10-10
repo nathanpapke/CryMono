@@ -4,7 +4,6 @@ using CryEngine;
 using CryEngine.Initialization;
 using CryEngine.Native;
 using Moq;
-using NUnit.Framework;
 using System.Linq;
 
 namespace CryBrary.Tests
@@ -14,21 +13,18 @@ namespace CryBrary.Tests
 	{
         [NonSerialized]
 	    protected List<Mock> _mocks;
-
         protected Mock<T> GetMock<T>() where T : class
         {
             return _mocks.First(m => m.Object is T) as Mock<T>;
         }
-        
 
-		[SetUp]
-		public void Init()
-		{
+        public CryBraryTests()
+        {
             // Don't show gui's when unit testing
             CryEngine.Utils.Settings.IsGuiSupported = false;
 
-		    InitializeMocks();
-		}
+            InitializeMocks();
+        }
 
         protected virtual void ConfigureMocks()
         {
