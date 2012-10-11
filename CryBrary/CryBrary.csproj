@@ -109,6 +109,9 @@
     <Compile Include="Native\Interfaces\INativeNetworkMethods.cs" />
     <Compile Include="Native\NativeNetworkMethods.cs" />
     <Compile Include="Network\RemoteInvocationException.cs" />
+    <Compile Include="Serialization\CrySerializationSurrogate.cs" />
+    <Compile Include="Serialization\CrySurrogateSelector.cs" />
+    <Compile Include="Serialization\ICrySerializable.cs" />
     <Compile Include="Utils\ProjectSettings.cs" />
     <Compile Include="Engine\Texture.cs" />
     <Compile Include="Entity\AnimationFlags.cs" />

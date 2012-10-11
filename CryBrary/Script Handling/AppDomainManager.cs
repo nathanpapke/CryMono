@@ -74,24 +74,23 @@ namespace CryEngine
         /// <returns></returns>
         public bool Reload()
         {
-            Debug.LogAlways("TODO: Reload");
-            return true;
-            Debug.LogAlways("Serialize what we have now!");
-            using (MemoryStream ms = new MemoryStream())
+            // TODO: Serialization first
+            try
             {
-                Stream serializationStream = _loader.Serialize();
-                serializationStream.CopyTo(ms);
-
-                //AppDomain.Unload(_scriptAppDomain);
+                using (Stream currentSerializationStream = _loader.Serialize())
+                {
+                    
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return false;
             }
 
-            Debug.LogAlways("Unloaded script domain, creating new");
+            InitializeScriptDomain(AppDomain.CurrentDomain.BaseDirectory);
 
-            InitializeScriptDomain();
-
-            
-
-            return false;
+            return true;
         }
 
 
