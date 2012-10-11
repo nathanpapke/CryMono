@@ -107,9 +107,6 @@ namespace CryBrary.Tests.ScriptHandling
 
                                                     Assert.Equal(entity.Active, true);
                                                     Assert.Equal(entity.Health, 200);
-                                                    Assert.True((entity.Flags & EntityFlags.CastShadow) > 0);
-                                                    Assert.True((entity.Flags & EntityFlags.ClientOnly) > 0);
-                                                    Assert.True(entity.Position.X > 0);
                                                 });
         }
     }

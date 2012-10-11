@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Linq;
 
@@ -19,13 +21,27 @@ namespace CryEngine.Serialization
                 // Do our custom serialization here!
                 var type = obj.GetType();
 
-                foreach (var fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic))
+                foreach (var fieldInfo in GetFields(type))
                 {
                     info.AddValue(fieldInfo.Name, fieldInfo.GetValue(obj));
                 }
                 
 
             }
+        }
+
+        private static IEnumerable<FieldInfo> GetFields(Type type)
+        {
+            var fields = new List<FieldInfo>();
+            if (type.BaseType != null)
+            {
+                fields.AddRange(GetFields(type.BaseType));
+            }
+            
+            fields.AddRange(type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic));
+
+
+            return fields;
         }
 
         public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
@@ -46,9 +62,8 @@ namespace CryEngine.Serialization
 
             // Do our custom serialization here!
             var type = obj.GetType();
-            var typeFields = type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
            
-            foreach (var fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic))
+            foreach (var fieldInfo in GetFields(type))
             {
                 foreach (SerializationEntry entry in info)
                 {
