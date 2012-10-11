@@ -4,17 +4,6 @@ using CryEngine.Native;
 
 namespace CryEngine
 {
-	public static class GlobalPhysics
-	{
-      
-        const string gravityCVar = "p_gravity_z";
-		public static float GravityZ
-		{
-			get { return CVar.Get(gravityCVar).FVal; }
-			set { CVar.Get(gravityCVar).FVal = value; }
-		}
-    }
-
 	internal struct RayHit
 	{
 		public float dist;
@@ -168,5 +157,26 @@ namespace CryEngine
 		/// queues procedural breakage requests; can only be used in SimulateExplosion
 		/// </summary>
 		DelayedDeformations = 0x80000
+	}
+
+	internal struct pe_explosion
+	{
+		public Vec3 epicenter;	// epicenter for the occlusion computation
+		public Vec3 epicenterImp; // epicenter for impulse computation
+		// the impulse a surface fragment with area dS and normal n gets is: dS*k*n*max(0,n*dir_to_epicenter)/max(rmin, dist_to_epicenter)^2
+		// k is selected in such way that at impulsivePressureAtR = k/r^2
+		public float rmin, rmax, r;
+		public float impulsivePressureAtR;
+		public int nOccRes; // resolution of the occlusion map (0 disables)
+		public int nGrow; // grow occlusion projections by this amount of cells to allow explosion to reach around corners a bit
+		public float rminOcc; // ignores geometry closer than this for occlusion computations
+		public float holeSize;	// explosion shape for iholeType will be scaled by this holeSize / shape's declared size
+		public Vec3 explDir;	// hit direction, for aligning the explosion boolean shape
+		public int iholeType; // breakability index for the explosion (<0 disables)
+		public bool forceDeformEntities; // force deformation even if breakImpulseScale is zero
+		// filled as results
+		IntPtr pAffectedEnts;
+		IntPtr pAffectedEntsExposure;	// 0..1 exposure, computed from the occlusion map
+		public int nAffectedEnts;
 	}
 }
