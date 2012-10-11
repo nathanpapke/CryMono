@@ -37,6 +37,13 @@ namespace CryEngine.Serialization
                 return crySerializableObj.SetObjectData(obj, info, context);
             }
 
+            // Is this class ISerializable and does it have a serialization constructor?
+            var serializableObj = obj as ISerializable;
+            if (serializableObj != null)
+            {
+                
+            }
+
             // Do our custom serialization here!
             var type = obj.GetType();
             var typeFields = type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic);

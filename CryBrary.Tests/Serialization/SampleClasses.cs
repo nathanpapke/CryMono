@@ -71,5 +71,27 @@ namespace CryBrary.Tests.Serialization
                 _complexClass = c;
             }
         }
+
+        public class SerializableClassWithSerializationConstructor : ISerializable
+        {
+            public int A { get; set; }
+            public string B { get; set; }
+
+            public SerializableClassWithSerializationConstructor()
+            {
+            }
+
+            public SerializableClassWithSerializationConstructor(SerializationInfo info, StreamingContext context)
+            {
+                A = (int)info.GetValue("A", typeof (int));
+                B = (string) info.GetValue("B", typeof (string));
+            }
+
+            public void GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                info.AddValue("A", A);
+                info.AddValue("B", B);
+            }
+        }
     }
 }
