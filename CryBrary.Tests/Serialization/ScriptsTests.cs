@@ -124,6 +124,8 @@ namespace CryBrary.Tests.Serialization
             {
 				var scriptManager = new ScriptManager(true);
 
+                ScriptManager.Instance = scriptManager;
+
 				scriptManager.AddScriptInstance(new TestEntity(), ScriptType.Entity);
 
 				serializer.Serialize(stream, scriptManager.Scripts);
