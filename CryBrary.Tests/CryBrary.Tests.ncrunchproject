@@ -16,10 +16,5 @@
   <UseBuildConfiguration></UseBuildConfiguration>
   <ProxyProcessPath></ProxyProcessPath>
   <UseCPUArchitecture>AutoDetect</UseCPUArchitecture>
-  <IgnoredTests>
-    <RegexTestSelector>
-      <RegularExpression>CryBrary\.Tests\.Serialization\.ScriptsTests\..*</RegularExpression>
-    </RegexTestSelector>
-  </IgnoredTests>
   <HiddenWarnings>CopyReferencedAssembliesToWorkspaceIsOn</HiddenWarnings>
 </ProjectConfiguration>
