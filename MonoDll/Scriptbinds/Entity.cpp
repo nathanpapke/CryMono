@@ -114,6 +114,9 @@ CScriptbind_Entity::CScriptbind_Entity()
 
 	REGISTER_METHOD(AcquireAnimatedCharacter);
 
+	REGISTER_METHOD(Hide);
+	REGISTER_METHOD(IsHidden);
+
 	//RegisterNativeEntityClass();
 
 	gEnv->pEntitySystem->AddSink(this, IEntitySystem::OnSpawn | IEntitySystem::OnRemove, 0);
@@ -894,4 +897,14 @@ IAnimatedCharacter *CScriptbind_Entity::AcquireAnimatedCharacter(EntityId id)
 		return static_cast<IAnimatedCharacter *>(pGameObject->AcquireExtension("AnimatedCharacter"));
 
 	return nullptr;
+}
+
+void CScriptbind_Entity::Hide(IEntity *pEntity, bool hide)
+{
+	pEntity->Hide(hide);
+}
+
+bool CScriptbind_Entity::IsHidden(IEntity *pEntity)
+{
+	return pEntity->IsHidden();
 }
