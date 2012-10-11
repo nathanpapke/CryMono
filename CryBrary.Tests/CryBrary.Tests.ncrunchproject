@@ -16,5 +16,5 @@
   <UseBuildConfiguration></UseBuildConfiguration>
   <ProxyProcessPath></ProxyProcessPath>
   <UseCPUArchitecture>AutoDetect</UseCPUArchitecture>
-  <HiddenWarnings>CopyReferencedAssembliesToWorkspaceIsOn</HiddenWarnings>
+  <HiddenWarnings>CopyReferencedAssembliesToWorkspaceIsOn;LongTestTimesWithoutParallelExecution</HiddenWarnings>
 </ProjectConfiguration>

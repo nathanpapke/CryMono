@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Runtime.Serialization;
 
 namespace CryEngine.Serialization
 {
     public class CrySurrogateSelector : ISurrogateSelector
     {
-        private ISerializationSurrogate _serializationSurrogate;
+        private readonly ISerializationSurrogate _serializationSurrogate;
         public CrySurrogateSelector()
         {
-            _serializationSurrogate = new CrySerializationSurrogate();
+            _serializationSurrogate = FormatterServices.GetSurrogateForCyclicalReference(new CrySerializationSurrogate());
         }
 
         public void ChainSelector(ISurrogateSelector selector)
@@ -31,11 +28,8 @@ namespace CryEngine.Serialization
                 selector = null;
                 return null;
             }
-            else // Otherwise, use the Cry Serialization (best shot at serialization)
-            {
-                selector = this;
-                return _serializationSurrogate;
-            }
+            selector = this;
+            return _serializationSurrogate;
         }
     }
 }
