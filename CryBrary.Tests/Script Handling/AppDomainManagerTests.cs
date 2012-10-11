@@ -1,11 +1,10 @@
 using System;
 using CryEngine.Native;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
 namespace CryBrary.Tests.ScriptHandling
 {
-    [TestFixture]
     [Serializable]
     public class AppDomainManagerTests : CryBraryTests
     {
@@ -38,7 +37,7 @@ namespace CryBrary.Tests.ScriptHandling
             return appDomainManager;
         }
 
-        [Test]
+        [Fact]
         public void InitializeScriptDomain_InitialDomain_CreatedSuccesfully()
         {
             // Arrange
@@ -48,9 +47,9 @@ namespace CryBrary.Tests.ScriptHandling
             appDomainManager.InitializeScriptDomain(AppDomain.CurrentDomain.BaseDirectory);
 
             // Assert
-            Assert.IsNotNull(appDomainManager.ScriptAppDomain);
-            Assert.AreNotEqual(AppDomain.CurrentDomain.Id, appDomainManager.ScriptAppDomain.Id);
-            Assert.AreEqual(appDomainManager.ScriptAppDomain.Id, _storage.Values["ScriptDomainId"]);
+            Assert.NotNull(appDomainManager.ScriptAppDomain);
+            Assert.NotEqual(AppDomain.CurrentDomain.Id, appDomainManager.ScriptAppDomain.Id);
+            Assert.Equal(appDomainManager.ScriptAppDomain.Id, _storage.Values["ScriptDomainId"]);
         }
     }
 }
