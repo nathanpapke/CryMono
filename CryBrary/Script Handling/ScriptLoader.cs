@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -52,9 +53,21 @@ namespace CryEngine
             action();
         }
 
-        public bool Deserialize()
+        public bool Deserialize(Stream serializationStream)
         {
-            return false;
+            Debug.LogAlways("Deserializing in " + AppDomain.CurrentDomain.FriendlyName);
+            if (ScriptManager.Instance == null)
+                throw new InvalidOperationException("Cannot deserialize because the ScriptManager instance is null");
+
+            IFormatter formatter = new BinaryFormatter();
+
+            formatter.SurrogateSelector = new CrySurrogateSelector();
+
+            var result = formatter.Deserialize(serializationStream);
+
+            ScriptManager.Instance.Scripts = result as List<CryScript>;
+
+            return true;
         }
     }
 }

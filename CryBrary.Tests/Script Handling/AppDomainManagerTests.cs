@@ -1,4 +1,7 @@
 using System;
+using System.Linq;
+using CryEngine;
+using CryEngine.Initialization;
 using CryEngine.Native;
 using Moq;
 using Xunit;
@@ -66,6 +69,48 @@ namespace CryBrary.Tests.ScriptHandling
             // Assert
             Assert.True(reloadResult);
             Assert.NotEqual(originalAppDomainId, appDomainManager.ScriptAppDomain.Id);
+        }
+
+        [Entity]
+        public class MyTestEntity : EntityBase
+        {
+            [EditorProperty]
+            public bool Active { get; set; }
+
+            public int Health { get; set; }
+
+        }
+
+        [Fact]
+        public void ReloadScriptDomain_WithSimpleEntity_DataRetained()
+        {
+            var appDomainManager = CreateAppDomainManager();
+
+            // Act
+            appDomainManager.InitializeScriptDomain(AppDomain.CurrentDomain.BaseDirectory);
+            appDomainManager.Loader.Execute(() =>
+                                  {
+                                      var entity = new MyTestEntity() { Active = true, Health = 200, Flags = EntityFlags.CastShadow | EntityFlags.ClientOnly, Position = new Vec3(1, 2, 3) };
+                                      ScriptManager.Instance.AddScriptInstance(entity, ScriptType.Entity);
+                                  });
+            int originalAppDomainId = appDomainManager.ScriptAppDomain.Id;
+            bool reloadResult = appDomainManager.Reload();
+
+            // Assert
+            Assert.True(reloadResult);
+            Assert.NotEqual(originalAppDomainId, appDomainManager.ScriptAppDomain.Id);
+            appDomainManager.Loader.Execute(() =>
+                                                {
+                                                    Assert.NotEmpty(ScriptManager.Instance.Scripts);
+
+                                                    var entity = ScriptManager.Instance.Scripts.First().ScriptInstances.First() as MyTestEntity;
+
+                                                    Assert.Equal(entity.Active, true);
+                                                    Assert.Equal(entity.Health, 200);
+                                                    Assert.True((entity.Flags & EntityFlags.CastShadow) > 0);
+                                                    Assert.True((entity.Flags & EntityFlags.ClientOnly) > 0);
+                                                    Assert.True(entity.Position.X > 0);
+                                                });
         }
     }
 }

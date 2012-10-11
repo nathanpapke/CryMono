@@ -79,7 +79,8 @@ namespace CryEngine
             {
                 using (Stream currentSerializationStream = _loader.Serialize())
                 {
-                    
+                    InitializeScriptDomain(AppDomain.CurrentDomain.BaseDirectory);
+                    return _loader.Deserialize(currentSerializationStream);
                 }
             }
             catch (Exception e)
@@ -88,7 +89,6 @@ namespace CryEngine
                 return false;
             }
 
-            InitializeScriptDomain(AppDomain.CurrentDomain.BaseDirectory);
 
             return true;
         }
