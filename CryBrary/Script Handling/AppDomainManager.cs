@@ -42,7 +42,7 @@ namespace CryEngine
             bool initialLoad = ScriptAppDomain == null;
             var appDomainSetup = new AppDomainSetup()
                                      {
-                                         ShadowCopyFiles =  "true",
+                                         ShadowCopyFiles = "true",
                                          ApplicationBase = appDomainRootPath
                                      };
 
@@ -50,7 +50,7 @@ namespace CryEngine
 
             _loader =
                 _scriptAppDomain.CreateInstanceFromAndUnwrap(Assembly.GetExecutingAssembly().Location,
-                                                      typeof (ScriptLoader).FullName) as ScriptLoader;
+                                                      typeof(ScriptLoader).FullName) as ScriptLoader;
 
             if (_loader == null)
                 throw new InvalidOperationException("Failed to initialize the scriptloader");
@@ -75,12 +75,15 @@ namespace CryEngine
         public bool Reload()
         {
             // TODO: Serialization first
+            bool switchedSuccessfully = false;
+            var previousAppdomain = _scriptAppDomain;
             try
             {
                 using (Stream currentSerializationStream = _loader.Serialize())
                 {
+                    // Initialize a new scriptdomain
                     InitializeScriptDomain(AppDomain.CurrentDomain.BaseDirectory);
-                    return _loader.Deserialize(currentSerializationStream);
+                    switchedSuccessfully = _loader.Deserialize(currentSerializationStream);
                 }
             }
             catch (Exception e)
@@ -88,9 +91,16 @@ namespace CryEngine
                 Debug.LogException(e);
                 return false;
             }
+            finally
+            {
+                if (switchedSuccessfully)
+                {
+                    AppDomain.Unload(previousAppdomain);
+                }
+            }
 
 
-            return true;
+            return switchedSuccessfully;
         }
 
 
