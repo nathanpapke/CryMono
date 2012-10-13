@@ -29,6 +29,9 @@ namespace CryEngine.Initialization
 				revertButton.Enabled = false;
 
 			errorBox.Text = exception.ToString();
+
+            // Make sure we show the cursor when a form is shown
+            Cursor.Show();
 		}
 	}
 }

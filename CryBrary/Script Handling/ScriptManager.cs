@@ -39,6 +39,7 @@ namespace CryEngine.Initialization
             }
             catch (Exception ex)
             {
+                Debug.LogException(ex);
                 if (CryEngine.Utils.Settings.IsGuiSupported)
                 {
                     var scriptReloadMessage = new ScriptReloadMessage(ex, !initialLoad);
