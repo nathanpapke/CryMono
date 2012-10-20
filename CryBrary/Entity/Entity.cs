@@ -13,7 +13,7 @@ using CryEngine.Native;
 namespace CryEngine
 {
 	/// <summary>
-	/// The base class for all entities in the game world.
+	/// Represents an entity created via CryMono.
 	/// </summary>
 	public abstract partial class Entity : EntityBase
 	{
@@ -57,6 +57,11 @@ namespace CryEngine
 
 		#region Callbacks
 		/// <summary>
+		/// This callback is called when this entity has finished spawning. The entity has been created and added to the list of entities.
+		/// </summary>
+		public virtual void OnSpawn() { }
+
+		/// <summary>
 		/// Called when the entity is being removed.
 		/// </summary>
 		/// <returns>True to allow removal, false to deny.</returns>
@@ -66,7 +71,7 @@ namespace CryEngine
 		/// Called when resetting the state of the entity in Editor.
 		/// </summary>
 		/// <param name="enteringGame">true if currently entering gamemode, false if exiting.</param>
-		protected virtual void OnReset(bool enteringGame) { }
+		protected virtual void OnEditorReset(bool enteringGame) { }
 
 		/// <summary>
 		/// Called when game is started (games may start multiple times)
@@ -83,6 +88,7 @@ namespace CryEngine
 		/// </summary>
 		/// <param name="entityId"></param>
 		/// <param name="areaEntityId"></param>
+		/// <param name="fade"></param>
 		protected virtual void OnEnterArea(EntityId entityId, int areaEntityId, float fade) { }
 
 		/// <summary>
@@ -98,6 +104,7 @@ namespace CryEngine
 		/// </summary>
 		/// <param name="entityId"></param>
 		/// <param name="areaEntityId"></param>
+		/// <param name="fade"></param>
 		protected virtual void OnLeaveArea(EntityId entityId, int areaEntityId, float fade) { }
 
 		protected virtual void OnEnterNearArea(EntityId entityId, int areaId, float fade) { }
@@ -107,7 +114,7 @@ namespace CryEngine
 		/// <summary>
 		/// Sent on entity collision.
 		/// </summary>
-		/// <param name="targetEntityId"></param>
+		/// <param name="colliderId"></param>
 		/// <param name="hitPos"></param>
 		/// <param name="dir"></param>
 		/// <param name="materialId"></param>

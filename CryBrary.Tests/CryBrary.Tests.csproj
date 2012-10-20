@@ -66,6 +66,8 @@
     <Compile Include="Script Handling\AppDomainManagerTests.cs" />
     <Compile Include="Script Handling\CrossAppDomainStorage.cs" />
     <Compile Include="Serialization\CrySerializationSurrogateTests.cs" />
+    <Compile Include="Scripts\Actor.cs" />
+    <Compile Include="Scripts\Entity.cs" />
     <Compile Include="Serialization\CrySerializerTests.cs" />
     <Compile Include="Serialization\CrySurrogateSelectorTests.cs" />
     <Compile Include="Serialization\SampleClasses.cs" />

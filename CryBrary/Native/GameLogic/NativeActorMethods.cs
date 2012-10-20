@@ -6,9 +6,6 @@ namespace CryEngine.Native
     internal class NativeActorMethods : INativeActorMethods
     {
         #region Externals
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static void _RegisterActorClass(string className, bool isAI);
-
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         extern internal static float _GetPlayerHealth(IntPtr actorPtr);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
@@ -23,8 +20,10 @@ namespace CryEngine.Native
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         extern internal static ActorInfo _GetActorInfoById(uint entId);
 
+		[MethodImplAttribute(MethodImplOptions.InternalCall)]
+		extern internal static void _RegisterActorClass(string name, bool isNative);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern private static ActorInfo _CreateActor(Actor actor, int channelId, string name, string className, Vec3 pos, Vec3 angles, Vec3 scale);
+		extern private static ActorInfo _CreateActor(int channelId, string name, string className, Vec3 pos, Quat rot, Vec3 scale);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         extern internal static void _RemoveActor(uint id);
 
@@ -33,14 +32,9 @@ namespace CryEngine.Native
         #endregion
 
 
-        public void RegisterClass(string className, bool isAI)
+        public void RegisterClass(string className, bool isNative)
         {
-            _RegisterActorClass(className, isAI);
-        }
-
-        public void RegisterActorClass(string className, bool isAI)
-        {
-            _RegisterActorClass(className, isAI);
+			_RegisterActorClass(className, isNative);
         }
 
         public float GetPlayerHealth(IntPtr actorPtr)
@@ -73,9 +67,9 @@ namespace CryEngine.Native
             return _GetActorInfoById(entId);
         }
 
-        public ActorInfo CreateActor(Actor actor, int channelId, string name, string className, Vec3 pos, Vec3 angles, Vec3 scale)
+		public ActorInfo CreateActor(int channelId, string name, string className, Vec3 pos, Quat rot, Vec3 scale)
         {
-            return _CreateActor(actor, channelId, name, className, pos, angles, scale);
+            return _CreateActor(channelId, name, className, pos, rot, scale);
         }
 
         public void RemoveActor(uint id)

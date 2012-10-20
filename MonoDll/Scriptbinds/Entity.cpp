@@ -71,6 +71,8 @@ CScriptbind_Entity::CScriptbind_Entity()
 	REGISTER_METHOD(SetHUDSilhouettesParams);
 
 	REGISTER_METHOD(PlayAnimation);
+	REGISTER_METHOD(StopAnimationInLayer);
+	REGISTER_METHOD(StopAnimationsInAllLayers);
 
 	REGISTER_METHOD(AddEntityLink);
 	REGISTER_METHOD(RemoveEntityLink);
@@ -156,9 +158,35 @@ void CScriptbind_Entity::PlayAnimation(IEntity *pEntity, mono::string animationN
 	CryCharAnimationParams params;
 	params.m_fTransTime = blend;
 	params.m_nLayerID = layer;
+	params.m_fPlaybackSpeed = speed;
 	params.m_nFlags = (flags & EAnimFlag_Loop ? CA_LOOP_ANIMATION : 0) | (flags & EAnimFlag_RestartAnimation ? CA_ALLOW_ANIM_RESTART : 0) | (flags & EAnimFlag_RepeatLastFrame ? CA_REPEAT_LAST_KEY : 0);
 	pSkeletonAnim->StartAnimation(ToCryString(animationName),  params);
-	pSkeletonAnim->SetLayerUpdateMultiplier(layer, speed);
+}
+
+void CScriptbind_Entity::StopAnimationInLayer(IEntity *pEntity, int slot, int layer, float blendOutTime)
+{
+	ICharacterInstance *pCharacter = pEntity->GetCharacter(slot);
+	if(!pCharacter)
+		return;
+
+	ISkeletonAnim *pSkeletonAnim = pCharacter->GetISkeletonAnim();
+	if(!pSkeletonAnim)
+		return;
+
+	pSkeletonAnim->StopAnimationInLayer(layer, blendOutTime);
+}
+
+void CScriptbind_Entity::StopAnimationsInAllLayers(IEntity *pEntity, int slot)
+{
+	ICharacterInstance *pCharacter = pEntity->GetCharacter(slot);
+	if(!pCharacter)
+		return;
+
+	ISkeletonAnim *pSkeletonAnim = pCharacter->GetISkeletonAnim();
+	if(!pSkeletonAnim)
+		return;
+
+	pSkeletonAnim->StopAnimationsAllLayers();
 }
 
 bool CScriptbind_Entity::IsMonoEntity(const char *className)

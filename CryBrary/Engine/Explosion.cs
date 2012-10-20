@@ -7,8 +7,14 @@ using CryEngine.Native;
 
 namespace CryEngine
 {
+	/// <summary>
+	/// Used to simulate explosions on physical entities.
+	/// </summary>
 	public class Explosion
 	{
+		/// <summary>
+		/// Creates a new explosion instance
+		/// </summary>
 		public Explosion()
 		{
 			explosion = new pe_explosion
@@ -16,9 +22,11 @@ namespace CryEngine
 				rminOcc = 0.07f,
 				explDir = new Vec3(0, 0, 1)
 			};
-
 		}
 
+		/// <summary>
+		/// Boom.
+		/// </summary>
 		public void Explode()
 		{
 			if (explosion.rmax == 0)

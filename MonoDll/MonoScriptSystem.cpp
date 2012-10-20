@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include "stdafx.h"
 #include "MonoScriptSystem.h"
 
@@ -25,7 +26,6 @@
 #include "MonoConverter.h"
 
 // Bindings
-#include "Scriptbinds\ItemSystem.h"
 #include "Scriptbinds\Console.h"
 #include "Scriptbinds\GameRules.h"
 #include "Scriptbinds\ActorSystem.h"
@@ -229,7 +229,6 @@ void CScriptSystem::RegisterDefaultBindings()
 	RegisterBinding(CScriptbind_Physics);
 	RegisterBinding(CScriptbind_Renderer);
 	RegisterBinding(CScriptbind_Console);
-	RegisterBinding(CScriptbind_ItemSystem);
 	RegisterBinding(CGameRules);
 	RegisterBinding(CScriptbind_Debug);
 	RegisterBinding(CTime);
@@ -275,17 +274,20 @@ void CScriptSystem::RegisterMethodBinding(const void *method, const char *fullMe
 		mono_add_internal_call(fullMethodName, method);
 }
 
-IMonoObject *CScriptSystem::InstantiateScript(const char *scriptName, EMonoScriptFlags scriptType, IMonoArray *pConstructorParameters)
+IMonoObject *CScriptSystem::InstantiateScript(const char *scriptName, EMonoScriptFlags scriptType, IMonoArray *pConstructorParameters, bool throwOnFail)
 {
-	IMonoObject *pResult = m_pScriptManager->CallMethod("CreateScriptInstance", scriptName, scriptType, pConstructorParameters);
+	IMonoObject *pResult = m_pScriptManager->CallMethod("CreateScriptInstance", scriptName, scriptType, pConstructorParameters, throwOnFail);
+
 
 	if(!pResult)
 		MonoWarning("Failed to instantiate script %s", scriptName);
 	else
 		RegisterScriptInstance(pResult, pResult->GetPropertyValue("ScriptId")->Unbox<int>());
 
+
 	return pResult;
 }
+
 
 void CScriptSystem::RemoveScriptInstance(int id, EMonoScriptFlags scriptType)
 {

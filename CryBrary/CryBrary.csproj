@@ -47,7 +47,7 @@
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>3</WarningLevel>
     <Optimize>false</Optimize>
     <DocumentationFile>CryBrary.xml</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
@@ -61,7 +61,7 @@
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>2</WarningLevel>
+    <WarningLevel>3</WarningLevel>
     <DocumentationFile>CryBrary.xml</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
@@ -78,6 +78,7 @@
     <DocumentationFile>CryBrary.xml</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <NoWarn />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Profile|x64'">
     <OutputPath>..\..\..\Bin64\Plugins\CryMono\</OutputPath>
@@ -91,16 +92,25 @@
     <Prefer32Bit>false</Prefer32Bit>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Actor\Actor.cs" />
+    <Compile Include="Actor\ActorBase.cs" />
     <Compile Include="Actor\ViewParams.cs" />
     <Compile Include="Engine\Explosion.cs" />
     <Compile Include="Entity\Extensions\Attachment.cs" />
     <Compile Include="Entity\Exceptions\EntityRemovalException.cs" />
-    <Compile Include="Entity\Exceptions\EntityDestroyedException.cs" />
+    <Compile Include="Extensions\NativeScriptTableExtensions.cs" />
+    <Compile Include="Native\Interfaces\INativeAppDomainMethods.cs" />
+    <Compile Include="Native\NativeAppDomainMethods.cs" />
+    <Compile Include="Script Handling\AppDomainManager.cs" />
+    <Compile Include="Script Handling\IScriptManagerCallback.cs" />
+    <Compile Include="Script Handling\ScriptInstanceDestroyedException.cs" />
     <Compile Include="Math\Angle.cs" />
     <Compile Include="Math\QuatT.cs" />
     <Compile Include="Misc\BoredAtWorkException.cs" />
@@ -111,18 +121,17 @@
     <Compile Include="Native\Interfaces\INativeNetworkMethods.cs" />
     <Compile Include="Native\NativeNetworkMethods.cs" />
     <Compile Include="Network\RemoteInvocationException.cs" />
+    <Compile Include="Script Handling\ScriptLoader.cs" />
     <Compile Include="Serialization\CryDeserializationBinder.cs" />
     <Compile Include="Serialization\CrySerializationSurrogate.cs" />
     <Compile Include="Serialization\CrySurrogateSelector.cs" />
     <Compile Include="Serialization\ICrySerializable.cs" />
     <Compile Include="Utils\ProjectSettings.cs" />
-    <Compile Include="Engine\Texture.cs" />
     <Compile Include="Entity\Extensions\AnimationFlags.cs" />
     <Compile Include="Entity\Extensions\EntityLight.cs" />
     <Compile Include="Native\Interfaces\INative3DEngineMethods.cs" />
     <Compile Include="Native\Interfaces\INativeActorMethods.cs" />
     <Compile Include="Actor\NativeActor.cs" />
-    <Compile Include="Native\Interfaces\INativeAppDomainMethods.cs" />
     <Compile Include="Native\Interfaces\INativeCVarMethods.cs" />
     <Compile Include="Native\Interfaces\INativeDebugMethods.cs" />
     <Compile Include="Native\Interfaces\INativeEntityMethods.cs" />
@@ -140,7 +149,6 @@
     <Compile Include="Native\Interfaces\INativeTimeMethods.cs" />
     <Compile Include="Native\Interfaces\INativeUIMethods.cs" />
     <Compile Include="Native\Interfaces\INativeViewMethods.cs" />
-    <Compile Include="Native\NativeAppDomainMethods.cs" />
     <Compile Include="Native\NativeMethods.cs" />
     <Compile Include="Native\3DEngine\Native3DEngineMethods.cs" />
     <Compile Include="Native\GameLogic\NativeActorMethods.cs" />
@@ -186,7 +194,6 @@
       <DependentUpon>FormLoader.cs</DependentUpon>
     </Compile>
     <Compile Include="Sandbox\Helper.cs" />
-    <Compile Include="Script Handling\AppDomainManager.cs" />
     <Compile Include="Script Handling\CryScript.cs" />
     <Compile Include="Script Handling\ExceptionMessage.cs">
       <SubType>Form</SubType>
@@ -194,8 +201,6 @@
     <Compile Include="Script Handling\ExceptionMessage.Designer.cs">
       <DependentUpon>ExceptionMessage.cs</DependentUpon>
     </Compile>
-    <Compile Include="Script Handling\IScriptManagerCallback.cs" />
-    <Compile Include="Script Handling\ScriptLoader.cs" />
     <Compile Include="Script Handling\ScriptRegistrationParams.cs" />
     <Compile Include="Script Handling\ScriptCompiler.cs" />
     <Compile Include="Engine\Material.cs" />
@@ -254,13 +259,11 @@
     <Compile Include="Entity\EntityConfig.cs" />
     <Compile Include="Console\CVar.cs" />
     <Compile Include="Misc\Time.cs" />
-    <Compile Include="ThirdParty\Arduino.cs" />
     <Compile Include="Utils\Debug\Debug.cs" />
     <Compile Include="Extensions\Reflection.cs" />
     <Compile Include="Entity\EntityStatics.cs" />
     <Compile Include="Entity\Entity.cs" />
     <Compile Include="FlowSystem\FlowNode.cs" />
-    <Compile Include="Actor\ItemSystem.cs" />
     <Compile Include="Utils\Debug\Logging.cs" />
     <Compile Include="GameRules\GameRules.cs" />
     <Compile Include="Utils\PointerWrapper.cs" />

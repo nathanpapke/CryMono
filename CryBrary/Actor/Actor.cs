@@ -11,12 +11,17 @@ namespace CryEngine
     /// <summary>
 	/// WIP Player class. TODO: Redo, currently very limited in terms of callbacks + interoperability with C++ backend
 	/// </summary>
-	public abstract class Actor : EntityBase
+	public abstract class Actor : ActorBase
 	{
 		#region Statics
-		public static Actor Get(int channelId)
+		/// <summary>
+		/// Gets the actor with the specified channel id if it exists.
+		/// </summary>
+		/// <param name="channelId"></param>
+		/// <returns></returns>
+		public static ActorBase Get(int channelId)
 		{
-			var actor = Get<Actor>(channelId);
+			var actor = Get<ActorBase>(channelId);
 			if(actor != null)
 				return actor;
 
@@ -27,14 +32,26 @@ namespace CryEngine
 			return null;
 		}
 
-		public static T Get<T>(int channelId) where T : Actor
+		/// <summary>
+		/// Gets the actor with the specified channel id if it exists.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="channelId"></param>
+		/// <returns></returns>
+		public static T Get<T>(int channelId) where T : ActorBase
 		{
 			return ScriptManager.Instance.Find<T>(ScriptType.Actor, x => x.ChannelId == channelId);
 		}
 
-		public static Actor Get(EntityId actorId)
+
+		/// <summary>
+		/// Gets the actor with the specified entity id if it exists.
+		/// </summary>
+		/// <param name="actorId"></param>
+		/// <returns></returns>
+		public static ActorBase Get(EntityId actorId)
 		{
-			var actor = Get<Actor>(actorId);
+			var actor = Get<ActorBase>(actorId);
 			if(actor != null)
 				return actor;
 
@@ -46,7 +63,12 @@ namespace CryEngine
 			return null;
 		}
 
-		public static T Get<T>(EntityId actorId) where T : Actor
+		/// <summary>
+		/// Gets the actor with the specified entity id if it exists.
+		/// </summary>
+		/// <param name="actorId"></param>
+		/// <returns></returns>
+		public static T Get<T>(EntityId actorId) where T : ActorBase
 		{
 #if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if(actorId == 0)
@@ -56,7 +78,7 @@ namespace CryEngine
 			return ScriptManager.Instance.Find<T>(ScriptType.Actor, x => x.Id == actorId);
 		}
 
-		internal static Actor CreateNativeActor(ActorInfo actorInfo)
+		internal static ActorBase CreateNativeActor(ActorInfo actorInfo)
 		{
 #if !(RELEASE && RELEASE_DISABLE_CHECKS)
 			if(actorInfo.Id == 0)
@@ -73,7 +95,10 @@ namespace CryEngine
 			return nativeActor;
 		}
 
-		public static Actor LocalClient 
+		/// <summary>
+		/// Gets the player actor in use on this PC.
+		/// </summary>
+		public static ActorBase LocalClient 
 		{
 			get
 			{
@@ -85,119 +110,112 @@ namespace CryEngine
 			} 
 		}
 
-		public static T Create<T>(int channelId, string name = "Dude", Vec3? pos = null, Vec3? angles = null, Vec3? scale = null) where T : Actor, new()
+		/// <summary>
+		/// Spawns a new actor
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="channelId"></param>
+		/// <param name="name"></param>
+		/// <param name="pos"></param>
+		/// <param name="rot"></param>
+		/// <param name="scale"></param>
+		/// <returns></returns>
+		public static T Create<T>(int channelId, string name = "Dude", Vec3? pos = null, Quat? rot = null, Vec3? scale = null) where T : ActorBase, new()
 		{
-			string className = "MonoActor";
-			var actorType = typeof(T);
+			return CreateCommon<T>(typeof(T).Name, channelId, name, pos, rot, scale);
+		}
+		
+		/// <summary>
+		/// Spawns a new actor
+		/// </summary>
+		/// <param name="actorType"></param>
+		/// <param name="channelId"></param>
+		/// <param name="name"></param>
+		/// <param name="pos"></param>
+		/// <param name="rot"></param>
+		/// <param name="scale"></param>
+		/// <returns></returns>
+		public static ActorBase Create(Type actorType, int channelId, string name = "Dude", Vec3? pos = null, Quat? rot = null, Vec3? scale = null)
+		{
+			return CreateCommon<ActorBase>(actorType.Name, channelId, name, pos, rot, scale);
+		}
 
-			bool isNative = actorType.Implements(typeof(NativeActor));
-			if (isNative)
-				className = actorType.Name;
+		/// <summary>
+		/// Spawns a new actor
+		/// </summary>
+		/// <param name="className"></param>
+		/// <param name="channelId"></param>
+		/// <param name="name"></param>
+		/// <param name="pos"></param>
+		/// <param name="rot"></param>
+		/// <param name="scale"></param>
+		/// <returns></returns>
+		public static ActorBase Create(string className, int channelId, string name = "Dude", Vec3? pos = null, Quat? rot = null, Vec3? scale = null)
+		{
+			return CreateCommon<ActorBase>(className, channelId, name, pos, rot, scale);
+		}
 
+		internal static T CreateCommon<T>(string className, int channelId, string name = "Dude", Vec3? pos = null, Quat? rot = null, Vec3? scale = null) where T : ActorBase
+		{
 			var actor = Get<T>(channelId);
 			if (actor != null)
 				return actor;
 
-			actor = new T();
+			var info = NativeMethods.Actor.CreateActor(channelId, name, className, pos ?? new Vec3(0, 0, 0), rot ?? Quat.Identity, scale ?? new Vec3(1, 1, 1));
+			if (info.Id == 0)
+				throw new Exception("Actor creation failed, make sure your IActor implementation is registered with the same name as your managed actor class.");
 
-			var info = NativeMethods.Actor.CreateActor(actor, channelId, name, className, pos ?? new Vec3(0, 0, 0), angles ?? new Vec3(0, 0, 0), scale ?? new Vec3(1, 1, 1));
-			if(info.Id == 0)
-			{
-				if (isNative)
-					throw new Exception("Actor creation failed, make sure your IActor implementation is registered with the same name as your managed actor class.");
-				else
-					throw new Exception("Actor creation failed");
-			}
-
-			ScriptManager.Instance.AddScriptInstance(actor, ScriptType.Actor);
-			actor.InternalSpawn(info, channelId);
-
-			// actor must have physics
-			actor.Physics.Type = PhysicalizationType.Rigid;
-
-			return actor;
+			return Get<T>(channelId);
 		}
 
+		/// <summary>
+		/// Removes an actor by entity id.
+		/// </summary>
+		/// <param name="id"></param>
 		public static void Remove(EntityId id)
 		{
             NativeMethods.Actor.RemoveActor(id);
-
-			ScriptManager.Instance.RemoveInstances<Actor>(ScriptType.Actor, actor => actor.Id == id);
 		}
 
+		/// <summary>
+		/// Removes an actor by channelId
+		/// </summary>
+		/// <param name="channelId"></param>
 		public static void Remove(int channelId)
 		{
             var actorInfo = NativeMethods.Actor.GetActorInfoByChannelId((ushort)channelId);
 			if(actorInfo.Id != 0)
                 NativeMethods.Actor.RemoveActor(actorInfo.Id);
-
-			ScriptManager.Instance.RemoveInstances<Actor>(ScriptType.Actor, actor => actor.ChannelId == channelId);
 		}
+		#endregion
+
+		#region Callbacks
+		/// <summary>
+		/// Called when resetting the state of the entity in Editor.
+		/// </summary>
+		/// <param name="enteringGame">true if currently entering gamemode, false if exiting.</param>
+		protected virtual void OnEditorReset(bool enteringGame) { }
+
+		/// <summary>
+		/// Called to update the view associated to this actor.
+		/// </summary>
+		/// <param name="viewParams"></param>
+		protected virtual void UpdateView(ref ViewParams viewParams) { }
+
+		/// <summary>
+		/// Called prior to updating physics, useful for requesting movement.
+		/// </summary>
+		protected virtual void OnPrePhysicsUpdate() { }
 		#endregion
 
 		/// <summary>
-		/// Initializes the player.
+		/// Sets / gets the current health of this actor.
 		/// </summary>
-		/// <param name="actorInfo"></param>
-		/// <param name="channelId"></param>
-		internal void InternalSpawn(ActorInfo actorInfo, int channelId)
-		{
-            System.Diagnostics.Contracts.Contract.Requires(channelId > 0);
-			Id = new EntityId(actorInfo.Id);
-			this.SetActorHandle(new HandleRef(this, actorInfo.ActorPtr));
-			this.SetEntityHandle(new HandleRef(this, actorInfo.EntityPtr));
-
-			ChannelId = channelId;
-
-			OnSpawn();
-		}
-
-		#region Callbacks
-		public virtual void UpdateView(ref ViewParams viewParams) { }
-		#endregion
-
-		#region Overrides
-		public override void Remove(bool forceRemoveNow = false)
-		{
-			if (forceRemoveNow)
-				throw new NotSupportedException("forceRemoveNow");
-
-			Actor.Remove(Id);
-		}
-
-		public override int GetHashCode()
-        {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hash = 17;
-
-                hash = hash * 29 + ScriptId.GetHashCode();
-                hash = hash * 29 + Id.GetHashCode();
-                hash = hash * 29 + ChannelId.GetHashCode();
-				hash = hash * 29 + this.GetActorHandle().Handle.GetHashCode();
-                hash = hash * 29 + this.GetEntityHandle().Handle.GetHashCode();
-
-                return hash;
-            }
-        }
-
-        internal override void OnScriptReloadInternal()
-		{
-            this.SetActorHandle(new HandleRef(this, NativeMethods.Actor.GetActorInfoById(Id).ActorPtr));
-
-            base.OnScriptReloadInternal();
-		}
-        #endregion
-
-		internal HandleRef ActorHandleRef { get; set; }
-		public int ChannelId { get; set; }
-
-		public float Health { get { return NativeMethods.Actor.GetPlayerHealth(this.GetActorHandle().Handle); } set { NativeMethods.Actor.SetPlayerHealth(this.GetActorHandle().Handle, value); } }
-		public float MaxHealth { get { return NativeMethods.Actor.GetPlayerMaxHealth(this.GetActorHandle().Handle); } set { NativeMethods.Actor.SetPlayerMaxHealth(this.GetActorHandle().Handle, value); } }
-
-		public bool IsDead() { return Health <= 0; }
-
-		public bool IsLocalClient { get { return Actor.LocalClient == this; } }
+		public override float Health { get; set; }
+		/// <summary>
+		/// Sets / gets the max health value for this actor.
+		/// </summary>
+		public override float MaxHealth { get; set; }
 	}
 
 	internal struct ActorInfo
@@ -205,5 +223,6 @@ namespace CryEngine
 		public IntPtr EntityPtr;
 		public IntPtr ActorPtr;
 		public uint Id;
+		public int ChannelId;
 	}
 }
