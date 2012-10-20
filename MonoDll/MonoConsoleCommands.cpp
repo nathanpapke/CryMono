@@ -22,6 +22,16 @@ CMonoConsoleCommands::~CMonoConsoleCommands()
 
 void CMonoConsoleCommands::MonoReload(IConsoleCmdArgs* pCmdArgs)
 {
-	gEnv->pMonoScriptSystem->GetAppDomainManager()->CallMethod("Reload");
+	auto currentDomain = mono_domain_get();
+	// Always execute this in the root appdomain
+	mono_domain_set(mono_domain_get_by_id(0), false);
 
+	bool reloadSuccess = gEnv->pMonoScriptSystem->GetAppDomainManager()->CallMethod("Reload")->Unbox<bool>();
+	
+	// If the reload was succesful, the appdomain will be set to the new appdomain in CryBrary
+	// If not, we need to reset it to our previous value here again
+	if (!reloadSuccess)
+	{
+		mono_domain_set(currentDomain,false);
+	}
 }

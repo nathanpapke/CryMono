@@ -31,7 +31,13 @@ namespace CryEngine.Initialization
 			if (Scripts == null)
 				Scripts = new List<CryScript>();
 
-//            TestManager.Init();
+            if (initialLoad)
+            {
+                RegisterInternalTypes();
+                TestManager.Init();
+
+            }
+
 
             try
             {
@@ -55,6 +61,27 @@ namespace CryEngine.Initialization
 
 		    //InitializeScriptDomain(true);
 		}
+
+        private void RegisterInternalTypes()
+        {
+            CryScript script;
+            if (CryScript.TryCreate(typeof(NativeActor), out script))
+                Scripts.Add(script);
+
+
+            if (CryScript.TryCreate(typeof(NativeEntity), out script))
+            {
+                var entityRegistrationParams = new EntityRegistrationParams();
+
+
+                entityRegistrationParams.name = script.ScriptName;
+                entityRegistrationParams.flags = EntityClassFlags.Default | EntityClassFlags.Invisible;
+
+
+                NativeMethods.Entity.RegisterClass(entityRegistrationParams);
+                Scripts.Add(script);
+            }
+        }
 
 		void InitializeScriptDomain(bool initialLoad = false)
 		{
@@ -168,7 +195,6 @@ namespace CryEngine.Initialization
                 if (File.Exists(compilerDll))
                 {
                     var assembly = LoadAssembly(compilerDll);
-
                     var compilerType = assembly.GetTypes().First(x => x.Implements<ScriptCompiler>());
                     Debug.LogAlways("		Initializing {0} compiler...", compilerType.Name);
 
@@ -254,22 +280,17 @@ namespace CryEngine.Initialization
 				throw new ArgumentException("string cannot be empty!", "assemblyPath");
 #endif
 
-			var newPath = Path.Combine(PathUtils.TempFolder, Path.GetFileName(assemblyPath));
+			//var newPath = Path.Combine(PathUtils.TempFolder, Path.GetFileName(assemblyPath));
 
-			TryCopyFile(assemblyPath, ref newPath);
+			//TryCopyFile(assemblyPath, ref newPath);
 
 #if !RELEASE
 			GenerateDebugDatabaseForAssembly(assemblyPath);
 
 			var mdbFile = assemblyPath + ".mdb";
-			if(File.Exists(mdbFile)) // success
-			{
-				var newMdbPath = Path.Combine(PathUtils.TempFolder, Path.GetFileName(mdbFile));
-				TryCopyFile(mdbFile, ref newMdbPath);
-			}
 #endif
 
-			return Assembly.LoadFrom(newPath);
+			return Assembly.LoadFrom(assemblyPath);
 		}
 
 		void TryCopyFile(string currentPath, ref string newPath, bool overwrite = true)
@@ -307,11 +328,11 @@ namespace CryEngine.Initialization
 			if(File.Exists(Path.ChangeExtension(assemblyPath, "pdb")))
 			{
 				var assembly = Assembly.LoadFrom(Path.Combine(PathUtils.MonoFolder, "bin", "pdb2mdb.dll"));
-				var driver = assembly.GetType("Driver");
+                var driver = assembly.GetType("Pdb2Mdb.Converter");
 				var convertMethod = driver.GetMethod("Convert", BindingFlags.Static | BindingFlags.Public);
 
 				object[] args = { assemblyPath };
-				convertMethod.Invoke(null, args);
+				//convertMethod.Invoke(null, args);
 			}
 		}
 

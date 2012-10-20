@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Threading;
+using CryEngine.Native;
 
 namespace CryEngine
 {
@@ -34,19 +36,25 @@ namespace CryEngine
 
         public void InitializeScriptDomain()
         {
-            InitializeScriptDomain(null);
+            InitializeScriptDomain(PathUtils.CryMonoFolder);
         }
 
         public void InitializeScriptDomain(string appDomainRootPath)
         {
+            Debug.LogAlways("Initializing script domain from {0} ({1})", AppDomain.CurrentDomain.FriendlyName, System.Threading.Thread.GetDomainID());
             bool initialLoad = ScriptAppDomain == null;
+            string domainName = "ScriptDomain_" + ++ScriptDomainCounter;
             var appDomainSetup = new AppDomainSetup()
-                                     {
+              {
+                  ApplicationName = domainName,
+                  DynamicBase = Path.GetTempPath(),
+                  PrivateBinPath =  Path.GetTempPath(),
                                          ShadowCopyFiles = "true",
-                                         ApplicationBase = appDomainRootPath
+                                         ApplicationBase = appDomainRootPath,
+
                                      };
 
-            _scriptAppDomain = AppDomain.CreateDomain("ScriptDomain_" + ++ScriptDomainCounter, null, appDomainSetup);
+            _scriptAppDomain = AppDomain.CreateDomain(domainName, AppDomain.CurrentDomain.Evidence, appDomainSetup);
 
             _loader =
                 _scriptAppDomain.CreateInstanceFromAndUnwrap(Assembly.GetExecutingAssembly().Location,
@@ -57,8 +65,12 @@ namespace CryEngine
 
             OnScriptDomainCreated();
 
-            _loader.Register();
+            int appDomainId = _loader.Register();
             _loader.Initialize(initialLoad);
+
+            NativeMethods.AppDomain.SetScriptAppDomain(appDomainId);
+
+
         }
 
         private void OnScriptDomainCreated()
@@ -88,6 +100,7 @@ namespace CryEngine
             }
             catch (Exception e)
             {
+                Debug.LogWarning("Failed to reload, keeping original scripts. Exception details:");
                 Debug.LogException(e);
                 return false;
             }

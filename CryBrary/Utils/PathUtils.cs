@@ -60,6 +60,11 @@ namespace CryEngine
 		/// </summary>
 		public static string NativePluginsFolder { get { return Path.Combine(RootFolder, "Plugins"); } }
 
+        /// <summary>
+        /// Root CryMono folder
+        /// </summary>
+        public static string CryMonoFolder { get { return Path.Combine(RootFolder, "Bin32", "Plugins", "CryMono"); } }
+
 		/// <summary>
 		/// Directory from which CryMono will load managed plugins.
 		/// </summary>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using CryEngine.Initialization;
@@ -12,11 +13,12 @@ namespace CryEngine
 {
     internal class ScriptLoader : MarshalByRefObject
     {
-        public void Register()
+        public int Register()
         {
             int appDomainId = Thread.GetDomainID();
             Debug.LogAlways("Registering script domain {0} (ID: {1})", AppDomain.CurrentDomain.FriendlyName, appDomainId);
             NativeMethods.AppDomain.SetScriptAppDomain(appDomainId);
+            return appDomainId;
         }
 
         public void Initialize(bool initialLoad)
@@ -35,11 +37,14 @@ namespace CryEngine
             
             var memoryStream = new MemoryStream();
             IFormatter formatter = new BinaryFormatter();
+            ((BinaryFormatter)formatter).AssemblyFormat = FormatterAssemblyStyle.Simple;
 
             formatter.SurrogateSelector = new CrySurrogateSelector();
 
             formatter.Serialize(memoryStream, ScriptManager.Instance.Scripts);
             memoryStream.Position = 0;
+
+            Debug.LogAlways("Serialized in {0} bytes", memoryStream.Length);
 
             return memoryStream;
         }
@@ -61,8 +66,11 @@ namespace CryEngine
 
             IFormatter formatter = new BinaryFormatter();
 
+            ((BinaryFormatter)formatter).AssemblyFormat = FormatterAssemblyStyle.Simple;
             formatter.SurrogateSelector = new CrySurrogateSelector();
+            formatter.Binder = new CryDeserializationBinder();
 
+            Debug.LogAlways("Start the process");
             var result = formatter.Deserialize(serializationStream);
 
             ScriptManager.Instance.Scripts = result as List<CryScript>;

@@ -21,7 +21,9 @@ namespace CryEngine.Serialization
                 // Do our custom serialization here!
                 var type = obj.GetType();
 
-                foreach (var fieldInfo in GetFields(type))
+                var fields = GetFields(type);
+
+                foreach (var fieldInfo in fields)
                 {
                     info.AddValue(fieldInfo.Name, fieldInfo.GetValue(obj));
                 }
@@ -33,12 +35,19 @@ namespace CryEngine.Serialization
         private static IEnumerable<FieldInfo> GetFields(Type type)
         {
             var fields = new List<FieldInfo>();
+            fields.AddRange(type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic));
             if (type.BaseType != null)
             {
-                fields.AddRange(GetFields(type.BaseType));
+                var fieldsFromBaseType = GetFields(type.BaseType);
+                foreach (var baseFieldInfo in fieldsFromBaseType)
+                {
+                    if (fields.All(f => f.Name != baseFieldInfo.Name))
+                    {
+                        fields.Add(baseFieldInfo);
+                    }
+                }
             }
             
-            fields.AddRange(type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic));
 
 
             return fields;

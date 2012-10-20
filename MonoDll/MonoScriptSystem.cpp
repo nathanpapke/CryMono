@@ -353,7 +353,7 @@ IMonoAssembly *CScriptSystem::GetAssembly(const char *file, bool shadowCopy)
 	{
 		if(IMonoAssembly *pDebugDatabaseCreator = static_cast<CScriptSystem *>(gEnv->pMonoScriptSystem)->GetDebugDatabaseCreator())
 		{
-			if(IMonoClass *pDriverClass = pDebugDatabaseCreator->GetClass("Driver", ""))
+			if(IMonoClass *pDriverClass = pDebugDatabaseCreator->GetClass("Converter", "Pdb2Mdb"))
 			{
 				IMonoArray *pArgs = CreateMonoArray(1);
 				pArgs->Insert(file);
