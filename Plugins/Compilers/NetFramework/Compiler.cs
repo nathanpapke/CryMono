@@ -8,11 +8,59 @@ using CryEngine.Extensions;
 using CryEngine.Initialization;
 using CryEngine.Testing;
 using CryEngine.Utilities;
+using CryEngine.Compilers.NET.Handlers;
 
 namespace CryEngine.Compilers.NET
 {
 	public class NETCompiler : ScriptCompiler
 	{
+        public override IEnumerable<CryScript> GetCryScriptsFromAssembly(Assembly assembly)
+        {
+            if (assembly == null)
+                throw new ArgumentNullException("assembly");
+
+            var foundScripts = new List<CryScript>();
+
+            var typesInAssembly = assembly.GetTypes().Where(t => !t.ContainsAttribute<ExcludeFromCompilationAttribute>());
+            foreach (var type in typesInAssembly)
+            {
+                var scriptsFoundInType = GetCryScriptsFromType(type);
+                foundScripts.AddRange(scriptsFoundInType);
+            }
+
+            return foundScripts;
+        }
+
+        protected virtual IEnumerable<CryScript> GetCryScriptsFromType(Type type)
+        {
+            IScriptRegistrationParams scriptRegistrationParams;
+
+            return null;
+        }
+
+        protected virtual IEnumerable<IScriptRegistrationParams> GetScriptRegistrationParamsFromType(Type type)
+        {
+            CryScript cryScript;
+
+            bool scriptCreatedSuccessfully = CryScript.TryCreate(type, out cryScript);
+            if (!scriptCreatedSuccessfully)
+                yield break; 
+            
+            //cryScript.ScriptType
+            // Register stuff
+            var scriptRegistrationParamsFactory = new ScriptRegistrationParamsFactory();
+            scriptRegistrationParamsFactory.Register<ActorScriptRegistrationHandler>(ScriptType.Actor);
+
+
+            yield break;
+        }
+
+        public override string CompileScriptsIntoAssembly(string pathToScriptsFolder)
+        {
+            throw new NotImplementedException();
+        }
+
+
 		public override IEnumerable<CryScript> Process(IEnumerable<Assembly> assemblies)
 		{
             var scripts = new List<CryScript>();

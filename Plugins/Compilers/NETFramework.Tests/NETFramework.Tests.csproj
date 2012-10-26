@@ -43,9 +43,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompilerTests.cs" />
+    <Compile Include="Entities\SampleEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\CryBrary\CryBrary.csproj">
+      <Project>{4a7993b3-6611-4d9d-b8ab-836d6c27b12b}</Project>
+      <Name>CryBrary</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NetFramework\NETFramework.csproj">
       <Project>{a0504507-678e-44b5-9517-f89eb8575d3f}</Project>
       <Name>NETFramework</Name>

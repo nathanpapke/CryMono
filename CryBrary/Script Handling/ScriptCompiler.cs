@@ -38,6 +38,21 @@ namespace CryEngine.Initialization
 		#endregion
 
 		public abstract IEnumerable<CryScript> Process(IEnumerable<Assembly> assemblies);
+
+        /// <summary>
+        /// Gets all CryScripts located in an assembly
+        /// </summary>
+        /// <param name="assembly">The assembly to inspect</param>
+        /// <returns>A collection of all CryScripts found. In case of ny CryScript instances were found, an empty collection is returned</returns>
+        public abstract IEnumerable<CryScript> GetCryScriptsFromAssembly(Assembly assembly);
+
+        /// <summary>
+        /// Compiles the scripts found in the scripts folder and returns the path to the compiled assembly
+        /// </summary>
+        /// <param name="pathToScriptsFolder">Path to the scripts folder</param>
+        /// <returns>Path to the compiled assembly</returns>
+        public abstract string CompileScriptsIntoAssembly(string pathToScriptsFolder);
+
 	}
 
 	[Serializable]

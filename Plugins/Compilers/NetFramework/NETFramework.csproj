@@ -42,6 +42,9 @@
   <ItemGroup>
     <Compile Include="AssemblyReferenceHandler.cs" />
     <Compile Include="Compiler.cs" />
+    <Compile Include="Handlers\ActorScriptRegistrationHandler.cs" />
+    <Compile Include="IScriptRegistrationParamsHandler.cs" />
+    <Compile Include="RegistrationParamsFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
