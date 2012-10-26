@@ -106,39 +106,41 @@ namespace CryEngine
 
 	public struct EntityProperty
 	{
-		public EntityProperty(string Name, string Desc, EntityPropertyType Type, EntityPropertyLimits Limits, int Flags = 0)
-			: this(Name, Desc, Type)
+		public EntityProperty(string name, string desc, EntityPropertyType type, EntityPropertyLimits limits, int flags = 0)
+			: this(name, desc, type)
 		{
-			if(Limits.max == 0 && Limits.min == 0)
+		    var newLimits = Limits;
+			if(limits.max == 0 && limits.min == 0)
 			{
-				limits.max = Sandbox.UIConstants.MAX_SLIDER_VALUE;
+				newLimits.max = Sandbox.UIConstants.MAX_SLIDER_VALUE;
 			}
 			else
 			{
-				limits.max = Limits.max;
-				limits.min = Limits.min;
+                newLimits.max = limits.max;
+                newLimits.min = limits.min;
 			}
+		    Limits = newLimits;
 
-			flags = Flags;
+			Flags = flags;
 		}
 
 		public EntityProperty(string Name, string Desc, EntityPropertyType Type)
 			: this()
 		{
-			name = Name;
-			description = Desc;
+			this.Name = Name;
+			Description = Desc;
 
 			type = Type;
 		}
 
-		public string name;
-		public string description;
+        public string Name { get; set; }
+        public string Description { get; set; }
 
 #pragma warning disable 414
 		private string editType;
 #pragma warning restore 414
 
-		public string folder;
+	    public string Folder { get; set; }
 
 		private EntityPropertyType _type;
 		public EntityPropertyType type
@@ -229,8 +231,8 @@ namespace CryEngine
 			}
 		}
 
-		public int flags;
+        public int Flags { get; set; }
 
-		public EntityPropertyLimits limits;
+        public EntityPropertyLimits Limits { get; set; }
 	}
 }

@@ -1,8 +1,6 @@
-﻿using CryEngine.Initialization;
-using System;
+﻿using System.Linq;
+using CryEngine.Initialization;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace CryEngine.Compilers.NET
 {
@@ -24,7 +22,14 @@ namespace CryEngine.Compilers.NET
             _map.Add(type, new T());
         }
 
-
-
+        public IEnumerable<IScriptRegistrationParams> GetScriptRegistrationParams(CryScript cryScript)
+        {
+            return 
+                from entry in _map 
+                let scriptType = entry.Key 
+                let handler = entry.Value 
+                where (cryScript.ScriptType & scriptType) == scriptType 
+                select handler.GetScriptRegistrationParams(cryScript.Type);
+        }
     }
 }

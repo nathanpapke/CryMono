@@ -74,8 +74,8 @@ namespace CryEngine.Initialization
                 var entityRegistrationParams = new EntityRegistrationParams();
 
 
-                entityRegistrationParams.name = script.ScriptName;
-                entityRegistrationParams.flags = EntityClassFlags.Default | EntityClassFlags.Invisible;
+                entityRegistrationParams.Name = script.ScriptName;
+                entityRegistrationParams.Flags = EntityClassFlags.Default | EntityClassFlags.Invisible;
 
 
                 NativeMethods.Entity.RegisterClass(entityRegistrationParams);
@@ -188,7 +188,7 @@ namespace CryEngine.Initialization
 			if (!Directory.Exists(pluginsDirectory))
 				return;
 
-			bool hasDefaultGameRules = false;
+			//bool hasDefaultGameRules = false;
             foreach (var directory in Directory.GetDirectories(pluginsDirectory))
             {
                 var compilerDll = Path.Combine(directory, "Compiler.dll");
@@ -215,7 +215,7 @@ namespace CryEngine.Initialization
 
 						if (script.RegistrationParams == null)
 							continue;
-						else if (script.RegistrationParams is ActorRegistrationParams)
+						/*else if (script.RegistrationParams is ActorRegistrationParams)
                         {
                             var registrationParams = (ActorRegistrationParams)script.RegistrationParams;
 
@@ -259,7 +259,7 @@ namespace CryEngine.Initialization
                             script.ScriptName = registrationParams.category + ":" + registrationParams.name;
 
                             FlowNodes.Add(script.ScriptName);
-                        }
+                        }*/
 
                         Scripts.Add(script);
                     }

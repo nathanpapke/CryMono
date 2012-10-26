@@ -13,26 +13,26 @@ namespace CryEngine.Initialization
 
     public struct EntityRegistrationParams : IScriptRegistrationParams
     {
-        public string name;
-        public string category;
+        public string Name { get; set; }
+        public string Category { get; set; }
 
-        public string editorHelper;
-        public string editorIcon;
+        public string EditorHelper { get; set; }
+        public string EditorIcon { get; set; }
 
-        public EntityClassFlags flags;
+        public EntityClassFlags Flags { get; set; }
 
-        public object[] properties;
+        public EntityProperty[] Properties { get; set; }
     }
 
     public struct GameRulesRegistrationParams : IScriptRegistrationParams
     {
-        public string name;
-        public bool defaultGamemode;
+        public string Name { get; set; }
+        public bool DefaultGamemode { get; set; }
     }
 
     public struct FlowNodeRegistrationParams : IScriptRegistrationParams
     {
-        public string name;
-        public string category;
+        public string Name { get; set; }
+        public string Category { get; set; }
     }
 }

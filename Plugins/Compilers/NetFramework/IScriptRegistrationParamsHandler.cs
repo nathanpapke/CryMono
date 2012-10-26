@@ -1,9 +1,9 @@
 ﻿using CryEngine.Initialization;
-using System.Collections.Generic;
+
 namespace CryEngine.Compilers.NET
 {
     internal interface IScriptRegistrationParamsHandler
     {
-        IEnumerable<IScriptRegistrationParams> GetScriptRegistrationParams();
+        IScriptRegistrationParams GetScriptRegistrationParams(System.Type type);
     }
 }

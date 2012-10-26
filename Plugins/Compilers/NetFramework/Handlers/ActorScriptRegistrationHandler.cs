@@ -1,16 +1,15 @@
 ﻿using CryEngine.Initialization;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace CryEngine.Compilers.NET.Handlers
 {
     internal class ActorScriptRegistrationHandler : IScriptRegistrationParamsHandler
     {
-        public IEnumerable<IScriptRegistrationParams> GetScriptRegistrationParams()
+        public IScriptRegistrationParams GetScriptRegistrationParams(System.Type type)
         {
-            throw new NotImplementedException();
+            var actorRegistrationParams = new ActorRegistrationParams();
+
+            return actorRegistrationParams;
         }
     }
 }

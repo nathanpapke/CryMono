@@ -12,8 +12,22 @@ using CryEngine.Compilers.NET.Handlers;
 
 namespace CryEngine.Compilers.NET
 {
-	public class NETCompiler : ScriptCompiler
+	public class NetCompiler : ScriptCompiler
 	{
+	    private readonly ScriptRegistrationParamsFactory _scriptRegistrationFactory;
+
+	    public NetCompiler()
+	    {
+	        _scriptRegistrationFactory = new ScriptRegistrationParamsFactory();
+
+            // Register registration handlers here
+            _scriptRegistrationFactory.Register<ActorScriptRegistrationHandler>(ScriptType.Actor);
+            _scriptRegistrationFactory.Register<CryScriptInstanceScriptRegistrationHandler>(ScriptType.CryScriptInstance);
+            _scriptRegistrationFactory.Register<EntityScriptRegistrationHandler>(ScriptType.Entity);
+            _scriptRegistrationFactory.Register<FlowNodeScriptRegistrationHandler>(ScriptType.FlowNode);
+            _scriptRegistrationFactory.Register<GameRulesScriptRegistrationHandler>(ScriptType.GameRules);
+	    }
+
         public override IEnumerable<CryScript> GetCryScriptsFromAssembly(Assembly assembly)
         {
             if (assembly == null)
@@ -24,35 +38,59 @@ namespace CryEngine.Compilers.NET
             var typesInAssembly = assembly.GetTypes().Where(t => !t.ContainsAttribute<ExcludeFromCompilationAttribute>());
             foreach (var type in typesInAssembly)
             {
-                var scriptsFoundInType = GetCryScriptsFromType(type);
-                foundScripts.AddRange(scriptsFoundInType);
+                if (!type.ContainsAttribute<ExcludeFromCompilationAttribute>())
+                {
+                    var scriptsFoundInType = GetCryScriptsFromType(type);
+                    foundScripts.AddRange(scriptsFoundInType);
+                }
+
+                // Find tests, this seems out of place
+                if (type.ContainsAttribute<TestCollectionAttribute>())
+                {
+                    RegisterTestCollection(type);
+                }
             }
 
             return foundScripts;
         }
 
-        protected virtual IEnumerable<CryScript> GetCryScriptsFromType(Type type)
+        private void RegisterTestCollection(Type type)
         {
-            IScriptRegistrationParams scriptRegistrationParams;
+            if (type.ContainsAttribute<TestCollectionAttribute>())
+            {
+                var ctor = type.GetConstructor(Type.EmptyTypes);
+                if (ctor != null)
+                {
+                    var collection = new TestCollection
+                    {
+                        Instance = ctor.Invoke(Type.EmptyTypes),
+                        Tests = from method in type.GetMethods()
+                                where method.ContainsAttribute<TestAttribute>()
+                                    && method.GetParameters().Length == 0
+                                select method
+                    };
 
-            return null;
+                    TestManager.TestCollections.Add(collection);
+                }
+            }
         }
 
-        protected virtual IEnumerable<IScriptRegistrationParams> GetScriptRegistrationParamsFromType(Type type)
+        protected virtual IEnumerable<CryScript> GetCryScriptsFromType(Type type)
         {
             CryScript cryScript;
-
             bool scriptCreatedSuccessfully = CryScript.TryCreate(type, out cryScript);
-            if (!scriptCreatedSuccessfully)
-                yield break; 
             
-            //cryScript.ScriptType
-            // Register stuff
-            var scriptRegistrationParamsFactory = new ScriptRegistrationParamsFactory();
-            scriptRegistrationParamsFactory.Register<ActorScriptRegistrationHandler>(ScriptType.Actor);
+            if (scriptCreatedSuccessfully)
+            {
+                var scriptRegistrationParams = GetScriptRegistrationParamsFromCryScript(cryScript);
+                cryScript.RegistrationParams.AddRange(scriptRegistrationParams);
+                yield return cryScript;
+            }
+        }
 
-
-            yield break;
+        protected virtual IEnumerable<IScriptRegistrationParams> GetScriptRegistrationParamsFromCryScript(CryScript cryScript)
+        {
+            return _scriptRegistrationFactory.GetScriptRegistrationParams(cryScript).Where(x => x != null);
         }
 
         public override string CompileScriptsIntoAssembly(string pathToScriptsFolder)
@@ -63,7 +101,7 @@ namespace CryEngine.Compilers.NET
 
 		public override IEnumerable<CryScript> Process(IEnumerable<Assembly> assemblies)
 		{
-            var scripts = new List<CryScript>();
+            /*var scripts = new List<CryScript>();
 
             foreach (var assembly in assemblies)
                 scripts.AddRange(ProcessAssembly(assembly));
@@ -71,192 +109,10 @@ namespace CryEngine.Compilers.NET
             scripts.AddRange(ProcessAssembly(CompileCSharpFromSource()));
           //  scripts.AddRange(ProcessAssembly(CompileVisualBasicFromSource()));
 
-            return scripts;
+            return scripts;*/
+
+            throw new NotSupportedException();
 		}
-
-		bool TryGetActorParams(ref IScriptRegistrationParams registrationParams, Type type)
-		{
-			var actorRegistrationParams = new ActorRegistrationParams();
-
-			registrationParams = actorRegistrationParams;
-
-			return true;
-		}
-
-		bool TryGetEntityParams(ref IScriptRegistrationParams registrationParams, Type type)
-		{
-			var entityRegistrationParams = new EntityRegistrationParams();
-
-			//LoadFlowNode(ref script, true);
-
-			BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-			var folders = type.GetNestedTypes(flags).Where(x => x.ContainsAttribute<EditorPropertyFolderAttribute>());
-			var members = type.GetMembers(flags);
-			var entityProperties = new List<object>();
-
-			EntityProperty property;
-			members.ForEach(member =>
-				{
-					if (TryGetProperty(member, out property))
-						entityProperties.Add(property);
-				});
-
-			folders.ForEach(folder =>
-				{
-					folder.GetMembers().ForEach(member =>
-						{
-							if (TryGetProperty(member, out property))
-							{
-								property.folder = folder.Name;
-								entityProperties.Add(property);
-							}
-						});
-				});
-
-			entityRegistrationParams.properties = entityProperties.ToArray();
-
-			EntityAttribute entAttribute;
-			if (type.TryGetAttribute(out entAttribute))
-			{
-				entityRegistrationParams.name = entAttribute.Name;
-				entityRegistrationParams.category = entAttribute.Category;
-				entityRegistrationParams.editorHelper = entAttribute.EditorHelper;
-				entityRegistrationParams.editorIcon = entAttribute.Icon;
-				entityRegistrationParams.flags = entAttribute.Flags;
-			}
-
-			registrationParams = entityRegistrationParams;
-
-			return true;
-		}
-
-		bool TryGetProperty(MemberInfo memberInfo, out EntityProperty property)
-		{
-			EditorPropertyAttribute propertyAttribute;
-			if (memberInfo.TryGetAttribute(out propertyAttribute))
-			{
-				Type memberType = null;
-				switch (memberInfo.MemberType)
-				{
-					case MemberTypes.Field:
-						memberType = (memberInfo as FieldInfo).FieldType;
-						break;
-					case MemberTypes.Property:
-						memberType = (memberInfo as PropertyInfo).PropertyType;
-						break;
-				}
-
-				var limits = new EntityPropertyLimits(propertyAttribute.Min, propertyAttribute.Max);
-
-				property = new EntityProperty(memberInfo.Name, propertyAttribute.Description, Entity.GetEditorType(memberType, propertyAttribute.Type), limits, propertyAttribute.Flags);
-				return true;
-			}
-
-			property = new EntityProperty();
-			return false;
-		}
-
-		bool TryGetFlowNodeParams(ref IScriptRegistrationParams registrationParams, Type type)
-		{
-			if (!type.GetMembers().Any(member => member.ContainsAttribute<PortAttribute>()))
-				return false;
-
-			var nodeRegistrationParams = new FlowNodeRegistrationParams();
-
-			FlowNodeAttribute nodeInfo;
-			if (type.TryGetAttribute(out nodeInfo))
-			{
-				if (!string.IsNullOrEmpty(nodeInfo.UICategory))
-					nodeRegistrationParams.category = nodeInfo.UICategory;
-
-				if (!string.IsNullOrEmpty(nodeInfo.Name))
-					nodeRegistrationParams.name = nodeInfo.Name;
-			}
-
-			registrationParams = nodeRegistrationParams;
-
-			return true;
-		}
-
-		bool TryGetGamemodeParams(ref IScriptRegistrationParams registrationParams, Type type)
-		{
-			var gamemodeRegistrationParams = new GameRulesRegistrationParams();
-
-			GameRulesAttribute gamemodeAttribute;
-			if (type.TryGetAttribute(out gamemodeAttribute))
-			{
-				if (!string.IsNullOrEmpty(gamemodeAttribute.Name))
-					gamemodeRegistrationParams.name = gamemodeAttribute.Name;
-
-				gamemodeRegistrationParams.defaultGamemode = gamemodeAttribute.Default;
-			}
-
-			registrationParams = gamemodeRegistrationParams;
-
-			return true;
-		}
-
-        IEnumerable<CryScript> ProcessAssembly(Assembly assembly)
-        {
-            var scripts = new List<CryScript>();
-
-            foreach (var type in assembly.GetTypes())
-            {
-				IScriptRegistrationParams registrationParams = null;
-
-                CryScript script;
-                if (!type.ContainsAttribute<ExcludeFromCompilationAttribute>() && CryScript.TryCreate(type, out script))
-                {
-					if (script.ScriptType.ContainsFlag(ScriptType.Actor))
-						TryGetActorParams(ref registrationParams, script.Type);
-					else if (script.ScriptType.ContainsFlag(ScriptType.GameRules))
-						TryGetGamemodeParams(ref registrationParams, script.Type);
-					else if (script.ScriptType.ContainsFlag(ScriptType.Entity))
-						TryGetEntityParams(ref registrationParams, script.Type);
-					else if (script.ScriptType.ContainsFlag(ScriptType.FlowNode))
-					{
-						if (!TryGetFlowNodeParams(ref registrationParams, script.Type))
-							continue;
-					}
-                   // else if (script.ScriptType.ContainsFlag(ScriptType.UIEventSystem))
-                       // UIEventSystem.Load(script);
-
-                    if (script.ScriptType.ContainsFlag(ScriptType.CryScriptInstance))
-                    {
-                        foreach (var member in type.GetMethods(BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.Public))
-                        {
-							ConsoleCommandAttribute attribute;
-							if (member.TryGetAttribute(out attribute))
-								ConsoleCommand.Register(attribute.Name ?? member.Name, Delegate.CreateDelegate(typeof(ConsoleCommandDelegate), member as MethodInfo) as ConsoleCommandDelegate, attribute.Comment, attribute.Flags);
-                        }
-                    }
-
-					script.RegistrationParams = registrationParams;
-
-                    scripts.Add(script);
-                }
-
-				if(type.ContainsAttribute<TestCollectionAttribute>())
-				{
-					var ctor = type.GetConstructor(Type.EmptyTypes);
-					if(ctor != null)
-					{
-						var collection = new TestCollection
-						{
-							Instance = ctor.Invoke(Type.EmptyTypes),
-							Tests = from method in type.GetMethods()
-									where method.ContainsAttribute<TestAttribute>()
-										&& method.GetParameters().Length == 0
-									select method
-						};
-
-						TestManager.TestCollections.Add(collection);
-					}
-				}
-            }
-
-            return scripts;
-        }
 
         Assembly CompileVisualBasicFromSource()
         {

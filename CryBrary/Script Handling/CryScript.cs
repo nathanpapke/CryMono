@@ -15,7 +15,7 @@ namespace CryEngine.Initialization
 		{
 			Type = type;
 			ScriptName = type.Name;
-
+            RegistrationParams = new List<IScriptRegistrationParams>();
 			ScriptType = scriptType;
 		}
 
@@ -72,7 +72,7 @@ namespace CryEngine.Initialization
 		/// </summary>
 		public List<CryScriptInstance> ScriptInstances { get; internal set; }
 
-        public IScriptRegistrationParams RegistrationParams { get; set; }
+        public List<IScriptRegistrationParams> RegistrationParams { get; private set; }
 
 		#region Operators
 		public static bool operator ==(CryScript script1, CryScript script2)
