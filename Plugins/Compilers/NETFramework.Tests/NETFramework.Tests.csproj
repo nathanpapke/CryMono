@@ -44,7 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CompilerTests.cs" />
-    <Compile Include="Entities\SampleEntity.cs" />
+    <Compile Include="Samples\SampleFlowNode.cs" />
+    <Compile Include="Samples\SampleGameRules.cs" />
+    <Compile Include="Samples\SampleActor.cs" />
+    <Compile Include="Samples\SampleEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

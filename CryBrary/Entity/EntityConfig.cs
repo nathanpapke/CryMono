@@ -96,12 +96,12 @@ namespace CryEngine
 		public EntityPropertyLimits(float min, float max)
 			: this()
 		{
-			this.min = min;
-			this.max = max;
+			Min = min;
+			Max = max;
 		}
 
-		public float min;
-		public float max;
+		public float Min;
+		public float Max;
 	}
 
 	public struct EntityProperty
@@ -110,40 +110,40 @@ namespace CryEngine
 			: this(name, desc, type)
 		{
 		    var newLimits = Limits;
-			if(limits.max == 0 && limits.min == 0)
+			if(limits.Max == 0 && limits.Min == 0)
 			{
-				newLimits.max = Sandbox.UIConstants.MAX_SLIDER_VALUE;
+				newLimits.Max = Sandbox.UIConstants.MAX_SLIDER_VALUE;
 			}
 			else
 			{
-                newLimits.max = limits.max;
-                newLimits.min = limits.min;
+                newLimits.Max = limits.Max;
+                newLimits.Min = limits.Min;
 			}
 		    Limits = newLimits;
 
 			Flags = flags;
 		}
 
-		public EntityProperty(string Name, string Desc, EntityPropertyType Type)
+		public EntityProperty(string name, string desc, EntityPropertyType type)
 			: this()
 		{
-			this.Name = Name;
-			Description = Desc;
+			this.Name = name;
+			Description = desc;
 
-			type = Type;
+			this.Type = type;
 		}
 
         public string Name { get; set; }
         public string Description { get; set; }
 
 #pragma warning disable 414
-		private string editType;
+		private string _editType;
 #pragma warning restore 414
 
 	    public string Folder { get; set; }
 
 		private EntityPropertyType _type;
-		public EntityPropertyType type
+		public EntityPropertyType Type
 		{
 			get
 			{
@@ -158,17 +158,17 @@ namespace CryEngine
 					//VALUE TYPES
 					case EntityPropertyType.Bool:
 						{
-							editType = "b";
+							_editType = "b";
 						}
 						break;
 					case EntityPropertyType.Int:
 						{
-							editType = "i";
+							_editType = "i";
 						}
 						break;
 					case EntityPropertyType.Float:
 						{
-							editType = "f";
+							_editType = "f";
 						}
 						break;
 
@@ -176,31 +176,31 @@ namespace CryEngine
 					//FILE SELECTORS
 					case EntityPropertyType.File:
 						{
-							editType = "file";
+							_editType = "file";
 							_type = EntityPropertyType.String;
 						}
 						break;
 					case EntityPropertyType.Object:
 						{
-							editType = "object";
+							_editType = "object";
 							_type = EntityPropertyType.String;
 						}
 						break;
 					case EntityPropertyType.Texture:
 						{
-							editType = "texture";
+							_editType = "texture";
 							_type = EntityPropertyType.String;
 						}
 						break;
 					case EntityPropertyType.Sound:
 						{
-							editType = "sound";
+							_editType = "sound";
 							_type = EntityPropertyType.String;
 						}
 						break;
 					case EntityPropertyType.Dialogue:
 						{
-							editType = "dialog";
+							_editType = "dialog";
 							_type = EntityPropertyType.String;
 						}
 						break;
@@ -209,20 +209,20 @@ namespace CryEngine
 					//VECTORS
 					case EntityPropertyType.Color:
 						{
-							editType = "color";
+							_editType = "color";
 							_type = EntityPropertyType.Vec3;
 						}
 						break;
 					case EntityPropertyType.Vec3:
 						{
-							editType = "vector";
+							_editType = "vector";
 						}
 						break;
 
 					//MISC
 					case EntityPropertyType.Sequence:
 						{
-							editType = "_seq";
+							_editType = "_seq";
 							_type = EntityPropertyType.String;
 						}
 						break;

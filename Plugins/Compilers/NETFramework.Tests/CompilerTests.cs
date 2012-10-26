@@ -1,12 +1,11 @@
-﻿using CryEngine.Compilers.NET;
+﻿using CryEngine;
+using CryEngine.Compilers.NET;
 using CryEngine.Initialization;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 using System.Reflection;
-using NETFramework.Tests.Entities;
+using NETFramework.Tests.Samples;
 
 namespace NETFramework.Tests
 {
@@ -70,9 +69,65 @@ namespace NETFramework.Tests
             Assert.Equal(entityRegistrationParams.Category, "SampleCategory");
             Assert.Equal(entityRegistrationParams.Properties.Count(), 2);
 
-            //entityRegistrationParams.Properties.Where(p => p.Name)
+            Assert.Equal(entityRegistrationParams.Properties.Single(p => p.Name == "Enabled").Type, EntityPropertyType.Bool);
+        }
+
+        [Fact]
+        public void GetCryScriptsFromAssembly_TestAssembly_ContainsCorrectActorScript()
+        {
+            // Arrange
+            var compiler = new NetCompiler();
+
+            // Act
+            var foundScripts = compiler.GetCryScriptsFromAssembly(Assembly.GetExecutingAssembly());
+
+            // Assert
+            var actorScript = foundScripts.Single(c => c.Type == typeof(SampleActor));
+            Assert.NotEmpty(actorScript.RegistrationParams);
+            Assert.Equal(actorScript.RegistrationParams.Count, 2); // It is an actor and an entity
+            Assert.Equal(actorScript.ScriptType & ScriptType.Actor, ScriptType.Actor);
+            Assert.Single(actorScript.RegistrationParams.OfType<ActorRegistrationParams>());
+        }
+
+        [Fact]
+        public void GetCryScriptsFromAssembly_TestAssembly_ContainsCorrectGameRulesScript()
+        {
+            // Arrange
+            var compiler = new NetCompiler();
+
+            // Act
+            var foundScripts = compiler.GetCryScriptsFromAssembly(Assembly.GetExecutingAssembly());
+
+            // Assert
+            var gameRulesScript = foundScripts.Single(c => c.Type == typeof(SampleGameRules));
+            Assert.NotEmpty(gameRulesScript.RegistrationParams);
+            Assert.Equal(gameRulesScript.RegistrationParams.Count, 2); // Gamerules and entity
+            Assert.Equal(gameRulesScript.ScriptType & ScriptType.GameRules, ScriptType.GameRules);
+            Assert.Single(gameRulesScript.RegistrationParams.OfType<GameRulesRegistrationParams>());
+
+            var gameRulesRegistrationParams = gameRulesScript.RegistrationParams.OfType<GameRulesRegistrationParams>().Single();
+            Assert.True(gameRulesRegistrationParams.DefaultGamemode);
+            Assert.Equal(gameRulesRegistrationParams.Name, "MyGameRules");
 
         }
+
+        [Fact]
+        public void GetCryScriptsFromAssembly_TestAssembly_ContainsCorrectFlowNodeScript()
+        {
+            // Arrange
+            var compiler = new NetCompiler();
+
+            // Act
+            var foundScripts = compiler.GetCryScriptsFromAssembly(Assembly.GetExecutingAssembly());
+
+            // Assert
+            var flowNodeScript = foundScripts.Single(c => c.Type == typeof(SampleFlowNode));
+            Assert.NotEmpty(flowNodeScript.RegistrationParams);
+            Assert.Equal(flowNodeScript.RegistrationParams.Count, 1);
+            Assert.Equal(flowNodeScript.ScriptType & ScriptType.FlowNode, ScriptType.FlowNode);
+            Assert.Single(flowNodeScript.RegistrationParams.OfType<FlowNodeRegistrationParams>());
+        }
+
 
         public void Dispose()
         {

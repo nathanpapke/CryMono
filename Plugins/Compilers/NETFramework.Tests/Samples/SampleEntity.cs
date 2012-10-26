@@ -1,6 +1,6 @@
 ﻿using CryEngine;
 
-namespace NETFramework.Tests.Entities
+namespace NETFramework.Tests.Samples
 {
     [Entity(Category = "SampleCategory")]
     public class SampleEntity : Entity
