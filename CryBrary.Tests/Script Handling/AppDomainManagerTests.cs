@@ -115,7 +115,7 @@ namespace CryBrary.Tests.ScriptHandling
                                                 {
                                                     Assert.NotEmpty(ScriptManager.Instance.Scripts);
 
-                                                    var entity = ScriptManager.Instance.Scripts.First().ScriptInstances.First() as MyTestEntity;
+                                                    var entity = ScriptManager.Instance.Scripts.Single(c => c.Type == typeof(MyTestEntity)).ScriptInstances.First() as MyTestEntity;
 
                                                     Assert.Equal(entity.Active, true);
                                                     Assert.Equal(entity.Health, 200);

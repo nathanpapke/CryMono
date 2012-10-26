@@ -46,13 +46,9 @@ namespace CryEngine
             string domainName = "ScriptDomain_" + ++ScriptDomainCounter;
             var appDomainSetup = new AppDomainSetup()
               {
-                  ApplicationName = domainName,
-                  DynamicBase = Path.GetTempPath(),
-                  PrivateBinPath =  Path.GetTempPath(),
-                                         ShadowCopyFiles = "true",
-                                         ApplicationBase = appDomainRootPath,
+                  ApplicationBase = appDomainRootPath,
 
-                                     };
+              };
 
             _scriptAppDomain = AppDomain.CreateDomain(domainName, AppDomain.CurrentDomain.Evidence, appDomainSetup);
 
