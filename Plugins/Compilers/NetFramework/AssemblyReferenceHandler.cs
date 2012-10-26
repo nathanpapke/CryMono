@@ -52,7 +52,7 @@ namespace CryEngine.Utilities
 				}
 			}
 
-			foreach(var assembly in AppDomain.CurrentDomain.GetAssemblies().Select(x => x.Location).ToArray())
+			foreach(var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(x => !x.IsDynamic).Select(x => x.Location).ToArray())
 			{
 				if(!assemblyPaths.Contains(assembly))
 					assemblyPaths.Add(assembly);

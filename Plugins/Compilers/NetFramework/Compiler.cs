@@ -95,7 +95,105 @@ namespace CryEngine.Compilers.NET
 
         public override string CompileScriptsIntoAssembly(string pathToScriptsFolder)
         {
-            throw new NotImplementedException();
+            // Select the provider we want
+            var selectedProvider = GetBestMatchingCodeDomProvider(pathToScriptsFolder);
+            
+            // Get the compiler parameters
+            CompilerParameters compilerParameters = GetCompilerParameters(selectedProvider);
+
+            // Get all files to compile
+            var scripts = new List<string>();
+            foreach (var script in Directory.GetFiles(pathToScriptsFolder, "*." + selectedProvider.FileExtension))
+                    scripts.Add(script);
+
+            if (scripts.Count == 0)
+                return null;
+
+            CompilerResults results;
+            using (selectedProvider)
+            {
+                var referenceHandler = new AssemblyReferenceHandler();
+                compilerParameters.ReferencedAssemblies.AddRange(referenceHandler.GetRequiredAssembliesFromFiles(scripts));
+
+                results = selectedProvider.CompileAssemblyFromFile(compilerParameters, scripts.ToArray());
+            }
+
+            // Todo: validation
+
+           // return ScriptCompiler.ValidateCompilation(results);
+
+
+
+            return results.PathToAssembly;
+        }
+
+        private CompilerParameters GetCompilerParameters(CodeDomProvider codeDomProvider)
+        {
+            var compilerParameters = new CompilerParameters
+                                         {
+                                             GenerateExecutable = false,
+                                             IncludeDebugInformation = true,
+                                             GenerateInMemory = false
+                                         };
+
+
+            // Necessary for stack trace line numbers etc
+#if RELEASE
+			if(!compilationParameters.ForceDebugInformation)
+			{
+				compilerParameters.GenerateInMemory = true;
+				compilerParameters.IncludeDebugInformation = false;
+			}
+#endif
+
+            if (!compilerParameters.GenerateInMemory)
+            {
+                var assemblyPath = Path.Combine(PathUtils.TempFolder, string.Format("CompiledScripts_{0}.dll", codeDomProvider.FileExtension));
+                if (File.Exists(assemblyPath))
+                {
+                    try
+                    {
+                        File.Delete(assemblyPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex is UnauthorizedAccessException || ex is IOException)
+                            assemblyPath = Path.ChangeExtension(assemblyPath, "_" + Path.GetExtension(assemblyPath));
+                        else
+                            throw;
+                    }
+                }
+
+                compilerParameters.OutputAssembly = assemblyPath;
+            }
+
+            return compilerParameters;
+        }
+
+        private CodeDomProvider GetBestMatchingCodeDomProvider(string pathToScriptsFolder)
+        {
+            if (pathToScriptsFolder == null)
+                throw  new ArgumentNullException();
+
+            if (!Directory.Exists(pathToScriptsFolder))
+                throw new DirectoryNotFoundException();
+
+            var supportedProviders =
+                new[]
+                    {
+                        CodeDomProvider.CreateProvider("CSharp"),
+                        CodeDomProvider.CreateProvider("VisualBasic")
+                    };
+
+            var scores = new Dictionary<CodeDomProvider, int>();
+
+            foreach (var supportedProvider in supportedProviders)
+            {
+                scores[supportedProvider] = Directory.GetFiles(pathToScriptsFolder,
+                                                               "*." + supportedProvider.FileExtension).Count();
+            }
+
+            return scores.OrderByDescending(x => x.Value).First().Key;
         }
 
 
@@ -112,79 +210,6 @@ namespace CryEngine.Compilers.NET
             return scripts;*/
 
             throw new NotSupportedException();
-		}
-
-        Assembly CompileVisualBasicFromSource()
-        {
-            return CompileFromSource(CodeDomProvider.CreateProvider("VisualBasic"), "*.vb");
-        }
-
-		Assembly CompileCSharpFromSource()
-        {
-            return CompileFromSource(CodeDomProvider.CreateProvider("CSharp"), "*.cs");
-        }
-
-        Assembly CompileFromSource(CodeDomProvider provider, string searchPattern)
-		{
-			var compilerParameters = new CompilerParameters();
-
-			compilerParameters.GenerateExecutable = false;
-
-			// Necessary for stack trace line numbers etc
-			compilerParameters.IncludeDebugInformation = true;
-			compilerParameters.GenerateInMemory = false;
-
-#if RELEASE
-			if(!compilationParameters.ForceDebugInformation)
-			{
-				compilerParameters.GenerateInMemory = true;
-				compilerParameters.IncludeDebugInformation = false;
-			}
-#endif
-
-			if(!compilerParameters.GenerateInMemory)
-			{
-                var assemblyPath = Path.Combine(PathUtils.TempFolder, string.Format("CompiledScripts_{0}.dll", searchPattern.Replace("*.", "")));
-
-				if(File.Exists(assemblyPath))
-				{
-					try
-					{
-						File.Delete(assemblyPath);
-					}
-					catch(Exception ex)
-					{
-						if(ex is UnauthorizedAccessException || ex is IOException)
-							assemblyPath = Path.ChangeExtension(assemblyPath, "_" + Path.GetExtension(assemblyPath));
-						else
-							throw;
-					}
-				}
-
-				compilerParameters.OutputAssembly = assemblyPath;
-			}
-
-			var scripts = new List<string>();
-			var scriptsDirectory = PathUtils.ScriptsFolder;
-
-			if(Directory.Exists(scriptsDirectory))
-			{
-                foreach (var script in Directory.GetFiles(scriptsDirectory, searchPattern, SearchOption.AllDirectories))
-					scripts.Add(script);
-			}
-			else
-				Debug.LogAlways("Scripts directory could not be located");
-
-			CompilerResults results;
-            using(provider)
-			{
-				var referenceHandler = new AssemblyReferenceHandler();
-				compilerParameters.ReferencedAssemblies.AddRange(referenceHandler.GetRequiredAssembliesFromFiles(scripts));
-
-				results = provider.CompileAssemblyFromFile(compilerParameters, scripts.ToArray());
-			}
-
-			return ScriptCompiler.ValidateCompilation(results);
 		}
 	}
 }

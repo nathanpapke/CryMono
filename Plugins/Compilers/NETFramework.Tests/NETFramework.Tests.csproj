@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CompilerTests.cs" />
+    <EmbeddedResource Include="Samples\Raw_SampleEntity.cs" />
     <Compile Include="Samples\SampleFlowNode.cs" />
     <Compile Include="Samples\SampleGameRules.cs" />
     <Compile Include="Samples\SampleActor.cs" />
@@ -51,6 +52,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\CryBrary.Tests\CryBrary.Tests.csproj">
+      <Project>{25588172-6725-4c61-8ce5-3799fa125533}</Project>
+      <Name>CryBrary.Tests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\CryBrary\CryBrary.csproj">
       <Project>{4a7993b3-6611-4d9d-b8ab-836d6c27b12b}</Project>
       <Name>CryBrary</Name>
@@ -59,6 +64,9 @@
       <Project>{a0504507-678e-44b5-9517-f89eb8575d3f}</Project>
       <Name>NETFramework</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Samples\Raw_SampleEntity.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

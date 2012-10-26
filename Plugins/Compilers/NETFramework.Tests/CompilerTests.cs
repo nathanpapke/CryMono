@@ -6,10 +6,12 @@ using System.Linq;
 using Xunit;
 using System.Reflection;
 using NETFramework.Tests.Samples;
+using System.IO;
+using CryBrary.Tests;
 
 namespace NETFramework.Tests
 {
-    public class CompilerTests : IDisposable
+    public class CompilerTests : CryBraryTests,IDisposable
     {
         public CompilerTests()
         {
@@ -128,6 +130,123 @@ namespace NETFramework.Tests
             Assert.Single(flowNodeScript.RegistrationParams.OfType<FlowNodeRegistrationParams>());
         }
 
+        [Fact]
+        public void CompileScriptsIntoAssembly_NullPath_ArgumentNullException()
+        {
+            // Arrange
+            var compiler = new NetCompiler();
+
+            // Act
+            Assert.ThrowsDelegate action = () => compiler.CompileScriptsIntoAssembly(null);
+
+            // Assert
+            Assert.Throws<ArgumentNullException>(action);
+        }
+
+        [Fact]
+        public void CompileScriptsIntoAssembly_NonExistingPath_DirectoryNotFoundException()
+        {
+            // Arrange
+            var compiler = new NetCompiler();
+
+            // Act
+            Assert.ThrowsDelegate action = () => compiler.CompileScriptsIntoAssembly(@"yz:test");
+
+            // Assert
+            Assert.Throws<DirectoryNotFoundException>(action);
+        }
+
+        [Fact]
+        public void CompileScriptsIntoAssembly_PathNotContainingAnyScripts_NoAssemblyBuilt()
+        {
+            string sourceDirectory = Path.Combine(Path.GetTempPath(), "CryMonoTests");
+            if (!Directory.Exists(sourceDirectory))
+                Directory.CreateDirectory(sourceDirectory);
+            try
+            {
+                // Arrange
+                var compiler = new NetCompiler();
+
+                // Act
+                string assemblyBuilt = compiler.CompileScriptsIntoAssembly(sourceDirectory);
+
+                // Assert
+                Assert.Null(assemblyBuilt);
+            } finally
+            {
+                if (Directory.Exists(sourceDirectory))
+                    Directory.Delete(sourceDirectory);
+            }
+        }
+
+        [Fact]
+        public void CompileScriptsIntoAssembly_PathContaingCSharpFiles_AssemblyBuilt()
+        {
+            string sourceDirectory = Path.Combine(Path.GetTempPath(), "CryMonoTests");
+            if (!Directory.Exists(sourceDirectory))
+                Directory.CreateDirectory(sourceDirectory);
+            try
+            {
+                // Arrange
+                var compiler = new NetCompiler();
+                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("NETFramework.Tests.Samples.Raw_SampleEntity.cs"))
+                {
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        string outputfileName = Path.Combine(sourceDirectory, "sourcefile1.cs");
+                        File.WriteAllText(outputfileName, reader.ReadToEnd());
+                    }
+                }
+
+
+                // Act
+                string assemblyBuilt = compiler.CompileScriptsIntoAssembly(sourceDirectory);
+
+                // Assert
+                Assert.NotNull(assemblyBuilt);
+                Assert.True(File.Exists(assemblyBuilt));
+            }
+            finally
+            {
+                if (Directory.Exists(sourceDirectory))
+                    Directory.Delete(sourceDirectory, true);
+            }
+        }
+
+
+        [Fact]
+        public void CompileScriptsIntoAssembly_PathContaingVbFiles_AssemblyBuilt()
+        {
+            string sourceDirectory = Path.Combine(Path.GetTempPath(), "CryMonoTests");
+            if (!Directory.Exists(sourceDirectory))
+                Directory.CreateDirectory(sourceDirectory);
+            try
+            {
+                // Arrange
+                var compiler = new NetCompiler();
+                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("NETFramework.Tests.Samples.Raw_SampleEntity.vb"))
+                {
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        string outputfileName = Path.Combine(sourceDirectory, "sourcefile1.vb");
+                        File.WriteAllText(outputfileName, reader.ReadToEnd());
+                    }
+                }
+
+
+                // Act
+                string assemblyBuilt = compiler.CompileScriptsIntoAssembly(sourceDirectory);
+
+                // Assert
+                Assert.NotNull(assemblyBuilt);
+                Assert.True(File.Exists(assemblyBuilt));
+            }
+            finally
+            {
+                if (Directory.Exists(sourceDirectory))
+                    Directory.Delete(sourceDirectory, true);
+            }
+        }
 
         public void Dispose()
         {
