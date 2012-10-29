@@ -1,6 +1,6 @@
 ﻿using CryEngine.Initialization;
 
-namespace CryEngine.Compilers.NET
+namespace CryEngine.Compilers.Net
 {
     internal interface IScriptRegistrationParamsHandler
     {

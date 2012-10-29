@@ -5,11 +5,11 @@ using System.Reflection;
 using CryEngine.Extensions;
 using CryEngine.Initialization;
 
-namespace CryEngine.Compilers.NET.Handlers
+namespace CryEngine.Compilers.Net.Handlers
 {
     internal class EntityScriptRegistrationHandler : IScriptRegistrationParamsHandler
     {
-        bool TryGetProperty(MemberInfo memberInfo, out EntityProperty property)
+        private static bool TryGetProperty(MemberInfo memberInfo, out EntityProperty property)
         {
             EditorPropertyAttribute propertyAttribute;
             if (memberInfo.TryGetAttribute(out propertyAttribute))

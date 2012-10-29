@@ -3,7 +3,7 @@ using System.Reflection;
 using CryEngine.Extensions;
 using CryEngine.Initialization;
 
-namespace CryEngine.Compilers.NET.Handlers
+namespace CryEngine.Compilers.Net.Handlers
 {
     internal class CryScriptInstanceScriptRegistrationHandler : IScriptRegistrationParamsHandler
     {

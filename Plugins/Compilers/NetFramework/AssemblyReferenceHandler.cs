@@ -67,7 +67,7 @@ namespace CryEngine.Utilities
 		/// </summary>
 		/// <param name="sources"></param>
 		/// <returns></returns>
-		public string[] GetRequiredAssembliesFromSource(string[] sources)
+		public virtual string[] GetRequiredAssembliesFromSource(string[] sources)
 		{
 			if(sources == null || sources.Length <= 0)
 				return null;

@@ -12,14 +12,16 @@ namespace CryEngine.Initialization
     {
         #region Statics
         /// <summary>
-        /// Validates that a compilation has been successful.
+        /// Validates that a compilation has been successful. 
         /// </summary>
+        /// <exception cref="CryEngine.Initialization.ScriptCompilationException">Error found in compilation results</exception> 
         /// <param name="results">The results of the compilation that you wish to validate</param>
-        /// <returns>The resulting assembly, if no errors are found.</returns>
-        public static Assembly ValidateCompilation(CompilerResults results)
+        public static void ValidateCompilation(CompilerResults results)
         {
-            if (!results.Errors.HasErrors && results.CompiledAssembly != null)
-                return results.CompiledAssembly;
+            // Note: Do not use the CompiledAssembly property of the CompilerResults, since that will load the compiled assembly in the current appdomain
+            //       Instead, use the PathToAssembly property to check if the assembly has been generated correctly
+            if (!results.Errors.HasErrors && results.PathToAssembly != null)
+                return;
 
             string compilationError = string.Format("Compilation failed; {0} errors: ", results.Errors.Count);
 
@@ -36,8 +38,6 @@ namespace CryEngine.Initialization
             throw new ScriptCompilationException(compilationError);
         }
         #endregion
-
-        public abstract IEnumerable<CryScript> Process(IEnumerable<Assembly> assemblies);
 
         /// <summary>
         /// Gets all CryScripts located in an assembly

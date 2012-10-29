@@ -8,9 +8,10 @@ using CryEngine.Extensions;
 using CryEngine.Initialization;
 using CryEngine.Testing;
 using CryEngine.Utilities;
-using CryEngine.Compilers.NET.Handlers;
+using CryEngine.Compilers.Net.Handlers;
+using System.Globalization;
 
-namespace CryEngine.Compilers.NET
+namespace CryEngine.Compilers.Net
 {
 	public class NetCompiler : ScriptCompiler
 	{
@@ -54,7 +55,7 @@ namespace CryEngine.Compilers.NET
             return foundScripts;
         }
 
-        private void RegisterTestCollection(Type type)
+        private static void RegisterTestCollection(Type type)
         {
             if (type.ContainsAttribute<TestCollectionAttribute>())
             {
@@ -118,16 +119,13 @@ namespace CryEngine.Compilers.NET
                 results = selectedProvider.CompileAssemblyFromFile(compilerParameters, scripts.ToArray());
             }
 
-            // Todo: validation
-
-           // return ScriptCompiler.ValidateCompilation(results);
-
-
+            // Calling ValidateCompilation will check the results for errors. In case of an error, a ScriptCompilationException is thrown
+            ScriptCompiler.ValidateCompilation(results);
 
             return results.PathToAssembly;
         }
 
-        private CompilerParameters GetCompilerParameters(CodeDomProvider codeDomProvider)
+        protected virtual CompilerParameters GetCompilerParameters(CodeDomProvider codeDomProvider)
         {
             var compilerParameters = new CompilerParameters
                                          {
@@ -148,7 +146,7 @@ namespace CryEngine.Compilers.NET
 
             if (!compilerParameters.GenerateInMemory)
             {
-                var assemblyPath = Path.Combine(PathUtils.TempFolder, string.Format("CompiledScripts_{0}.dll", codeDomProvider.FileExtension));
+                var assemblyPath = Path.Combine(PathUtils.TempFolder, string.Format(CultureInfo.InvariantCulture, "CompiledScripts_{0}.dll", codeDomProvider.FileExtension));
                 if (File.Exists(assemblyPath))
                 {
                     try
@@ -170,23 +168,23 @@ namespace CryEngine.Compilers.NET
             return compilerParameters;
         }
 
-        private CodeDomProvider GetBestMatchingCodeDomProvider(string pathToScriptsFolder)
+        protected virtual CodeDomProvider GetBestMatchingCodeDomProvider(string pathToScriptsFolder)
         {
             if (pathToScriptsFolder == null)
-                throw  new ArgumentNullException();
+                throw  new ArgumentNullException("pathToScriptsFolder");
 
             if (!Directory.Exists(pathToScriptsFolder))
                 throw new DirectoryNotFoundException();
 
-            var supportedProviders =
-                new[]
-                    {
-                        CodeDomProvider.CreateProvider("CSharp"),
-                        CodeDomProvider.CreateProvider("VisualBasic")
-                    };
+            var availableProviders = CodeDomProvider.GetAllCompilerInfo();
+            var supportedProviders = new List<CodeDomProvider>(availableProviders.Length);
+            foreach (var provider in availableProviders)
+            {
+                var providerInstance = provider.CreateProvider();
+                supportedProviders.Add(providerInstance);
+            }
 
             var scores = new Dictionary<CodeDomProvider, int>();
-
             foreach (var supportedProvider in supportedProviders)
             {
                 scores[supportedProvider] = Directory.GetFiles(pathToScriptsFolder,
@@ -195,21 +193,5 @@ namespace CryEngine.Compilers.NET
 
             return scores.OrderByDescending(x => x.Value).First().Key;
         }
-
-
-		public override IEnumerable<CryScript> Process(IEnumerable<Assembly> assemblies)
-		{
-            /*var scripts = new List<CryScript>();
-
-            foreach (var assembly in assemblies)
-                scripts.AddRange(ProcessAssembly(assembly));
-
-            scripts.AddRange(ProcessAssembly(CompileCSharpFromSource()));
-          //  scripts.AddRange(ProcessAssembly(CompileVisualBasicFromSource()));
-
-            return scripts;*/
-
-            throw new NotSupportedException();
-		}
 	}
 }

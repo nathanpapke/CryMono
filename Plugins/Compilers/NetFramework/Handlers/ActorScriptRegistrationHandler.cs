@@ -1,7 +1,7 @@
 ﻿using CryEngine.Initialization;
 using System.Collections.Generic;
 
-namespace CryEngine.Compilers.NET.Handlers
+namespace CryEngine.Compilers.Net.Handlers
 {
     internal class ActorScriptRegistrationHandler : IScriptRegistrationParamsHandler
     {

@@ -2,7 +2,7 @@
 using CryEngine.Initialization;
 using System.Collections.Generic;
 
-namespace CryEngine.Compilers.NET
+namespace CryEngine.Compilers.Net
 {
     internal class ScriptRegistrationParamsFactory
     {

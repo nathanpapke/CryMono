@@ -1,5 +1,5 @@
 ﻿using CryEngine;
-using CryEngine.Compilers.NET;
+using CryEngine.Compilers.Net;
 using CryEngine.Initialization;
 using System;
 using System.Linq;
