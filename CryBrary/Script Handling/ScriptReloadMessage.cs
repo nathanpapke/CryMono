@@ -12,26 +12,26 @@ using System.CodeDom.Compiler;
 
 namespace CryEngine.Initialization
 {
-	public partial class ScriptReloadMessage : Form
-	{
-		public ScriptReloadMessage(Exception exception, bool canRevert)
-		{
+    public partial class ScriptReloadMessage : Form
+    {
+        public ScriptReloadMessage(Exception exception, bool canRevert)
+        {
             if (!CryEngine.Utils.Settings.IsGuiSupported)
                 throw new InvalidOperationException("Tried to create a form while a Gui is not supported");
 
-			InitializeComponent();
+            InitializeComponent();
 
-			tryAgainButton.Click += (s, a) => ScriptManager.Instance.OnReload();
-			revertButton.Click += (s, a) => ScriptManager.Instance.OnRevert();
-			exitButton.Click += (s, a) => Process.GetCurrentProcess().Kill();
+            tryAgainButton.Click += (s, a) => ScriptManager.Instance.OnReload();
+            revertButton.Click += (s, a) => ScriptManager.Instance.OnRevert();
+            exitButton.Click += (s, a) => Process.GetCurrentProcess().Kill();
 
-			if (!canRevert)
-				revertButton.Enabled = false;
+            if (!canRevert)
+                revertButton.Enabled = false;
 
-			errorBox.Text = exception.ToString();
+            errorBox.Text = exception.ToString();
 
             // Make sure we show the cursor when a form is shown
             Cursor.Show();
-		}
-	}
+        }
+    }
 }

@@ -130,60 +130,47 @@ void CScriptbind_Physics::SetVelocity(IEntity *pEntity, Vec3 vel)
 	pPhysicalEntity->Action(&asv);
 }
 
-int CScriptbind_Physics::RayWorldIntersection(Vec3 origin, Vec3 dir, int objFlags, unsigned int flags, SMonoRayHit &monoHit, int maxHits, mono::object skipEntities)
+int CScriptbind_Physics::RayWorldIntersection(Vec3 origin, Vec3 dir, int objFlags, unsigned int flags, ray_hit &hit, int maxHits, mono::object skipEntities)
 {
-	std::vector<IPhysicalEntity *> physEnts;
+	IPhysicalEntity **pSkipEnts = NULL;
+	int numSkipEnts = 0;
 
 	if(skipEntities)
 	{
 		IMonoArray *pSkipEntities = *skipEntities;
+		numSkipEnts = pSkipEntities->GetSize();
 
-		for(int i = 0; i < pSkipEntities->GetSize(); i++)
-		{
-			if(IEntity *pEntity = gEnv->pEntitySystem->GetEntity(pSkipEntities->GetItem(i)->Unbox<EntityId>()))
-			{
-				if(IPhysicalEntity *pPhysEnt = pEntity->GetPhysics())
-					physEnts.push_back(pPhysEnt);
-			}
-		}
+		pSkipEnts = new IPhysicalEntity*[numSkipEnts];
+
+		for(int i = 0; i < numSkipEnts; i++)
+			pSkipEnts[i] = (IPhysicalEntity *)pSkipEntities->GetItem(i)->GetManagedObject();
 
 		delete pSkipEntities;
 	}
 
-	IPhysicalEntity **pSkipEnts = new IPhysicalEntity*[physEnts.size()];
-
-	for(int i = 0; i < physEnts.size(); i++)
-		pSkipEnts[i] = physEnts[i];
-
-	ray_hit hit;
-	int numHits = gEnv->pPhysicalWorld->RayWorldIntersection(origin, dir, objFlags, flags, &hit, maxHits, pSkipEnts, physEnts.size());
+	hit = ray_hit();
+	int numHits = gEnv->pPhysicalWorld->RayWorldIntersection(origin, dir, objFlags, flags, &hit, maxHits, pSkipEnts, numSkipEnts);
 
 	SAFE_DELETE_ARRAY(pSkipEnts);
-	physEnts.clear();
-
-	monoHit.bTerrain = hit.bTerrain;
-
-	// We should return physical entity id's really, but this isn't exposed yet.
-	//if(hit.pCollider)
-		//monoHit.colliderId = gEnv->pPhysicalWorld->GetPhysicalEntityId(hit.pCollider);
-
-	monoHit.dist = hit.dist;
-	monoHit.foreignIdx = hit.foreignIdx;
-	monoHit.idmatOrg = hit.idmatOrg;
-	monoHit.iNode = hit.iNode;
-	monoHit.ipart = hit.ipart;
-	monoHit.iPrim = hit.iPrim;
-	monoHit.n = hit.n;
-	monoHit.partid = hit.partid;
-	monoHit.pt = hit.pt;
-	monoHit.surface_idx = hit.surface_idx;
 
 	return numHits;
 }
 
-void CScriptbind_Physics::SimulateExplosion(pe_explosion explosion)
+mono::object CScriptbind_Physics::SimulateExplosion(pe_explosion explosion)
 {
 	gEnv->pPhysicalWorld->SimulateExplosion(&explosion);
+
+	if(explosion.nAffectedEnts > 0)
+	{
+		IMonoArray *pAffectedEnts = CreateMonoArray(explosion.nAffectedEnts);
+
+		for(int i = 0; i < explosion.nAffectedEnts; i++)
+			pAffectedEnts->InsertNativePointer(explosion.pAffectedEnts[i]);
+
+		return pAffectedEnts->GetManagedObject();
+	}
+
+	return NULL;
 }
 
 pe_status_living CScriptbind_Physics::GetLivingEntityStatus(IEntity *pEntity)
