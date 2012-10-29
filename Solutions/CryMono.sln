@@ -117,6 +117,7 @@ Global
 		{12283C6D-A1F9-4409-976F-F816CB19E3B4}.Release|Windows x64.ActiveCfg = Release|Any CPU
 		{12283C6D-A1F9-4409-976F-F816CB19E3B4}.Release|Windows x64.Build.0 = Release|Any CPU
 		{12283C6D-A1F9-4409-976F-F816CB19E3B4}.Release|Windows x86.ActiveCfg = Release|Any CPU
+		{12283C6D-A1F9-4409-976F-F816CB19E3B4}.Release|Windows x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
