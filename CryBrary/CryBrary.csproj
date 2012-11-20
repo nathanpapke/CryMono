@@ -166,6 +166,8 @@
     <Compile Include="Math\Collision.cs" />
     <Compile Include="Math\Plane.cs" />
     <Compile Include="Math\PlaneIntersectionType.cs" />
+    <Compile Include="Native\NativeInterfaceImplementationNotFoundException.cs" />
+    <Compile Include="Native\NativeMethods.cs" />
     <Compile Include="Native\NativeScriptSystemMethods.cs" />
     <Compile Include="Physics\Explosion.cs" />
     <Compile Include="Script Handling\ScriptInstanceDestroyedException.cs" />
