@@ -21,7 +21,7 @@ namespace CryEngine
         /// <returns>The specified particle effect, or null if failed.</returns>
         public static ParticleEffect Get(string effectName, bool loadResources = true)
         {
-            var ptr = NativeParticleEffectMethods.FindEffect(effectName, loadResources);
+            var ptr = NativeParticleEffectMethods.Instance.FindEffect(effectName, loadResources);
             if (ptr != IntPtr.Zero)
                 return new ParticleEffect(ptr);
 
@@ -38,17 +38,17 @@ namespace CryEngine
         /// <param name="scale">Scale of the emitter.</param>
         public void Spawn(Vec3 pos, Vec3? dir = null, float scale = 1f, bool independent = true)
         {
-            NativeParticleEffectMethods.Spawn(Handle, independent, pos, dir ?? Vec3.Up, scale);
+            NativeParticleEffectMethods.Instance.Spawn(Handle, independent, pos, dir ?? Vec3.Up, scale);
         }
 
         public void Remove()
         {
-            NativeParticleEffectMethods.Remove(Handle);
+            NativeParticleEffectMethods.Instance.Remove(Handle);
         }
 
         public void LoadResources()
         {
-            NativeParticleEffectMethods.LoadResoruces(Handle);
+            NativeParticleEffectMethods.Instance.LoadResoruces(Handle);
         }
 
         #region Overrides

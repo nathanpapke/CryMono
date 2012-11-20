@@ -3,15 +3,15 @@ using System.Runtime.CompilerServices;
 
 namespace CryEngine.Native
 {
-    internal class NativeParticleEffectMethods
+    internal class NativeParticleEffectMethods : NativeMethods<INativeParticleEffectMethods>, INativeParticleEffectMethods
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr FindEffect(string effectName, bool loadResources);
+        public extern IntPtr FindEffect(string effectName, bool loadResources);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void Spawn(IntPtr ptr, bool independent, Vec3 pos, Vec3 dir, float scale);
+        public extern void Spawn(IntPtr ptr, bool independent, Vec3 pos, Vec3 dir, float scale);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void Remove(IntPtr ptr);
+        public extern void Remove(IntPtr ptr);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void LoadResoruces(IntPtr ptr);
+        public extern void LoadResoruces(IntPtr ptr);
     }
 }
