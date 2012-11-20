@@ -22,57 +22,57 @@ namespace CryEngine
         /// <summary>
         /// Gets or sets a value indicating whether the player is hidden or not.
         /// </summary>
-        public bool Hidden { get { return NativeEntityMethods.IsHidden(this.GetEntityHandle()); } set { NativeEntityMethods.Hide(this.GetEntityHandle(), value); } }
+        public bool Hidden { get { return NativeEntityMethods.Instance.IsHidden(this.GetEntityHandle()); } set { NativeEntityMethods.Instance.Hide(this.GetEntityHandle(), value); } }
 
         /// <summary>
         /// Gets or sets the world space entity position.
         /// </summary>
-        public Vec3 Position { get { return NativeEntityMethods.GetWorldPos(this.GetEntityHandle()); } set { NativeEntityMethods.SetWorldPos(this.GetEntityHandle(), value); } }
+        public Vec3 Position { get { return NativeEntityMethods.Instance.GetWorldPos(this.GetEntityHandle()); } set { NativeEntityMethods.Instance.SetWorldPos(this.GetEntityHandle(), value); } }
 
         /// <summary>
         /// Gets or sets the world space entity orientation quaternion.
         /// </summary>
-        public Quat Rotation { get { return NativeEntityMethods.GetWorldRotation(this.GetEntityHandle()); } set { NativeEntityMethods.SetWorldRotation(this.GetEntityHandle(), value); } }
+        public Quat Rotation { get { return NativeEntityMethods.Instance.GetWorldRotation(this.GetEntityHandle()); } set { NativeEntityMethods.Instance.SetWorldRotation(this.GetEntityHandle(), value); } }
 
         /// <summary>
         /// Gets or sets the local space entity position.
         /// </summary>
-        public Vec3 LocalPosition { get { return NativeEntityMethods.GetPos(this.GetEntityHandle()); } set { NativeEntityMethods.SetPos(this.GetEntityHandle(), value); } }
+        public Vec3 LocalPosition { get { return NativeEntityMethods.Instance.GetPos(this.GetEntityHandle()); } set { NativeEntityMethods.Instance.SetPos(this.GetEntityHandle(), value); } }
 
         /// <summary>
         /// Gets or sets the local space entity orientation quaternion.
         /// </summary>
-        public Quat LocalRotation { get { return NativeEntityMethods.GetRotation(this.GetEntityHandle()); } set { NativeEntityMethods.SetRotation(this.GetEntityHandle(), value); } }
+        public Quat LocalRotation { get { return NativeEntityMethods.Instance.GetRotation(this.GetEntityHandle()); } set { NativeEntityMethods.Instance.SetRotation(this.GetEntityHandle(), value); } }
 
         /// <summary>
         /// Gets or sets the world space entity transformation matrix.
         /// </summary>
-        public Matrix34 Transform { get { return NativeEntityMethods.GetWorldTM(this.GetEntityHandle()); } set { NativeEntityMethods.SetWorldTM(this.GetEntityHandle(), value); } }
+        public Matrix34 Transform { get { return NativeEntityMethods.Instance.GetWorldTM(this.GetEntityHandle()); } set { NativeEntityMethods.Instance.SetWorldTM(this.GetEntityHandle(), value); } }
 
         /// <summary>
         /// Gets or sets the local space entity transformation matrix.
         /// </summary>
-        public Matrix34 LocalTransform { get { return NativeEntityMethods.GetLocalTM(this.GetEntityHandle()); } set { NativeEntityMethods.SetLocalTM(this.GetEntityHandle(), value); } }
+        public Matrix34 LocalTransform { get { return NativeEntityMethods.Instance.GetLocalTM(this.GetEntityHandle()); } set { NativeEntityMethods.Instance.SetLocalTM(this.GetEntityHandle(), value); } }
 
         /// <summary>
         /// Gets the entity axis aligned bounding box in the world space.
         /// </summary>
-        public BoundingBox BoundingBox { get { return NativeEntityMethods.GetWorldBoundingBox(this.GetEntityHandle()); } }
+        public BoundingBox BoundingBox { get { return NativeEntityMethods.Instance.GetWorldBoundingBox(this.GetEntityHandle()); } }
 
         /// <summary>
         /// Gets the entity axis aligned bounding box in the world space.
         /// </summary>
-        public BoundingBox LocalBoundingBox { get { return NativeEntityMethods.GetBoundingBox(this.GetEntityHandle()); } }
+        public BoundingBox LocalBoundingBox { get { return NativeEntityMethods.Instance.GetBoundingBox(this.GetEntityHandle()); } }
 
         /// <summary>
         /// Gets or sets the entity name.
         /// </summary>
-        public string Name { get { return NativeEntityMethods.GetName(this.GetEntityHandle()); } set { NativeEntityMethods.SetName(this.GetEntityHandle(), value); } }
+        public string Name { get { return NativeEntityMethods.Instance.GetName(this.GetEntityHandle()); } set { NativeEntityMethods.Instance.SetName(this.GetEntityHandle(), value); } }
 
         /// <summary>
         /// Gets or sets the entity flags.
         /// </summary>
-        public EntityFlags Flags { get { return NativeEntityMethods.GetFlags(this.GetEntityHandle()); } set { NativeEntityMethods.SetFlags(this.GetEntityHandle(), value); } }
+        public EntityFlags Flags { get { return NativeEntityMethods.Instance.GetFlags(this.GetEntityHandle()); } set { NativeEntityMethods.Instance.SetFlags(this.GetEntityHandle(), value); } }
 
         /// <summary>
         /// Gets or sets the material currently assigned to this entity.
@@ -86,7 +86,7 @@ namespace CryEngine
         /// </summary>
         public EntityId Id { get; internal set; }
 
-        public EntityUpdatePolicy UpdatePolicy { get { return NativeEntityMethods.GetUpdatePolicy(this.GetEntityHandle()); } set { NativeEntityMethods.SetUpdatePolicy(this.GetEntityHandle(), value); } }
+        public EntityUpdatePolicy UpdatePolicy { get { return NativeEntityMethods.Instance.GetUpdatePolicy(this.GetEntityHandle()); } set { NativeEntityMethods.Instance.SetUpdatePolicy(this.GetEntityHandle(), value); } }
 
         /// <summary>
         /// Gets or sets entity velocity as set by the physics system.
@@ -133,7 +133,7 @@ namespace CryEngine
         /// <returns>The slot flags, or 0 if specified slot is not valid.</returns>
         public EntitySlotFlags GetSlotFlags(int slot = 0)
         {
-            return NativeEntityMethods.GetSlotFlags(this.GetEntityHandle(), slot);
+            return NativeEntityMethods.Instance.GetSlotFlags(this.GetEntityHandle(), slot);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace CryEngine
         /// <param name="slot">Index of the slot, if -1 apply to all existing slots.</param>
         public void SetSlotFlags(EntitySlotFlags flags, int slot = 0)
         {
-            NativeEntityMethods.SetSlotFlags(this.GetEntityHandle(), slot, flags);
+            NativeEntityMethods.Instance.SetSlotFlags(this.GetEntityHandle(), slot, flags);
         }
 
 #region Attachments
@@ -155,7 +155,7 @@ namespace CryEngine
         /// <returns>null if failed, otherwise the attachment.</returns>
         public Attachment GetAttachment(int index, int characterSlot = 0)
         {
-            var ptr = NativeEntityMethods.GetAttachmentByIndex(this.GetEntityHandle(), index, characterSlot);
+            var ptr = NativeEntityMethods.Instance.GetAttachmentByIndex(this.GetEntityHandle(), index, characterSlot);
             if (ptr == IntPtr.Zero)
                 return null;
 
@@ -170,7 +170,7 @@ namespace CryEngine
         /// <returns>null if failed, otherwise the attachment.</returns>
         public Attachment GetAttachment(string name, int characterSlot = 0)
         {
-            var ptr = NativeEntityMethods.GetAttachmentByName(this.GetEntityHandle(), name, characterSlot);
+            var ptr = NativeEntityMethods.Instance.GetAttachmentByName(this.GetEntityHandle(), name, characterSlot);
 
             return Attachment.TryAdd(ptr, this);
         }
@@ -182,7 +182,7 @@ namespace CryEngine
         /// <returns>Number of attachments at the specified slot</returns>
         public int GetAttachmentCount(int characterSlot = 0)
         {
-            return NativeEntityMethods.GetAttachmentCount(this.GetEntityHandle(), characterSlot); 
+            return NativeEntityMethods.Instance.GetAttachmentCount(this.GetEntityHandle(), characterSlot); 
         }
 #endregion
 
@@ -196,7 +196,7 @@ namespace CryEngine
         /// <returns>true if successful, otherwise false.</returns>
         public bool Link(string linkName, EntityId otherEntityId, Quat relativeRot, Vec3 relativePos)
         {
-            return NativeEntityMethods.AddEntityLink(this.GetEntityHandle(), linkName, otherEntityId, relativeRot, relativePos);
+            return NativeEntityMethods.Instance.AddEntityLink(this.GetEntityHandle(), linkName, otherEntityId, relativeRot, relativePos);
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace CryEngine
         /// <param name="otherEntityId">Id of the entity we are currently linked to</param>
         public void Unlink(EntityId otherEntityId)
         {
-            NativeEntityMethods.RemoveEntityLink(this.GetEntityHandle(), otherEntityId);
+            NativeEntityMethods.Instance.RemoveEntityLink(this.GetEntityHandle(), otherEntityId);
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace CryEngine
         /// <returns>The slot where the light source was loaded, or -1 if loading failed.</returns>
         public int LoadLight(LightParams parameters, int slot = 1)
         {
-            return NativeEntityMethods.LoadLight(this.GetEntityHandle(), slot, parameters);
+            return NativeEntityMethods.Instance.LoadLight(this.GetEntityHandle(), slot, parameters);
         }
 
         /// <summary>
@@ -231,9 +231,9 @@ namespace CryEngine
                 throw new ArgumentNullException("name");
 
             if (name.EndsWith("cgf"))
-                NativeEntityMethods.LoadObject(this.GetEntityHandle(), name, slot);
+                NativeEntityMethods.Instance.LoadObject(this.GetEntityHandle(), name, slot);
             else if (name.EndsWith("cdf") || name.EndsWith("cga") || name.EndsWith("chr"))
-                NativeEntityMethods.LoadCharacter(this.GetEntityHandle(), name, slot);
+                NativeEntityMethods.Instance.LoadCharacter(this.GetEntityHandle(), name, slot);
             else
                 return false;
 
@@ -247,7 +247,7 @@ namespace CryEngine
         /// <returns>Path to the currently loaded object at the specified slot.</returns>
         public string GetObjectFilePath(int slot = 0)
         {
-            return NativeEntityMethods.GetStaticObjectFilePath(this.GetEntityHandle(), slot);
+            return NativeEntityMethods.Instance.GetStaticObjectFilePath(this.GetEntityHandle(), slot);
         }
 
         /// <summary>
@@ -261,7 +261,7 @@ namespace CryEngine
         /// <param name="speed">Animation playback speed</param>
         public void PlayAnimation(string animationName, AnimationFlags flags = 0, int slot = 0, int layer = 0, float blend = 0.175f, float speed = 1.0f)
         {
-            NativeEntityMethods.PlayAnimation(this.GetEntityHandle(), animationName, slot, layer, blend, speed, flags);
+            NativeEntityMethods.Instance.PlayAnimation(this.GetEntityHandle(), animationName, slot, layer, blend, speed, flags);
         }
 
         /// <summary>
@@ -273,9 +273,9 @@ namespace CryEngine
         public void StopAnimation(int slot = 0, int layer = 0, float blendOutTime = 0)
         {
             if (layer == -1)
-                NativeEntityMethods.StopAnimationsInAllLayers(this.GetEntityHandle(), slot);
+                NativeEntityMethods.Instance.StopAnimationsInAllLayers(this.GetEntityHandle(), slot);
             else
-                NativeEntityMethods.StopAnimationInLayer(this.GetEntityHandle(), slot, layer, blendOutTime);
+                NativeEntityMethods.Instance.StopAnimationInLayer(this.GetEntityHandle(), slot, layer, blendOutTime);
         }
 
         /// <summary>
@@ -284,7 +284,7 @@ namespace CryEngine
         /// <param name="slot"></param>
         public void FreeSlot(int slot)
         {
-            NativeEntityMethods.FreeSlot(this.GetEntityHandle(), slot);
+            NativeEntityMethods.Instance.FreeSlot(this.GetEntityHandle(), slot);
         }
 
         /// <summary>
@@ -293,7 +293,7 @@ namespace CryEngine
         /// <param name="request"></param>
         public void AddMovement(ref EntityMovementRequest request)
         {
-            NativeEntityMethods.AddMovement(this.GetAnimatedCharacterHandle(), ref request);
+            NativeEntityMethods.Instance.AddMovement(this.GetAnimatedCharacterHandle(), ref request);
         }
 
         /// <summary>
@@ -304,7 +304,7 @@ namespace CryEngine
         /// <returns>Absolute of the specified joint</returns>
         public QuatT GetJointAbsolute(string jointName, int characterSlot = 0)
         {
-            return NativeEntityMethods.GetJointAbsolute(this.GetEntityHandle(), jointName, characterSlot);
+            return NativeEntityMethods.Instance.GetJointAbsolute(this.GetEntityHandle(), jointName, characterSlot);
         }
 
         /// <summary>
@@ -315,7 +315,7 @@ namespace CryEngine
         /// <returns>Default absolute of the specified joint</returns>
         public QuatT GetJointAbsoluteDefault(string jointName, int characterSlot = 0)
         {
-            return NativeEntityMethods.GetJointAbsoluteDefault(this.GetEntityHandle(), jointName, characterSlot);
+            return NativeEntityMethods.Instance.GetJointAbsoluteDefault(this.GetEntityHandle(), jointName, characterSlot);
         }
 
         /// <summary>
@@ -326,7 +326,7 @@ namespace CryEngine
         /// <param name="characterSlot">Slot containing the character</param>
         public void SetJointAbsolute(string jointName, QuatT absolute, int characterSlot = 0)
         {
-            NativeEntityMethods.SetJointAbsolute(this.GetEntityHandle(), jointName, characterSlot, absolute);
+            NativeEntityMethods.Instance.SetJointAbsolute(this.GetEntityHandle(), jointName, characterSlot, absolute);
         }
 
         /// <summary>
@@ -337,7 +337,7 @@ namespace CryEngine
         /// <returns>Relative of the specified joint</returns>
         public QuatT GetJointRelative(string jointName, int characterSlot = 0)
         {
-            return NativeEntityMethods.GetJointRelative(this.GetEntityHandle(), jointName, characterSlot);
+            return NativeEntityMethods.Instance.GetJointRelative(this.GetEntityHandle(), jointName, characterSlot);
         }
 
         /// <summary>
@@ -348,7 +348,7 @@ namespace CryEngine
         /// <returns>Default relative of the specified joint</returns>
         public QuatT GetJointRelativeDefault(string jointName, int characterSlot = 0)
         {
-            return NativeEntityMethods.GetJointRelativeDefault(this.GetEntityHandle(), jointName, characterSlot);
+            return NativeEntityMethods.Instance.GetJointRelativeDefault(this.GetEntityHandle(), jointName, characterSlot);
         }
     }
 }

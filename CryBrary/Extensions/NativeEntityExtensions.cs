@@ -23,7 +23,7 @@ namespace CryEngine.Native
             if (entity.IsDestroyed)
                 throw new ScriptInstanceDestroyedException("Attempted to access native animated character handle on a destroyed entity");
             if (entity.AnimatedCharacterHandle == IntPtr.Zero)
-                entity.SetAnimatedCharacterHandle(NativeEntityMethods.AcquireAnimatedCharacter(entity.Id));
+                entity.SetAnimatedCharacterHandle(NativeEntityMethods.Instance.AcquireAnimatedCharacter(entity.Id));
 
             return entity.AnimatedCharacterHandle;
         }

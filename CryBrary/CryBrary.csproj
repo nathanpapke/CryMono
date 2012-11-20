@@ -65,7 +65,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DocumentationFile>CryBrary.xml</DocumentationFile>
     <WarningLevel>3</WarningLevel>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <NoWarn>1591</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -167,6 +167,7 @@
     <Compile Include="Math\Plane.cs" />
     <Compile Include="Math\PlaneIntersectionType.cs" />
     <Compile Include="Native\Interfaces\INativeCVarMethods.cs" />
+    <Compile Include="Native\Interfaces\INativeEntityMethods.cs" />
     <Compile Include="Native\Interfaces\INativeLoggingMethods.cs" />
     <Compile Include="Native\NativeInterfaceImplementationNotFoundException.cs" />
     <Compile Include="Native\NativeMethods.cs" />

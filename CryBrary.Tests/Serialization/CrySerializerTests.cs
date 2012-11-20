@@ -8,6 +8,11 @@ namespace CryBrary.Tests.Serialization
 {
 	public class CrySerializerTests
 	{
+        public CrySerializerTests()
+        {
+            SerialializationTestUtilities.MockSerializationDependencies();
+        }
+
 		public class TestClass
 		{
 			public class NestedClass

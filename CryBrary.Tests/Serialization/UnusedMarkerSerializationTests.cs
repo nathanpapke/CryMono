@@ -6,11 +6,18 @@ using CryEngine;
 using CryEngine.Utilities;
 using CryEngine.Serialization;
 using Xunit;
+using CryEngine.Native;
+using Moq;
 
 namespace CryBrary.Tests.Serialization
 {
     public class UnusedMarkerSerializationTests
     {
+        public UnusedMarkerSerializationTests()
+        {
+            SerialializationTestUtilities.MockSerializationDependencies();
+        }
+
         [Fact]
         public void Unused_Integer()
         {
@@ -29,6 +36,7 @@ namespace CryBrary.Tests.Serialization
         [Fact]
         public void Unused_UnsignedInteger()
         {
+
             using (var stream = new MemoryStream())
             {
                 var serializer = new CrySerializer();

@@ -201,7 +201,7 @@ namespace CryEngine.Initialization
                 entityRegistrationParams.name = script.ScriptName;
                 entityRegistrationParams.flags = EntityClassFlags.Default | EntityClassFlags.Invisible; 
 
-                NativeEntityMethods.RegisterEntityClass(entityRegistrationParams);
+                NativeEntityMethods.Instance.RegisterEntityClass(entityRegistrationParams);
                 Scripts.Add(script);
             }
         }
@@ -259,7 +259,7 @@ namespace CryEngine.Initialization
                                 if (registrationParams.category == null)
                                     registrationParams.category = "Default";
 
-                                NativeEntityMethods.RegisterEntityClass(registrationParams);
+                                NativeEntityMethods.Instance.RegisterEntityClass(registrationParams);
                             }
                             else if (script.RegistrationParams is GameRulesRegistrationParams)
                             {

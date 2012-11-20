@@ -32,7 +32,7 @@ namespace CryEngine
 
         public void Break(BreakageParameters breakageParams)
         {
-            NativeEntityMethods.BreakIntoPieces(Owner.GetEntityHandle(), 0, 0, breakageParams);
+            NativeEntityMethods.Instance.BreakIntoPieces(Owner.GetEntityHandle(), 0, 0, breakageParams);
         }
 
         #region Basics
@@ -220,7 +220,7 @@ namespace CryEngine
             get
             {
                 if (owner == null)
-                    owner = Entity.Get(NativeEntityMethods.GetEntityFromPhysics(PhysicsPointer));
+                    owner = Entity.Get(NativeEntityMethods.Instance.GetEntityFromPhysics(PhysicsPointer));
 
                 return owner;
             }

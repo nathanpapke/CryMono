@@ -11,6 +11,11 @@ namespace CryBrary.Tests.Serialization
 {
 	public class ScriptsTests
 	{
+        public ScriptsTests()
+        {
+            SerialializationTestUtilities.MockSerializationDependencies();
+        }
+
 		[Fact]
 		public void Serialize_Native_Scripts()
 		{
