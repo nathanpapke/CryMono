@@ -4,19 +4,19 @@ using CryEngine.Lua;
 
 namespace CryEngine.Native
 {
-    internal class NativeScriptTableMethods
+    internal class NativeScriptTableMethods : NativeMethods<INativeScriptTableMethods>, INativeScriptTableMethods
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr GetScriptTable(IntPtr entityPtr);
+        public extern IntPtr GetScriptTable(IntPtr entityPtr);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr GetSubScriptTable(IntPtr scriptTablePtr, string tableName);
+        public extern IntPtr GetSubScriptTable(IntPtr scriptTablePtr, string tableName);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static object CallMethod(IntPtr scriptTablePtr, string methodName, object[] parameters);
+        public extern object CallMethod(IntPtr scriptTablePtr, string methodName, object[] parameters);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static object GetValue(IntPtr scriptTablePtr, string keyName);
+        public extern object GetValue(IntPtr scriptTablePtr, string keyName);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static bool ExecuteBuffer(string buffer);
+        public extern bool ExecuteBuffer(string buffer);
     }
 }
