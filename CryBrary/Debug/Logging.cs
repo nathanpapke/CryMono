@@ -35,7 +35,7 @@ namespace CryEngine
 #if UNIT_TESTING
             System.Console.WriteLine(format, args);
 #else
-            NativeLoggingMethods.Log(String.Format(format, args));
+            NativeLoggingMethods.Instance.Log(String.Format(format, args));
 #endif
         }
 
@@ -47,7 +47,7 @@ namespace CryEngine
 #if UNIT_TESTING
             System.Console.WriteLine(msg);
 #else
-            NativeLoggingMethods.Log(msg);
+            NativeLoggingMethods.Instance.Log(msg);
 #endif
         }
 
@@ -61,7 +61,7 @@ namespace CryEngine
 #if UNIT_TESTING
             System.Console.WriteLine(format, args);
 #else
-            NativeLoggingMethods.LogAlways(String.Format(format, args));
+            NativeLoggingMethods.Instance.LogAlways(String.Format(format, args));
 #endif
         }
 
@@ -73,7 +73,7 @@ namespace CryEngine
 #if UNIT_TESTING
             System.Console.WriteLine(msg);
 #else
-            NativeLoggingMethods.LogAlways(msg);
+            NativeLoggingMethods.Instance.LogAlways(msg);
 #endif
         }
 
@@ -111,7 +111,7 @@ namespace CryEngine
 #if UNIT_TESTING
             System.Console.WriteLine(format, args);
 #else
-            NativeLoggingMethods.Warning(String.Format(format, args));
+            NativeLoggingMethods.Instance.Warning(String.Format(format, args));
 #endif
         }
 
@@ -123,7 +123,7 @@ namespace CryEngine
 #if UNIT_TESTING
             System.Console.WriteLine("[Warning]" + msg);
 #else
-            NativeLoggingMethods.Warning(msg);
+            NativeLoggingMethods.Instance.Warning(msg);
 #endif
         }
 
