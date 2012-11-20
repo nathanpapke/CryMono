@@ -29,7 +29,7 @@ namespace CryEngine
         {
             get
             {
-                var ptr = NativeLevelMethods.GetCurrentLevel();
+                var ptr = NativeLevelMethods.Instance.GetCurrentLevel();
                 if (ptr != IntPtr.Zero)
                 {
                     if (levels.Any(x => x.Value.Handle == ptr))
@@ -47,42 +47,42 @@ namespace CryEngine
         /// <summary>
         /// Gets a value indicating whether a level is currently loaded.
         /// </summary>
-        public static bool Loaded { get { return NativeLevelMethods.IsLevelLoaded(); } }
+        public static bool Loaded { get { return NativeLevelMethods.Instance.IsLevelLoaded(); } }
 
         /// <summary>
         /// Gets the level name.
         /// </summary>
-        public string Name { get { return NativeLevelMethods.GetName(Handle); } }
+        public string Name { get { return NativeLevelMethods.Instance.GetName(Handle); } }
 
         /// <summary>
         /// Gets the level display name.
         /// </summary>
-        public string DisplayName { get { return NativeLevelMethods.GetDisplayName(Handle); } }
+        public string DisplayName { get { return NativeLevelMethods.Instance.GetDisplayName(Handle); } }
 
         /// <summary>
         /// Gets the full path to the directory this level resides in.
         /// </summary>
-        public string Path { get { return NativeLevelMethods.GetName(Handle); } }
+        public string Path { get { return NativeLevelMethods.Instance.GetName(Handle); } }
 
         /// <summary>
         /// Gets the heightmap size for this level.
         /// </summary>
-        public int HeightmapSize { get { return NativeLevelMethods.GetHeightmapSize(Handle); } }
+        public int HeightmapSize { get { return NativeLevelMethods.Instance.GetHeightmapSize(Handle); } }
 
         /// <summary>
         /// Gets the number of supported game rules for this level.
         /// </summary>
-        public int SupportedGamerules { get { return NativeLevelMethods.GetGameTypeCount(Handle); } }
+        public int SupportedGamerules { get { return NativeLevelMethods.Instance.GetGameTypeCount(Handle); } }
 
         /// <summary>
         /// Gets the default gamemode for this level.
         /// </summary>
-        public string DefaultGameRules { get { return NativeLevelMethods.GetDefaultGameType(Handle); } }
+        public string DefaultGameRules { get { return NativeLevelMethods.Instance.GetDefaultGameType(Handle); } }
 
         /// <summary>
         /// Gets a value indicating whether the level is configured to support any game rules.
         /// </summary>
-        public bool HasGameRules { get { return NativeLevelMethods.HasGameRules(Handle); } }
+        public bool HasGameRules { get { return NativeLevelMethods.Instance.HasGameRules(Handle); } }
 
         internal IntPtr Handle { get; set; }
 
@@ -98,7 +98,7 @@ namespace CryEngine
             if (levels.TryGetValue(name, out level))
                 return level;
 
-            var ptr = NativeLevelMethods.LoadLevel(name);
+            var ptr = NativeLevelMethods.Instance.LoadLevel(name);
             if (ptr != IntPtr.Zero)
                 return new Level(ptr);
 
@@ -110,7 +110,7 @@ namespace CryEngine
         /// </summary>
         public static void Unload()
         {
-            NativeLevelMethods.UnloadLevel();
+            NativeLevelMethods.Instance.UnloadLevel();
         }
         #endregion
 
@@ -143,7 +143,7 @@ namespace CryEngine
         /// <returns>Name of the supported gamemode</returns>
         public string GetSupportedGameRules(int index)
         {
-            return NativeLevelMethods.GetGameType(Handle, index);
+            return NativeLevelMethods.Instance.GetGameType(Handle, index);
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace CryEngine
         /// <returns>A boolean indicating whether the specified gamemode is supported.</returns>
         public bool SupportsGameRules(string gamemodeName)
         {
-            return NativeLevelMethods.SupportsGameType(Handle, gamemodeName);
+            return NativeLevelMethods.Instance.SupportsGameType(Handle, gamemodeName);
         }
     }
 }
