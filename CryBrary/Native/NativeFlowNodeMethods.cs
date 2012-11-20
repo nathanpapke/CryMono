@@ -6,48 +6,48 @@ using System.Text;
 
 namespace CryEngine.Native
 {
-    internal class NativeFlowNodeMethods
+    internal class NativeFlowNodeMethods : NativeMethods<INativeFlowNodeMethods>, INativeFlowNodeMethods
     {
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void RegisterNode(string typeName);
+        public extern void RegisterNode(string typeName);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr GetNode(UInt32 graphId, UInt16 nodeId);
+        public extern IntPtr GetNode(UInt32 graphId, UInt16 nodeId);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void SetRegularlyUpdated(IntPtr nodePtr, bool updated);
+        public extern void SetRegularlyUpdated(IntPtr nodePtr, bool updated);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static bool IsPortActive(IntPtr nodePtr, int port);
+        public extern bool IsPortActive(IntPtr nodePtr, int port);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void ActivateOutput(IntPtr nodePtr, int port);
+        public extern void ActivateOutput(IntPtr nodePtr, int port);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void ActivateOutputInt(IntPtr nodePtr, int port, int value);
+        public extern void ActivateOutputInt(IntPtr nodePtr, int port, int value);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void ActivateOutputFloat(IntPtr nodePtr, int port, float value);
+        public extern void ActivateOutputFloat(IntPtr nodePtr, int port, float value);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void ActivateOutputEntityId(IntPtr nodePtr, int port, uint value);
+        public extern void ActivateOutputEntityId(IntPtr nodePtr, int port, uint value);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void ActivateOutputString(IntPtr nodePtr, int port, string value);
+        public extern void ActivateOutputString(IntPtr nodePtr, int port, string value);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void ActivateOutputBool(IntPtr nodePtr, int port, bool value);
+        public extern void ActivateOutputBool(IntPtr nodePtr, int port, bool value);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void ActivateOutputVec3(IntPtr nodePtr, int port, Vec3 value);
+        public extern void ActivateOutputVec3(IntPtr nodePtr, int port, Vec3 value);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static int GetPortValueInt(IntPtr nodePtr, int port);
+        public extern int GetPortValueInt(IntPtr nodePtr, int port);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static float GetPortValueFloat(IntPtr nodePtr, int port);
+        public extern float GetPortValueFloat(IntPtr nodePtr, int port);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static uint GetPortValueEntityId(IntPtr nodePtr, int port);
+        public extern uint GetPortValueEntityId(IntPtr nodePtr, int port);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static string GetPortValueString(IntPtr nodePtr, int port);
+        public extern string GetPortValueString(IntPtr nodePtr, int port);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static bool GetPortValueBool(IntPtr nodePtr, int port);
+        public extern bool GetPortValueBool(IntPtr nodePtr, int port);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static Vec3 GetPortValueVec3(IntPtr nodePtr, int port);
+        public extern Vec3 GetPortValueVec3(IntPtr nodePtr, int port);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr GetTargetEntity(IntPtr nodePtr, out uint entId);
+        public extern IntPtr GetTargetEntity(IntPtr nodePtr, out uint entId);
     }
 }

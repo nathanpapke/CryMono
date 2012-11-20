@@ -15,7 +15,7 @@ namespace CryEngine
 
         public void Activate()
         {
-            NativeFlowNodeMethods.ActivateOutput(ParentNodePointer, PortId);
+            NativeFlowNodeMethods.Instance.ActivateOutput(ParentNodePointer, PortId);
         }
 
         IntPtr ParentNodePointer { get; set; }
@@ -36,17 +36,17 @@ namespace CryEngine
         public void Activate(T value)
         {
             if (value is int)
-                NativeFlowNodeMethods.ActivateOutputInt(ParentNodePointer, PortId, System.Convert.ToInt32(value));
+                NativeFlowNodeMethods.Instance.ActivateOutputInt(ParentNodePointer, PortId, System.Convert.ToInt32(value));
             else if (value is float || value is double)
-                NativeFlowNodeMethods.ActivateOutputFloat(ParentNodePointer, PortId, System.Convert.ToSingle(value));
+                NativeFlowNodeMethods.Instance.ActivateOutputFloat(ParentNodePointer, PortId, System.Convert.ToSingle(value));
             else if (value is EntityId)
-                NativeFlowNodeMethods.ActivateOutputEntityId(ParentNodePointer, PortId, (uint)((EntityId)(object)value)._value);
+                NativeFlowNodeMethods.Instance.ActivateOutputEntityId(ParentNodePointer, PortId, (uint)((EntityId)(object)value)._value);
             else if (value is string)
-                NativeFlowNodeMethods.ActivateOutputString(ParentNodePointer, PortId, System.Convert.ToString(value));
+                NativeFlowNodeMethods.Instance.ActivateOutputString(ParentNodePointer, PortId, System.Convert.ToString(value));
             else if (value is bool)
-                NativeFlowNodeMethods.ActivateOutputBool(ParentNodePointer, PortId, System.Convert.ToBoolean(value));
+                NativeFlowNodeMethods.Instance.ActivateOutputBool(ParentNodePointer, PortId, System.Convert.ToBoolean(value));
             else if (value is Vec3)
-                NativeFlowNodeMethods.ActivateOutputVec3(ParentNodePointer, PortId, (Vec3)(object)value);
+                NativeFlowNodeMethods.Instance.ActivateOutputVec3(ParentNodePointer, PortId, (Vec3)(object)value);
             else
                 throw new ArgumentException("Attempted to activate output with invalid value!");
         }
