@@ -266,11 +266,11 @@ namespace CryEngine.Initialization
                                 if (registrationParams.name == null)
                                     registrationParams.name = script.ScriptName;
 
-                                NativeGameRulesMethods.RegisterGameMode(registrationParams.name);
+                                NativeGameRulesMethods.Instance.RegisterGameMode(registrationParams.name);
 
                                 if (registrationParams.defaultGamemode || !hasDefaultGameRules)
                                 {
-                                    NativeGameRulesMethods.SetDefaultGameMode(registrationParams.name);
+                                    NativeGameRulesMethods.Instance.SetDefaultGameMode(registrationParams.name);
 
                                     hasDefaultGameRules = true;
                                 }

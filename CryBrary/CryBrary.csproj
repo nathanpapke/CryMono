@@ -173,6 +173,7 @@
     <Compile Include="Native\Interfaces\INativeMaterialMethods.cs" />
     <Compile Include="Native\Interfaces\INativeParticleEffectMethods.cs" />
     <Compile Include="Native\Interfaces\INativeActorMethods.cs" />
+    <Compile Include="Native\Interfaces\INativeGameRulesMethods.cs" />
     <Compile Include="Native\NativeInterfaceImplementationNotFoundException.cs" />
     <Compile Include="Native\NativeMethods.cs" />
     <Compile Include="Native\NativeScriptSystemMethods.cs" />
