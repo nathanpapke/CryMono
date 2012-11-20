@@ -182,6 +182,7 @@
     <Compile Include="Native\Interfaces\INativeFlowNodeMethods.cs" />
     <Compile Include="Native\Interfaces\INativeInputMethods.cs" />
     <Compile Include="Native\Interfaces\INativeLevelMethods.cs" />
+    <Compile Include="Native\Interfaces\INativeNetworkMethods.cs" />
     <Compile Include="Native\NativeInterfaceImplementationNotFoundException.cs" />
     <Compile Include="Native\NativeMethods.cs" />
     <Compile Include="Native\NativeScriptSystemMethods.cs" />

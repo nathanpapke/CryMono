@@ -104,7 +104,7 @@ namespace CryEngine
             if (Entity.Find(networkManagerName) == null)
                 NetworkManager = Entity.Spawn(networkManagerName, typeof(NativeEntity).Name);
 
-            NativeNetworkMethods.RemoteInvocation(NetworkManager.Id, target.Id, method.Name, args, netTarget, -1);
+            NativeNetworkMethods.Instance.RemoteInvocation(NetworkManager.Id, target.Id, method.Name, args, netTarget, -1);
         }
 
         public static void OnRemoteInvocation(string methodName, object[] args, EntityId targetId)
@@ -117,9 +117,9 @@ namespace CryEngine
         internal static Entity NetworkManager { get; set; }
 
         #region Properties
-        public static bool IsMultiplayer { get { return NativeNetworkMethods.IsMultiplayer(); } }
-        public static bool IsServer { get { return NativeNetworkMethods.IsServer(); } }
-        public static bool IsClient { get { return NativeNetworkMethods.IsClient(); } }
+        public static bool IsMultiplayer { get { return NativeNetworkMethods.Instance.IsMultiplayer(); } }
+        public static bool IsServer { get { return NativeNetworkMethods.Instance.IsServer(); } }
+        public static bool IsClient { get { return NativeNetworkMethods.Instance.IsClient(); } }
 
         // TODO: Find another place for this? - not quite so networky.
         public static bool IsEditor { private set; get; }

@@ -3,16 +3,16 @@ using System.Runtime.CompilerServices;
 
 namespace CryEngine.Native
 {
-    internal class NativeNetworkMethods
+    internal class NativeNetworkMethods : NativeMethods<INativeNetworkMethods>, INativeNetworkMethods
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static void RemoteInvocation(uint entityId, uint scriptId, string methodName, object[] args, NetworkTarget target, int channelId);
+        public extern void RemoteInvocation(uint entityId, uint scriptId, string methodName, object[] args, NetworkTarget target, int channelId);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static bool IsServer();
+        public extern bool IsServer();
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static bool IsClient();
+        public extern bool IsClient();
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static bool IsMultiplayer();
+        public extern bool IsMultiplayer();
     }
 }
