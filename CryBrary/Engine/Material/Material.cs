@@ -60,18 +60,18 @@ namespace CryEngine
         /// <summary>
         /// Gets the surface type assigned to this material.
         /// </summary>
-        public string SurfaceType { get { return NativeMaterialMethods.GetSurfaceTypeName(Handle); } }
+        public string SurfaceType { get { return NativeMaterialMethods.Instance.GetSurfaceTypeName(Handle); } }
 
         /// <summary>
         /// Gets the amount of shader parameters in this material.
         /// See <see cref="GetShaderParamName(int)"/>
         /// </summary>
-        public int ShaderParamCount { get { return NativeMaterialMethods.GetShaderParamCount(Handle); } }
+        public int ShaderParamCount { get { return NativeMaterialMethods.Instance.GetShaderParamCount(Handle); } }
 
         /// <summary>
         /// Gets the amount of submaterials tied to this material.
         /// </summary>
-        public int SubmaterialCount { get { return NativeMaterialMethods.GetSubmaterialCount(Handle); } }
+        public int SubmaterialCount { get { return NativeMaterialMethods.Instance.GetSubmaterialCount(Handle); } }
 
         /// <summary>
         /// Gets or sets the native IMaterial pointer.
@@ -82,21 +82,21 @@ namespace CryEngine
         #region Statics
         public static Material Find(string name)
         {
-            var ptr = NativeMaterialMethods.FindMaterial(name);
+            var ptr = NativeMaterialMethods.Instance.FindMaterial(name);
 
             return TryAdd(ptr);
         }
 
         public static Material Create(string name, bool makeIfNotFound = true, bool nonRemovable = false)
         {
-            var ptr = NativeMaterialMethods.CreateMaterial(name);
+            var ptr = NativeMaterialMethods.Instance.CreateMaterial(name);
 
             return TryAdd(ptr);
         }
 
         public static Material Load(string name, bool makeIfNotFound = true, bool nonRemovable = false)
         {
-            var ptr = NativeMaterialMethods.LoadMaterial(name, makeIfNotFound, nonRemovable);
+            var ptr = NativeMaterialMethods.Instance.LoadMaterial(name, makeIfNotFound, nonRemovable);
 
             return TryAdd(ptr);
         }
@@ -108,7 +108,7 @@ namespace CryEngine
                 throw new ArgumentNullException("entity");
 #endif
 
-            var ptr = NativeMaterialMethods.GetMaterial(entity.GetEntityHandle(), slot);
+            var ptr = NativeMaterialMethods.Instance.GetMaterial(entity.GetEntityHandle(), slot);
             return TryAdd(ptr);
         }
 
@@ -121,7 +121,7 @@ namespace CryEngine
                 throw new ArgumentNullException("mat");
 #endif
 
-            NativeMaterialMethods.SetMaterial(entity.GetEntityHandle(), mat.Handle, slot);
+            NativeMaterialMethods.Instance.SetMaterial(entity.GetEntityHandle(), mat.Handle, slot);
         }
         #endregion
 
@@ -132,7 +132,7 @@ namespace CryEngine
         /// <returns>The submaterial, or null if failed.</returns>
         public Material GetSubmaterial(int slot)
         {
-            var ptr = NativeMaterialMethods.GetSubMaterial(Handle, slot);
+            var ptr = NativeMaterialMethods.Instance.GetSubMaterial(Handle, slot);
 
             return TryAdd(ptr);
         }
@@ -144,7 +144,7 @@ namespace CryEngine
         /// <returns>The new clone.</returns>
         public Material Clone(int subMaterial = -1)
         {
-            var ptr = NativeMaterialMethods.CloneMaterial(Handle, subMaterial);
+            var ptr = NativeMaterialMethods.Instance.CloneMaterial(Handle, subMaterial);
 
             return TryAdd(ptr);
         }
@@ -157,7 +157,7 @@ namespace CryEngine
         /// <returns>true if successful, otherwise false.</returns>
         public bool SetParam(string paramName, float value)
         {
-            return NativeMaterialMethods.SetGetMaterialParamFloat(Handle, paramName, ref value, false);
+            return NativeMaterialMethods.Instance.SetGetMaterialParamFloat(Handle, paramName, ref value, false);
         }
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace CryEngine
         {
             value = 0;
 
-            return NativeMaterialMethods.SetGetMaterialParamFloat(Handle, paramName, ref value, true);
+            return NativeMaterialMethods.Instance.SetGetMaterialParamFloat(Handle, paramName, ref value, true);
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace CryEngine
         public bool SetParam(string paramName, Color value)
         {
             Vec3 vecValue = new Vec3(value.R, value.G, value.B);
-            var result = NativeMaterialMethods.SetGetMaterialParamVec3(Handle, paramName, ref vecValue, false);
+            var result = NativeMaterialMethods.Instance.SetGetMaterialParamVec3(Handle, paramName, ref vecValue, false);
 
             Opacity = value.A;
 
@@ -224,7 +224,7 @@ namespace CryEngine
         public bool TryGetParam(string paramName, out Color value)
         {
             Vec3 vecVal = Vec3.Zero;
-            bool result = NativeMaterialMethods.SetGetMaterialParamVec3(Handle, paramName, ref vecVal, true);
+            bool result = NativeMaterialMethods.Instance.SetGetMaterialParamVec3(Handle, paramName, ref vecVal, true);
 
             value = new Color();
             value.R = vecVal.X;
@@ -242,7 +242,7 @@ namespace CryEngine
         /// <param name="newVal"></param>
         public void SetShaderParam(string paramName, float newVal)
         {
-            NativeMaterialMethods.SetShaderParam(Handle, paramName, newVal);
+            NativeMaterialMethods.Instance.SetShaderParam(Handle, paramName, newVal);
         }
 
         /// <summary>
@@ -262,7 +262,7 @@ namespace CryEngine
         /// <param name="newVal"></param>
         public void SetShaderParam(string paramName, Color newVal)
         {
-            NativeMaterialMethods.SetShaderParam(Handle, paramName, newVal);
+            NativeMaterialMethods.Instance.SetShaderParam(Handle, paramName, newVal);
         }
 
         /// <summary>
@@ -293,7 +293,7 @@ namespace CryEngine
         /// <returns>The shader parameter name.</returns>
         public string GetShaderParamName(int index)
         {
-            return NativeMaterialMethods.GetShaderParamName(Handle, index);
+            return NativeMaterialMethods.Instance.GetShaderParamName(Handle, index);
         }
 
         #region Overrides

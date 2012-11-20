@@ -3,49 +3,49 @@ using System.Runtime.CompilerServices;
 
 namespace CryEngine.Native
 {
-    internal class NativeMaterialMethods
+    internal class NativeMaterialMethods : NativeMethods<INativeMaterialMethods>, INativeMaterialMethods
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr FindMaterial(string name);
+        public extern IntPtr FindMaterial(string name);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr CreateMaterial(string name);
+        public extern IntPtr CreateMaterial(string name);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr LoadMaterial(string name, bool makeIfNotFound = true, bool nonRemovable = false);
+        public extern IntPtr LoadMaterial(string name, bool makeIfNotFound = true, bool nonRemovable = false);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr GetSubMaterial(IntPtr materialPtr, int slot);
+        public extern IntPtr GetSubMaterial(IntPtr materialPtr, int slot);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static int GetSubmaterialCount(IntPtr materialPtr);
+        public extern int GetSubmaterialCount(IntPtr materialPtr);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr GetMaterial(IntPtr entityPtr, int slot);
+        public extern IntPtr GetMaterial(IntPtr entityPtr, int slot);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void SetMaterial(IntPtr entityPtr, IntPtr materialPtr, int slot);
+        public extern void SetMaterial(IntPtr entityPtr, IntPtr materialPtr, int slot);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr CloneMaterial(IntPtr materialPtr, int subMtl);
+        public extern IntPtr CloneMaterial(IntPtr materialPtr, int subMtl);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static string GetSurfaceTypeName(IntPtr ptr);
+        public extern string GetSurfaceTypeName(IntPtr ptr);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static bool SetGetMaterialParamFloat(IntPtr ptr, string paramName, ref float v, bool get);
+        public extern bool SetGetMaterialParamFloat(IntPtr ptr, string paramName, ref float v, bool get);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static bool SetGetMaterialParamVec3(IntPtr ptr, string paramName, ref Vec3 v, bool get);
+        public extern bool SetGetMaterialParamVec3(IntPtr ptr, string paramName, ref Vec3 v, bool get);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static int GetShaderParamCount(IntPtr ptr);
+        public extern int GetShaderParamCount(IntPtr ptr);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static string GetShaderParamName(IntPtr ptr, int index);
+        public extern string GetShaderParamName(IntPtr ptr, int index);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void SetShaderParam(IntPtr ptr, string paramName, float newVal);
+        public extern void SetShaderParam(IntPtr ptr, string paramName, float newVal);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void SetShaderParam(IntPtr ptr, string paramName, Color newVal);
+        public extern void SetShaderParam(IntPtr ptr, string paramName, Color newVal);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static MaterialFlags GetFlags(IntPtr ptr);
+        public extern MaterialFlags GetFlags(IntPtr ptr);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void SetFlags(IntPtr ptr, MaterialFlags flags);
+        public extern void SetFlags(IntPtr ptr, MaterialFlags flags);
     }
 }
