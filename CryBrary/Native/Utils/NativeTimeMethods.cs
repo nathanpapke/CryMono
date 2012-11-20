@@ -2,9 +2,9 @@
 
 namespace CryEngine.Native
 {
-    internal class NativeTimeMethods
+    internal class NativeTimeMethods : NativeMethods<INativeTimeMethods>, INativeTimeMethods
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static void SetTimeScale(float scale);
+        public extern void SetTimeScale(float scale);
     }
 }
