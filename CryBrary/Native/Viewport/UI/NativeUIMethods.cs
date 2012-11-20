@@ -3,17 +3,17 @@ using System.Runtime.CompilerServices;
 
 namespace CryEngine.Native
 {
-    internal class NativeUIMethods
+    internal class NativeUIMethods : NativeMethods<INativeUIMethods>, INativeUIMethods
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static IntPtr CreateEventSystem(string name, UI.EventSystemType type);
+        public extern IntPtr CreateEventSystem(string name, UI.EventSystemType type);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static uint RegisterFunction(IntPtr eventSystemPtr, string name, string desc, object[] inputs);
+        public extern uint RegisterFunction(IntPtr eventSystemPtr, string name, string desc, object[] inputs);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static uint RegisterEvent(IntPtr eventSystemPtr, string name, string desc, object[] outputs);
+        public extern uint RegisterEvent(IntPtr eventSystemPtr, string name, string desc, object[] outputs);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static void SendEvent(IntPtr eventSystemPtr, uint eventId, object[] args);
+        public extern void SendEvent(IntPtr eventSystemPtr, uint eventId, object[] args);
     }
 }
