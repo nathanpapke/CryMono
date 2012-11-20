@@ -14,20 +14,20 @@ namespace CryEngine
 
         public override string String
         {
-            get { return NativeCVarMethods.GetCVarString(Name); }
-            set { NativeCVarMethods.SetCVarString(Name, value); }
+            get { return NativeCVarMethods.Instance.GetCVarString(Name); }
+            set { NativeCVarMethods.Instance.SetCVarString(Name, value); }
         }
 
         public override float FVal
         {
-            get { return NativeCVarMethods.GetCVarFloat(Name); }
-            set { NativeCVarMethods.SetCVarFloat(Name, value); }
+            get { return NativeCVarMethods.Instance.GetCVarFloat(Name); }
+            set { NativeCVarMethods.Instance.SetCVarFloat(Name, value); }
         }
 
         public override int IVal
         {
-            get { return NativeCVarMethods.GetCVarInt(Name); }
-            set { NativeCVarMethods.SetCVarInt(Name, value); }
+            get { return NativeCVarMethods.Instance.GetCVarInt(Name); }
+            set { NativeCVarMethods.Instance.SetCVarInt(Name, value); }
         }
     }
 }

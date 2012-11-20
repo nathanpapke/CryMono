@@ -18,7 +18,7 @@ namespace CryEngine
         /// <param name="silent">suppresses log in error case and logging the command to the console</param>
         public static void Execute(string command, bool silent = false)
         {
-            NativeCVarMethods.Execute(command, silent);
+            NativeCVarMethods.Instance.Execute(command, silent);
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace CryEngine
         {
             if (!commands.ContainsKey(name))
             {
-                NativeCVarMethods.RegisterCommand(name, comment, flags);
+                NativeCVarMethods.Instance.RegisterCommand(name, comment, flags);
 
                 commands.Add(name, func);
             }
