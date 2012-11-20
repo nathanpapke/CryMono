@@ -3,36 +3,36 @@ using System.Runtime.CompilerServices;
 
 namespace CryEngine.Native
 {
-    internal class Native3DEngineMethods
+    internal class Native3DEngineMethods : NativeMethods<INative3DEngineMethods>, INative3DEngineMethods
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern internal static float GetTerrainElevation(float positionX, float positionY, bool includeOutdoorVoxels);
+        public extern float GetTerrainElevation(float positionX, float positionY, bool includeOutdoorVoxels);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static int GetTerrainSize();
+        public extern int GetTerrainSize();
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static int GetTerrainSectorSize();
+        public extern int GetTerrainSectorSize();
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static int GetTerrainUnitSize();
+        public extern int GetTerrainUnitSize();
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static int GetTerrainZ(int x, int y);
+        public extern int GetTerrainZ(int x, int y);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void SetTimeOfDay(float hour, bool forceUpdate = false);
+        public extern void SetTimeOfDay(float hour, bool forceUpdate = false);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static float GetTimeOfDay();
+        public extern float GetTimeOfDay();
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static TimeOfDay.AdvancedInfo GetTimeOfDayAdvancedInfo();
+        public extern TimeOfDay.AdvancedInfo GetTimeOfDayAdvancedInfo();
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void SetTimeOfDayAdvancedInfo(TimeOfDay.AdvancedInfo advancedInfo);
+        public extern void SetTimeOfDayAdvancedInfo(TimeOfDay.AdvancedInfo advancedInfo);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void SetTimeOfDayVariableValue(int id, float value);
+        public extern void SetTimeOfDayVariableValue(int id, float value);
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void SetTimeOfDayVariableValueColor(int id, Vec3 value);
+        public extern void SetTimeOfDayVariableValueColor(int id, Vec3 value);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
-        extern internal static void ActivatePortal(Vec3 pos, bool activate, string entityName);
+        public extern void ActivatePortal(Vec3 pos, bool activate, string entityName);
     }
 }

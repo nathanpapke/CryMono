@@ -46,12 +46,10 @@ namespace CryEngine.Initialization
                 catch(UnauthorizedAccessException) { }
             }
 
-#if !UNIT_TESTING
             TestManager.Init();
 
             if(initialLoad)
                 RegisterInternalTypes();
-#endif
 
             Formatter = new CrySerializer();
         }

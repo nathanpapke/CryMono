@@ -32,11 +32,9 @@ namespace CryEngine.Serialization
             Converter = new FormatterConverter();
             ObjectReferences = new Dictionary<int, ObjectReference>();
 
-#if !UNIT_TESTING
             var debugCVar = CVar.Get("mono_realtimeScriptingDebug");
             if (debugCVar != null)
                 IsDebugModeEnabled = (debugCVar.IVal != 0);
-#endif
         }
 
         public void Serialize(Stream stream, object graph)

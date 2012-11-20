@@ -17,7 +17,7 @@ namespace CryEngine
         {
             get
             {
-                return (int)Native3DEngineMethods.GetTimeOfDay();
+                return (int)Native3DEngineMethods.Instance.GetTimeOfDay();
             }
 
             set
@@ -44,7 +44,7 @@ namespace CryEngine
         {
             get
             {
-                return GetMinutes(Native3DEngineMethods.GetTimeOfDay());
+                return GetMinutes(Native3DEngineMethods.Instance.GetTimeOfDay());
             }
 
             set
@@ -60,14 +60,14 @@ namespace CryEngine
         {
             get
             {
-                return Native3DEngineMethods.GetTimeOfDayAdvancedInfo().StartTime;
+                return Native3DEngineMethods.Instance.GetTimeOfDayAdvancedInfo().StartTime;
             }
 
             set
             {
-                var info = Native3DEngineMethods.GetTimeOfDayAdvancedInfo();
+                var info = Native3DEngineMethods.Instance.GetTimeOfDayAdvancedInfo();
                 info.StartTime = value;
-                Native3DEngineMethods.SetTimeOfDayAdvancedInfo(info);
+                Native3DEngineMethods.Instance.SetTimeOfDayAdvancedInfo(info);
             }
         }
 
@@ -78,14 +78,14 @@ namespace CryEngine
         {
             get
             {
-                return Native3DEngineMethods.GetTimeOfDayAdvancedInfo().EndTime;
+                return Native3DEngineMethods.Instance.GetTimeOfDayAdvancedInfo().EndTime;
             }
 
             set
             {
-                var info = Native3DEngineMethods.GetTimeOfDayAdvancedInfo();
+                var info = Native3DEngineMethods.Instance.GetTimeOfDayAdvancedInfo();
                 info.EndTime = value;
-                Native3DEngineMethods.SetTimeOfDayAdvancedInfo(info);
+                Native3DEngineMethods.Instance.SetTimeOfDayAdvancedInfo(info);
             }
         }
 
@@ -96,14 +96,14 @@ namespace CryEngine
         {
             get
             {
-                return Native3DEngineMethods.GetTimeOfDayAdvancedInfo().AnimSpeed;
+                return Native3DEngineMethods.Instance.GetTimeOfDayAdvancedInfo().AnimSpeed;
             }
 
             set
             {
-                var info = Native3DEngineMethods.GetTimeOfDayAdvancedInfo();
+                var info = Native3DEngineMethods.Instance.GetTimeOfDayAdvancedInfo();
                 info.AnimSpeed = value;
-                Native3DEngineMethods.SetTimeOfDayAdvancedInfo(info);
+                Native3DEngineMethods.Instance.SetTimeOfDayAdvancedInfo(info);
             }
         }
 
@@ -114,12 +114,12 @@ namespace CryEngine
         {
             get
             {
-                return Native3DEngineMethods.GetTimeOfDay();
+                return Native3DEngineMethods.Instance.GetTimeOfDay();
             }
 
             set
             {
-                Native3DEngineMethods.SetTimeOfDay(value, ForceUpdates);
+                Native3DEngineMethods.Instance.SetTimeOfDay(value, ForceUpdates);
             }
         }
 
@@ -127,92 +127,92 @@ namespace CryEngine
         #region SetVariableValue methods
         public static void SetVariableValue(SkyParams param, float value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValue((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValue((int)param, value);
         }
 
         public static void SetVariableValue(SkyParams param, Vec3 value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValueColor((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValueColor((int)param, value);
         }
 
         public static void SetVariableValue(FogParams param, float value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValue((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValue((int)param, value);
         }
 
         public static void SetVariableValue(FogParams param, Vec3 value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValueColor((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValueColor((int)param, value);
         }
 
         public static void SetVariableValue(SkyLightParams param, float value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValue((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValue((int)param, value);
         }
 
         public static void SetVariableValue(SkyLightParams param, Vec3 value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValueColor((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValueColor((int)param, value);
         }
 
         public static void SetVariableValue(NightSkyParams param, float value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValue((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValue((int)param, value);
         }
 
         public static void SetVariableValue(NightSkyParams param, Vec3 value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValueColor((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValueColor((int)param, value);
         }
 
         public static void SetVariableValue(CloudShadingParams param, float value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValue((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValue((int)param, value);
         }
 
         public static void SetVariableValue(CloudShadingParams param, Vec3 value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValueColor((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValueColor((int)param, value);
         }
 
         public static void SetVariableValue(SunRaysEffectParams param, float value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValue((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValue((int)param, value);
         }
 
         public static void SetVariableValue(SunRaysEffectParams param, Vec3 value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValueColor((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValueColor((int)param, value);
         }
 
         public static void SetVariableValue(ColorGradingParams param, float value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValue((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValue((int)param, value);
         }
 
         public static void SetVariableValue(ColorGradingParams param, Vec3 value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValueColor((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValueColor((int)param, value);
         }
 
         public static void SetVariableValue(ShadowParams param, float value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValue((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValue((int)param, value);
         }
 
         public static void SetVariableValue(ShadowParams param, Vec3 value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValueColor((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValueColor((int)param, value);
         }
 
         public static void SetVariableValue(HDRParams param, float value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValue((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValue((int)param, value);
         }
 
         public static void SetVariableValue(HDRParams param, Vec3 value)
         {
-            Native3DEngineMethods.SetTimeOfDayVariableValueColor((int)param, value);
+            Native3DEngineMethods.Instance.SetTimeOfDayVariableValueColor((int)param, value);
         }
         #endregion
 
