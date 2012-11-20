@@ -93,8 +93,8 @@ namespace CryEngine
         /// </summary>
         public Vec3 Velocity
         {
-            get { return NativePhysicsMethods.GetVelocity(this.GetEntityHandle()); }
-            set { NativePhysicsMethods.SetVelocity(this.GetEntityHandle(), value); }
+            get { return NativePhysicsMethods.Instance.GetVelocity(this.GetEntityHandle()); }
+            set { NativePhysicsMethods.Instance.SetVelocity(this.GetEntityHandle(), value); }
         }
 
         /// <summary>

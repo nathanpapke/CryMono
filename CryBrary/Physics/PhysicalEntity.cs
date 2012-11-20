@@ -27,7 +27,7 @@ namespace CryEngine
             : this()
         {
             owner = _entity;
-            PhysicsPointer = NativePhysicsMethods.GetPhysicalEntity(Owner.GetEntityHandle());
+            PhysicsPointer = NativePhysicsMethods.Instance.GetPhysicalEntity(Owner.GetEntityHandle());
         }
 
         public void Break(BreakageParameters breakageParams)
@@ -46,7 +46,7 @@ namespace CryEngine
         /// </summary>
         public void Save()
         {
-            NativePhysicsMethods.Physicalize(Owner.GetEntityHandle(), _params);
+            NativePhysicsMethods.Instance.Physicalize(Owner.GetEntityHandle(), _params);
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace CryEngine
             if (point != null)
                 impulse.point = point.Value;
 
-            NativePhysicsMethods.AddImpulse(Owner.GetEntityHandle(), impulse);
+            NativePhysicsMethods.Instance.AddImpulse(Owner.GetEntityHandle(), impulse);
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace CryEngine
         public bool Resting
         {
             get { throw new NotImplementedException(); }
-            set { NativePhysicsMethods.Sleep(Owner.GetEntityHandle(), value); }
+            set { NativePhysicsMethods.Instance.Sleep(Owner.GetEntityHandle(), value); }
         }
 
         /// <summary>
@@ -211,7 +211,7 @@ namespace CryEngine
         #endregion
         #endregion
 
-        public pe_status_living LivingStatus { get { return NativePhysicsMethods.GetLivingEntityStatus(Owner.GetEntityHandle()); } }
+        public pe_status_living LivingStatus { get { return NativePhysicsMethods.Instance.GetLivingEntityStatus(Owner.GetEntityHandle()); } }
 
         internal IntPtr PhysicsPointer { get; set; }
         private EntityBase owner;
@@ -234,7 +234,7 @@ namespace CryEngine
     {
         public static pe_player_dynamics Create()
         {
-            return NativePhysicsMethods.GetPlayerDynamicsStruct();
+            return NativePhysicsMethods.Instance.GetPlayerDynamicsStruct();
         }
 
         public int type;
@@ -265,7 +265,7 @@ namespace CryEngine
     {
         public static pe_player_dimensions Create()
         {
-            return NativePhysicsMethods.GetPlayerDimensionsStruct();
+            return NativePhysicsMethods.Instance.GetPlayerDimensionsStruct();
         }
 
         public int type;
@@ -285,7 +285,7 @@ namespace CryEngine
     {
         public static pe_action_impulse Create()
         {
-            return NativePhysicsMethods.GetImpulseStruct();
+            return NativePhysicsMethods.Instance.GetImpulseStruct();
         }
 
         public int type;

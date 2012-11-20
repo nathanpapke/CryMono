@@ -22,7 +22,7 @@ namespace CryEngine
                 explosion.rmax = 0.0001f;
             explosion.nOccRes = explosion.rmax > 50 ? 0 : 16;
 
-            affectedEnts = NativePhysicsMethods.SimulateExplosion(explosion);
+            affectedEnts = NativePhysicsMethods.Instance.SimulateExplosion(explosion);
         }
 
         public Vec3 Epicenter { get { return explosion.epicenter; } set { explosion.epicenter = value; } }
