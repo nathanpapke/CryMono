@@ -11,22 +11,22 @@ namespace CryEngine
     {
         public static void DrawSphere(Vec3 pos, float radius, Color color, float timeout)
         {
-            NativeDebugMethods.AddPersistentSphere(pos, radius, color, timeout);
+            NativeDebugMethods.Instance.AddPersistentSphere(pos, radius, color, timeout);
         }
 
         public static void DrawDirection(Vec3 pos, float radius, Vec3 dir, Color color, float timeout)
         {
-            NativeDebugMethods.AddDirection(pos, radius, dir, color, timeout);
+            NativeDebugMethods.Instance.AddDirection(pos, radius, dir, color, timeout);
         }
 
         public static void DrawText(string text, float size, Color color, float timeout)
         {
-            NativeDebugMethods.AddPersistentText2D(text, size, color, timeout);
+            NativeDebugMethods.Instance.AddPersistentText2D(text, size, color, timeout);
         }
 
         public static void DrawLine(Vec3 startPos, Vec3 endPos, Color color, float timeout)
         {
-            NativeDebugMethods.AddPersistentLine(startPos, endPos, color, timeout);
+            NativeDebugMethods.Instance.AddPersistentLine(startPos, endPos, color, timeout);
         }
     }
 }
