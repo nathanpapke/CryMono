@@ -178,6 +178,7 @@
     <Compile Include="Native\Interfaces\INativeDebugMethods.cs" />
     <Compile Include="Native\Interfaces\INativeTimeMethods.cs" />
     <Compile Include="Native\Interfaces\INativeUIMethods.cs" />
+    <Compile Include="Native\Interfaces\INativeRendererMethods.cs" />
     <Compile Include="Native\NativeInterfaceImplementationNotFoundException.cs" />
     <Compile Include="Native\NativeMethods.cs" />
     <Compile Include="Native\NativeScriptSystemMethods.cs" />

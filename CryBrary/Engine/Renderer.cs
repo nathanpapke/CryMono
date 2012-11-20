@@ -8,16 +8,16 @@ namespace CryEngine
         /// <summary>
         /// Gets the width of the screen in pixels.
         /// </summary>
-        public static int ScreenHeight { get { return NativeRendererMethods.GetHeight(); } }
+        public static int ScreenHeight { get { return NativeRendererMethods.Instance.GetHeight(); } }
 
         /// <summary>
         /// Gets the height of the screen in pixels.
         /// </summary>
-        public static int ScreenWidth { get { return NativeRendererMethods.GetWidth(); } }
+        public static int ScreenWidth { get { return NativeRendererMethods.Instance.GetWidth(); } }
 
         public static Vec3 ScreenToWorld(int x, int y)
         {
-            return NativeRendererMethods.ScreenToWorld(x, y);
+            return NativeRendererMethods.Instance.ScreenToWorld(x, y);
         }
 
         public static void DrawTextToScreen(float x, float y, float fontSize, Color color, string text, params object[] args)
@@ -27,7 +27,7 @@ namespace CryEngine
 
         public static void DrawTextToScreen(float x, float y, float fontSize, Color color, bool centered, string text, params object[] args)
         {
-            NativeRendererMethods.DrawTextToScreen(x, y, fontSize, color, centered, string.Format(text, args));
+            NativeRendererMethods.Instance.DrawTextToScreen(x, y, fontSize, color, centered, string.Format(text, args));
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace CryEngine
         /// <returns>Texture id if successful, otherwise -1.</returns>
         public static int LoadTexture(string texturePath)
         {
-            return NativeRendererMethods.LoadTexture(texturePath);
+            return NativeRendererMethods.Instance.LoadTexture(texturePath);
         }
 
         /// <summary>
@@ -50,22 +50,22 @@ namespace CryEngine
         /// <param name="textureId">The ID of the texture (obtained using Renderer.LoadTexture(path)).</param>
         public static void DrawTexture(int x, int y, int width, int height, int textureId)
         {
-            NativeRendererMethods.DrawTextureToScreen(x, y, width, height, textureId);
+            NativeRendererMethods.Instance.DrawTextureToScreen(x, y, width, height, textureId);
         }
 
         public static int CreateRenderTarget(int width, int height, int flags = 0)
         {
-            return NativeRendererMethods.CreateRenderTarget(width, height, flags);
+            return NativeRendererMethods.Instance.CreateRenderTarget(width, height, flags);
         }
 
         public static void SetRenderTarget(int id)
         {
-            NativeRendererMethods.SetRenderTarget(id);
+            NativeRendererMethods.Instance.SetRenderTarget(id);
         }
 
         public static void DestroyRenderTarget(int id)
         {
-            NativeRendererMethods.DestroyRenderTarget(id);
+            NativeRendererMethods.Instance.DestroyRenderTarget(id);
         }
     }
 
