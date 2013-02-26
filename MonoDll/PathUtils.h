@@ -24,13 +24,13 @@ public:
 			binPath = "Bin64\\";
 #endif
 
-		return binPath.append("Plugins\\CryMono\\");
+		return binPath;
 	}
 
 	// Path to directory which contains CryMono config & utils, e.g. Mono/ & Plugins/.
 	static string GetConfigPath()
 	{
-		return GetBinaryPath();
+		return GetBinaryPath().append("CryMono\\");
 	}
 
 	static string GetEnginePath()

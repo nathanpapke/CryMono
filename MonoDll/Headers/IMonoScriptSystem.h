@@ -12,7 +12,7 @@
 #include <MonoAnyValue.h>
 
 // Undefine if Plugin SDK shouldn't be used
-#define PLUGIN_SDK
+//#define PLUGIN_SDK
 #ifdef PLUGIN_SDK
 #include <IPluginManager.h>
 #endif
