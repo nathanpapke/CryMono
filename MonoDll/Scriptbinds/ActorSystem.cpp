@@ -103,7 +103,7 @@ void CScriptbind_ActorSystem::RegisterActorClass(mono::string name, bool isNativ
 			return;
 		}
 
-		g_pScriptSystem->GetIGameFramework()->RegisterFactory(className, (CMonoActor *)0, false, (CMonoActor *)0);
+		gEnv->pGame->GetIGameFramework()->RegisterFactory(className, (CMonoActor *)0, false, (CMonoActor *)0);
 	}
 
 	m_monoActorClasses.insert(TActorClasses::value_type(className, isNative ? EMonoActorType_Native : EMonoActorType_Managed));
