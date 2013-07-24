@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using System.Linq;
+
 using CryEngine.Initialization;
 using CryEngine.Extensions;
 using CryEngine.Native;
@@ -201,7 +203,6 @@ namespace CryEngine
             if (String.IsNullOrEmpty(className))
                 throw new ArgumentException("className should not be null or empty", "className");
 #endif
-
             return GetEntitiesCommon<Entity>(NativeEntityMethods.GetEntitiesByClass(className));
         }
 
@@ -214,6 +215,11 @@ namespace CryEngine
         {
             return GetEntitiesCommon<T>(NativeEntityMethods.GetEntitiesByClass(typeof(T).Name));
         }
+
+		public static IEnumerable<EntityBase> GetByClasses(string[] classNames)
+		{
+			return GetEntitiesCommon<Entity>(NativeEntityMethods.GetEntitiesByClasses(classNames.Cast<object>().ToArray()));
+		}
 
         /// <summary>
         /// Gets a list of entities within the specified area.
