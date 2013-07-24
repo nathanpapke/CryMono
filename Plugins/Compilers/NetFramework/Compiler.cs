@@ -28,11 +28,20 @@ namespace CryEngine.Compilers.NET
                     scripts.AddRange(assemblyScripts);
             }
 
-            if (!CompileAndProcess("CSharp", "*.cs", ref scripts)
-                && !CompileAndProcess("VisualBasic", "*.vb", ref scripts))
-            {
-                Debug.DisplayException(new ScriptCompilationException("No scripts to compile were found in the Game/Scripts directory.\n This is not a fatal error, and can be ignored."));
-            }
+			var compileScriptsCVar = CVar.Get("mono_compileScripts");
+			if (compileScriptsCVar == null)
+				Debug.LogAlways("mono_compileScripts was null");
+			else
+				Debug.LogAlways("mono_compileScripts was {0}", compileScriptsCVar.IVal);
+
+			if (compileScriptsCVar != null && compileScriptsCVar.IVal != 0)
+			{
+				if (!CompileAndProcess("CSharp", "*.cs", ref scripts)
+					&& !CompileAndProcess("VisualBasic", "*.vb", ref scripts))
+				{
+					Debug.DisplayException(new ScriptCompilationException("No scripts to compile were found in the Game/Scripts directory.\n This is not a fatal error, and can be ignored."));
+				}
+			}
             
             return scripts;
 		}
@@ -158,7 +167,7 @@ namespace CryEngine.Compilers.NET
 
             if (!compilerParameters.GenerateInMemory)
             {
-                var assemblyPath = Path.Combine(PathUtils.TempFolder, string.Format("CompiledScripts_{0}.dll", searchPattern.Replace("*.", "")));
+                var assemblyPath = Path.Combine(ProjectSettings.TempDirectory, string.Format("CompiledScripts_{0}.dll", searchPattern.Replace("*.", "")));
 
                 if (File.Exists(assemblyPath))
                 {
@@ -188,7 +197,15 @@ namespace CryEngine.Compilers.NET
             }
 
             var scripts = new List<string>();
-			var scriptsDirectory = PathUtils.CryMonoScriptsFolder;
+			var scriptsDirectory = CryPak.ScriptsFolder;
+
+			CVar cvar;
+			if (CVar.TryGet("mono_scriptDirectory", out cvar))
+			{
+				var alternateScriptsDir = cvar.String;
+				if (!string.IsNullOrEmpty(alternateScriptsDir))
+					scriptsDirectory = alternateScriptsDir;
+			}
 
             if (Directory.Exists(scriptsDirectory))
             {

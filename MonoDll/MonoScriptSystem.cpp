@@ -46,6 +46,7 @@
 #include "Scriptbinds\CrySerialize.h"
 #include "Scriptbinds\GameObject.h"
 #include "Scriptbinds\Sound.h"
+#include "Scriptbinds\CryPak.h"
 
 #include "FlowManager.h"
 #include "MonoInput.h"
@@ -227,9 +228,9 @@ bool CScriptSystem::Reload()
 		m_pScriptManager->CallMethod("Serialize");
 	}
 
-	IMonoDomain *pScriptDomain = CreateDomain("ScriptDomain", true);
+	IMonoDomain *pScriptDomain = CreateDomain("ScriptDomain", nullptr, true);
 
-	IMonoAssembly *pCryBraryAssembly = pScriptDomain->LoadAssembly(PathUtils::GetBinaryPath() + "CryBrary.dll");
+	IMonoAssembly *pCryBraryAssembly = pScriptDomain->LoadAssembly(PathUtils::GetBinaryPath(true) + "CryBrary.dll");
 
 	IMonoArray *pCtorParams = CreateMonoArray(2);
 	pCtorParams->InsertAny(m_bFirstReload);
@@ -333,6 +334,7 @@ void CScriptSystem::RegisterPriorityBindings()
 	RegisterBinding(CScriptbind_CrySerialize);
 	RegisterBinding(CScriptbind_GameObject);
 	RegisterBinding(CScriptbind_Sound);
+	RegisterBinding(CScriptbind_CryPak);
 
 	m_pFlowManager = new CFlowManager();
 	m_pFlowManager->AddRef();
@@ -472,9 +474,9 @@ IMonoAssembly *CScriptSystem::GetCorlibAssembly()
 	return m_pRootDomain->TryGetAssembly(mono_get_corlib());
 }
 
-IMonoDomain *CScriptSystem::CreateDomain(const char *name, bool setActive)
+IMonoDomain *CScriptSystem::CreateDomain(const char *name, const char *configurationFile, bool setActive)
 {
-	CScriptDomain *pDomain = new CScriptDomain(name, setActive);
+	CScriptDomain *pDomain = new CScriptDomain(name, configurationFile, setActive);
 	m_domains.push_back(pDomain);
 
 	return pDomain;

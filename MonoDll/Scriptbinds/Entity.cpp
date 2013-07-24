@@ -706,7 +706,7 @@ mono::object CScriptbind_Entity::GetEntityLinks(IEntity *pEntity)
 	IMonoArray *pDynArray = CreateDynamicMonoArray();
 	while(pLink != nullptr)
 	{
-		pDynArray->InsertAny(reinterpret_cast<intptr_t>(pLink));
+		pDynArray->InsertNativePointer(pLink);
 
 		pLink = pLink->next;
 	}
