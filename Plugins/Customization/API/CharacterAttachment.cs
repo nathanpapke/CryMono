@@ -52,7 +52,7 @@ namespace CryEngine.CharacterCustomization
 				var slotAttachmentMaterials = new List<CharacterAttachmentMaterial>();
 
 				foreach (var materialElement in element.Elements("Material"))
-					slotAttachmentMaterials.Add(new CharacterAttachmentMaterial(materialElement));
+					slotAttachmentMaterials.Add(new CharacterAttachmentMaterial(this, materialElement));
 
 				Debug.LogAlways("Found {0} materials for {1}", slotAttachmentMaterials.Count, Name);
 				Materials = slotAttachmentMaterials.ToArray();

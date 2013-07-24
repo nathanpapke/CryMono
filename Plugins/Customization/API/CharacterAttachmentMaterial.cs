@@ -13,50 +13,82 @@ namespace CryEngine.CharacterCustomization
 {
 	public class CharacterAttachmentMaterial
 	{
-		internal CharacterAttachmentMaterial(XElement element)
+		internal CharacterAttachmentMaterial(CharacterAttachment attachment, XElement element, CharacterAttachmentMaterial parentMaterial = null)
 		{
 			Element = element;
+			Attachment = attachment;
 
-			var pathAttribute = element.Attribute("path");
-			if (pathAttribute != null)
-				BaseFilePath = pathAttribute.Value;
+			ParentMaterial = parentMaterial;
 
-			Debug.LogAlways("Found material {0}", BaseFilePath);
+			var subMaterialElements = element.Elements("Submaterial");
+			Submaterials = new CharacterAttachmentMaterial[subMaterialElements.Count()];
+
+			for(var i = 0; i < subMaterialElements.Count(); i++)
+			{
+				var subMaterialElement = subMaterialElements.ElementAt(i);
+
+				Submaterials[i] = new CharacterAttachmentMaterial(attachment, subMaterialElement, this);
+			}
+
+			if (parentMaterial == null)
+			{
+				var pathAttribute = element.Attribute("path");
+				if (pathAttribute != null)
+					BaseFilePath = pathAttribute.Value;
+			}
+			else
+			{
+				var nameAttribute = element.Attribute("name");
+				if (nameAttribute != null)
+					BaseFilePath = nameAttribute.Value;
+			}
 
 			var colorModifierElement = element.Element("ColorModifier");
 			if (colorModifierElement != null)
 			{
 				var redAttribute = colorModifierElement.Attribute("red");
 				if (redAttribute != null)
-					ColorRed = Vec3.Parse(redAttribute.Value) / 255;
+					ColorRed = ParseColor(redAttribute.Value);
 
 				var greenAttribute = colorModifierElement.Attribute("green");
 				if (greenAttribute != null)
-					ColorGreen = Vec3.Parse(greenAttribute.Value) / 255;
+					ColorGreen = ParseColor(greenAttribute.Value);
 
 				var blueAttribute = colorModifierElement.Attribute("blue");
 				if (blueAttribute != null)
-					ColorBlue = Vec3.Parse(blueAttribute.Value) / 255;
+					ColorBlue = ParseColor(blueAttribute.Value);
 
 				var alphaAttribute = colorModifierElement.Attribute("alpha");
 				if (alphaAttribute != null)
-					ColorAlpha = Vec3.Parse(alphaAttribute.Value) / 255;
+					ColorAlpha = ParseColor(alphaAttribute.Value);
 			}
 
 			var diffuseElement = element.Element("Diffuse");
+			DiffuseColor = UnusedMarker.Vec3;
+
 			if (diffuseElement != null)
 			{
 				var texPathAttribute = diffuseElement.Attribute("path");
 				if (texPathAttribute != null)
 					DiffuseTexture = texPathAttribute.Value;
+
+				var colorAttribute = diffuseElement.Attribute("color");
+				if (colorAttribute != null)
+					DiffuseColor = ParseColor(colorAttribute.Value);
 			}
 
 			var specularElement = element.Element("Specular");
+			SpecularColor = UnusedMarker.Vec3;
+
 			if (specularElement != null)
 			{
 				var texPathAttribute = specularElement.Attribute("path");
 				if (texPathAttribute != null)
 					SpecularTexture = texPathAttribute.Value;
+
+				var colorAttribute = specularElement.Attribute("color");
+				if (colorAttribute != null)
+					SpecularColor = ParseColor(colorAttribute.Value);
 			}
 
 			var bumpmapElement = element.Element("Bumpmap");
@@ -75,30 +107,30 @@ namespace CryEngine.CharacterCustomization
 					CustomTexture = texPathAttribute.Value;
 			}
 
-			Save();
+			if(parentMaterial == null)
+				Save();
 		}
 
-		public void Save()
+		Vec3 ParseColor(string colorString)
 		{
-			// Used to determine whether we need to save to an alternate location.
-			bool modifiedMaterial = false;
+			Vec3 color = Vec3.Parse(colorString);
 
-			var basePath = Path.Combine(CryPak.GameFolder, BaseFilePath);
-			if (!File.Exists(basePath + ".mtl"))
-				throw new CustomizationConfigurationException(string.Format("Could not save modified material, base {0} did not exist.", basePath));
+			return new Vec3((float)Math.Pow(color.X / 255, 2.2), (float)Math.Pow(color.Y / 255, 2.2), (float)Math.Pow(color.Z / 255, 2.2));
+		}
 
-			var materialDocument = XDocument.Load(basePath + ".mtl");
-			var materialElement = materialDocument.Element("Material");
+		bool UpdateMaterialElement(XElement materialElement, CharacterAttachmentMaterial material)
+		{
+			var modifiedMaterial = false;
 
 			var genMaskAttribute = materialElement.Attribute("StringGenMask");
 			if (genMaskAttribute != null && genMaskAttribute.Value.Contains("%COLORMASKING"))
 			{
 				var publicParamsElement = materialElement.Element("PublicParams");
 
-				publicParamsElement.SetAttributeValue("ColorMaskR", ColorRed.ToString());
-				publicParamsElement.SetAttributeValue("ColorMaskG", ColorGreen.ToString());
-				publicParamsElement.SetAttributeValue("ColorMaskB", ColorBlue.ToString());
-				publicParamsElement.SetAttributeValue("ColorMaskA", ColorAlpha.ToString());
+				publicParamsElement.SetAttributeValue("ColorMaskR", material.ColorRed.ToString());
+				publicParamsElement.SetAttributeValue("ColorMaskG", material.ColorGreen.ToString());
+				publicParamsElement.SetAttributeValue("ColorMaskB", material.ColorBlue.ToString());
+				publicParamsElement.SetAttributeValue("ColorMaskA", material.ColorAlpha.ToString());
 
 				modifiedMaterial = true;
 			}
@@ -106,12 +138,61 @@ namespace CryEngine.CharacterCustomization
 			var texturesElement = materialElement.Element("Textures");
 			if (texturesElement != null)
 			{
-				if (WriteTexture(texturesElement, "Diffuse", DiffuseTexture)
-					|| WriteTexture(texturesElement, "Specular", SpecularTexture)
-					|| WriteTexture(texturesElement, "Bumpmap", BumpmapTexture)
-					|| WriteTexture(texturesElement, "Custom", CustomTexture))
+				if (WriteTexture(texturesElement, "Diffuse", material.DiffuseTexture)
+					|| WriteTexture(texturesElement, "Specular", material.SpecularTexture)
+					|| WriteTexture(texturesElement, "Bumpmap", material.BumpmapTexture)
+					|| WriteTexture(texturesElement, "Custom", material.CustomTexture))
 				{
 					modifiedMaterial = true;
+				}
+			}
+
+			if (!UnusedMarker.IsUnused(DiffuseColor))
+				materialElement.SetAttributeValue("Diffuse", DiffuseColor.ToString());
+
+			if (!UnusedMarker.IsUnused(SpecularColor))
+				materialElement.SetAttributeValue("Specular", SpecularColor.ToString());
+
+			return modifiedMaterial;
+		}
+
+		public void Save()
+		{
+			var basePath = Path.Combine(CryPak.GameFolder, BaseFilePath);
+			if (!File.Exists(basePath + ".mtl"))
+				throw new CustomizationConfigurationException(string.Format("Could not save modified material, base {0} did not exist.", basePath));
+
+			var materialDocument = XDocument.Load(basePath + ".mtl");
+
+			var materialElement = materialDocument.Element("Material");
+
+			// Store boolean to determine whether we need to save to an alternate location.
+			bool modifiedMaterial = false;
+
+			if (Submaterials.Length == 0)
+				modifiedMaterial = UpdateMaterialElement(materialElement, this);
+			else
+			{
+				var subMaterialsElement = materialElement.Element("SubMaterials");
+
+				var subMaterialElements = subMaterialsElement.Elements("Material");
+
+				for (var i = 0; i < Submaterials.Length; i++)
+				{
+					var subMaterial = Submaterials.ElementAt(i);
+
+					var modifiedSubMaterial = UpdateMaterialElement(subMaterialElements.FirstOrDefault(x => 
+						{
+							var nameAttribute = x.Attribute("Name");
+
+							if(nameAttribute != null)
+								return nameAttribute.Value == subMaterial.BaseFilePath;
+
+							return false;
+						}), subMaterial);
+
+					if (modifiedSubMaterial)
+						modifiedMaterial = modifiedSubMaterial;
 				}
 			}
 
@@ -128,7 +209,7 @@ namespace CryEngine.CharacterCustomization
 					var fileName = new string(stringChars);
 					Debug.LogAlways("{0} generated {1}", BaseFilePath, fileName);
 
-					FilePath = Path.Combine("%USER%", "Cosmetics", "Materials", fileName);
+					FilePath = Path.Combine("%USER%", "Cosmetics", "Materials", Attachment.Slot.Name, Attachment.Name ?? "unknown", fileName);
 				}
 
 				var fullFilePath = CryPak.AdjustFileName(FilePath, PathResolutionRules.RealPath | PathResolutionRules.ForWriting) + ".mtl";
@@ -169,13 +250,11 @@ namespace CryEngine.CharacterCustomization
 
 				element.SetAttributeValue("Map", textureType);
 				element.SetAttributeValue("File", texturePath);
-			}
-			else
-			{
-				element.SetAttributeValue("File", texturePath);
 
 				texturesElement.SetElementValue("Texture", element);
 			}
+			else
+				element.SetAttributeValue("File", texturePath);
 
 			return true;
 		}
@@ -190,6 +269,9 @@ namespace CryEngine.CharacterCustomization
 		public string BumpmapTexture { get; set; }
 		public string CustomTexture { get; set; }
 
+		public Vec3 DiffuseColor { get; set; }
+		public Vec3 SpecularColor { get; set; }
+
 		/// <summary>
 		/// Path to the mtl file.
 		/// </summary>
@@ -198,6 +280,11 @@ namespace CryEngine.CharacterCustomization
 		/// Path to the mtl file this material is based on.
 		/// </summary>
 		public string BaseFilePath { get; set; }
+
+		public CharacterAttachmentMaterial[] Submaterials { get; set; }
+		public CharacterAttachmentMaterial ParentMaterial { get; set; }
+
+		public CharacterAttachment Attachment { get; set; }
 
 		public XElement Element { get; set; }
 	}
