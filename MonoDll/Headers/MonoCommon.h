@@ -26,14 +26,6 @@ namespace mono
 
 		EntityId id;
 	};
-
-	struct pointer
-	{
-		pointer(void *ptr)
-			: pPointer(ptr) {}
-
-		void *pPointer;
-	};
 };
 
 
