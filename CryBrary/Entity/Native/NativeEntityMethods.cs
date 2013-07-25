@@ -38,13 +38,15 @@ namespace CryEngine.Native
         extern public static EntityId GetEntityId(IntPtr entPtr);
         [MethodImpl(MethodImplOptions.InternalCall)]
         extern public static EntityId FindEntity(string name);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern public static object[] GetEntitiesByClass(string className);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern public static object[] GetEntitiesByClasses(object[] classes);
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern public static object[] GetEntitiesByClass(string className);
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        extern public static object[] GetEntitiesInBox(BoundingBox bbox, EntityQueryFlags flags);
+		extern public static object[] GetEntitiesInBox(BoundingBox bbox, EntityQueryFlags flags);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        extern public static object[] QueryProximity(BoundingBox box, string className, EntityFlags flags);
+		extern public static object[] QueryProximity(BoundingBox box, string className, EntityFlags flags);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         extern public static bool RegisterEntityClass(EntityRegistrationParams registerParams);

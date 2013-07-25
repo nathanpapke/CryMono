@@ -199,6 +199,7 @@ protected:
 
 	static EntityId FindEntity(mono::string);
 	static mono::object GetEntitiesByClass(mono::string);
+	static mono::object GetEntitiesByClasses(mono::object);
 	static mono::object GetEntitiesInBox(AABB bbox, int objTypes);
 
 	static mono::object QueryProximity(AABB box, mono::string className, uint32 nEntityFlags);

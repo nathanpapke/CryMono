@@ -37,6 +37,7 @@ CScriptbind_Entity::CScriptbind_Entity()
 	REGISTER_METHOD(GetEntityId);
 	REGISTER_METHOD(FindEntity);
 	REGISTER_METHOD(GetEntitiesByClass);
+	REGISTER_METHOD(GetEntitiesByClasses);
 	REGISTER_METHOD(GetEntitiesInBox);
 
 	REGISTER_METHOD(QueryProximity);
@@ -450,6 +451,43 @@ mono::object CScriptbind_Entity::GetEntitiesByClass(mono::string _class)
 		{
 			if(pEntity->GetClass() == pDesiredClass)
 				pEntities->InsertMonoObject(pEntityIdClass->BoxObject(&mono::entityId(pEntity->GetId())));
+		}
+	}
+
+	auto result = pEntities->GetManagedObject();
+	pEntities->Release();
+
+	return result;
+}
+
+mono::object CScriptbind_Entity::GetEntitiesByClasses(mono::object classes)
+{
+	IMonoArray *pClassArray = *classes;
+
+	int numClasses = pClassArray->GetSize();
+	IEntityClass **pClasses = new IEntityClass *[numClasses];
+	for(int i = 0; i < numClasses; i++)
+		pClasses[i] = gEnv->pEntitySystem->GetClassRegistry()->FindClass(ToCryString((mono::string)pClassArray->GetManagedObject()));
+
+	IEntityItPtr pIt = gEnv->pEntitySystem->GetEntityIterator();
+
+	IMonoClass *pEntityIdClass = g_pScriptSystem->GetCryBraryAssembly()->GetClass("EntityId");
+	IMonoArray *pEntities = CreateDynamicMonoArray();
+	
+	pIt->MoveFirst();
+	while(!pIt->IsEnd())
+	{
+		if(IEntity *pEntity = pIt->Next())
+		{
+			IEntityClass *pEntityClass = pEntity->GetClass();
+			for(int i = 0; i < numClasses; i++)
+			{
+				if(pEntityClass == pClasses[i])
+				{
+					pEntities->InsertMonoObject(pEntityIdClass->BoxObject(&mono::entityId(pEntity->GetId())));
+					break;
+				}
+			}
 		}
 	}
 
