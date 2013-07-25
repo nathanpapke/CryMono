@@ -19,7 +19,7 @@ class CScriptbind_Debug : public IMonoScriptBind
 {
 public:
 	CScriptbind_Debug();
-	~CScriptbind_Debug() {}
+	~CScriptbind_Debug();
 
 protected:
 
@@ -35,6 +35,12 @@ protected:
 	//static void 
 	// ~IPersistentDebug
 
+	// Profiling
+	static CFrameProfiler *CreateFrameProfiler(mono::string methodName);
+	static CFrameProfilerSection *CreateFrameProfilerSection(CFrameProfiler *pProfiler);
+	static void DeleteFrameProfilerSection(CFrameProfilerSection *pSection);
+	// ~Profiling
+
 	// ~Externals
 
 	static IPersistantDebug *GetIPersistentDebug();
@@ -42,6 +48,9 @@ protected:
 	// IMonoScriptBind
 	virtual const char *GetClassName() override { return "NativeDebugMethods"; }
 	// ~IMonoScriptBind
+
+protected:
+	static std::vector<CFrameProfiler *> m_frameProfilers;
 };
 
 #endif

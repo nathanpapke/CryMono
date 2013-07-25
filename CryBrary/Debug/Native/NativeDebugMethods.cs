@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -24,8 +25,18 @@ namespace CryEngine.Native
         extern internal static void AddPersistentLine(Vec3 pos, Vec3 end, Color color, float timeout);
         #endregion
 
-        #region Logging
-        [SuppressUnmanagedCodeSecurity]
+		#region Profiling
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static IntPtr CreateFrameProfiler(string methodName);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static IntPtr CreateFrameProfilerSection(IntPtr profiler);
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		extern internal static void DeleteFrameProfilerSection(IntPtr profilerSection);
+		#endregion
+
+		#region Logging
+		[SuppressUnmanagedCodeSecurity]
         [SuppressMessage("Microsoft.Globalization", "CA2101:SpecifyMarshalingForPInvokeStringArguments", MessageId = "0"), DllImport("CryMono.dll")]
         public extern static void LogAlways(string msg);
 
