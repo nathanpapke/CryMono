@@ -3,6 +3,8 @@
 
 #include <IGameFramework.h>
 
+std::vector<CFrameProfiler *> CScriptbind_Debug::m_frameProfilers = std::vector<CFrameProfiler *>();
+
 CScriptbind_Debug::CScriptbind_Debug()
 {
 	REGISTER_METHOD(AddPersistentSphere);
@@ -11,6 +13,18 @@ CScriptbind_Debug::CScriptbind_Debug()
 	REGISTER_METHOD(AddPersistentLine);
 
 	REGISTER_METHOD(AddAABB);
+
+	REGISTER_METHOD(CreateFrameProfiler);
+	REGISTER_METHOD(CreateFrameProfilerSection);
+	REGISTER_METHOD(DeleteFrameProfilerSection);
+}
+
+CScriptbind_Debug::~CScriptbind_Debug()
+{
+	for each(auto pFrameProfiler in m_frameProfilers)
+		delete pFrameProfiler;
+
+	m_frameProfilers.clear();
 }
 
 void CScriptbind_Debug::AddPersistentSphere(Vec3 pos, float radius, ColorF color, float timeout)
@@ -49,6 +63,25 @@ void CScriptbind_Debug::AddAABB(Vec3 pos, AABB aabb, ColorF clr, float timeout)
 IPersistantDebug *CScriptbind_Debug::GetIPersistentDebug()
 {
 	return gEnv->pGameFramework->GetIPersistantDebug();
+}
+
+CFrameProfiler *CScriptbind_Debug::CreateFrameProfiler(mono::string methodName)
+{
+	CFrameProfiler *pFrameProfiler = new CFrameProfiler(GetISystem(), ToCryString(methodName), PROFILE_SCRIPT);
+
+	m_frameProfilers.push_back(pFrameProfiler);
+
+	return pFrameProfiler;
+}
+
+CFrameProfilerSection *CScriptbind_Debug::CreateFrameProfilerSection(CFrameProfiler *pProfiler)
+{
+	return new CFrameProfilerSection(pProfiler);
+}
+
+void CScriptbind_Debug::DeleteFrameProfilerSection(CFrameProfilerSection *pSection)
+{
+	delete pSection;
 }
 
 extern "C"

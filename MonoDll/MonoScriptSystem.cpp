@@ -361,12 +361,16 @@ void CScriptSystem::EraseBinding(IMonoScriptBind *pScriptBind)
 
 void CScriptSystem::OnPostUpdate(float fDeltaTime)
 {
+	FUNCTION_PROFILER_FAST(GetISystem(), PROFILE_SCRIPT, gEnv->bProfilerEnabled);
+
 	// Updates all scripts and sets Time.FrameTime.
 	m_pScriptManager->CallMethod("OnUpdate", fDeltaTime, gEnv->pTimer->GetFrameStartTime().GetMilliSeconds(), gEnv->pTimer->GetAsyncTime().GetMilliSeconds(), gEnv->pTimer->GetFrameRate(), gEnv->pTimer->GetTimeScale());
 }
 
 void CScriptSystem::OnFileChange(const char *fileName)
 {
+	FUNCTION_PROFILER_FAST(GetISystem(), PROFILE_SCRIPT, gEnv->bProfilerEnabled);
+
 	if(g_pMonoCVars->mono_realtimeScriptingDetectChanges == 0)
 		return;
 
@@ -402,6 +406,8 @@ void CScriptSystem::RegisterMethodBinding(const void *method, const char *fullMe
 
 IMonoObject *CScriptSystem::InstantiateScript(const char *scriptName, EMonoScriptFlags scriptFlags, IMonoArray *pConstructorParameters, bool throwOnFail)
 {
+	FUNCTION_PROFILER_FAST(GetISystem(), PROFILE_SCRIPT, gEnv->bProfilerEnabled);
+
 	auto *pInstance = new CCryScriptInstance(scriptFlags);
 
 	IMonoArray *pScriptCreationArgs = CreateMonoArray(5);
@@ -448,6 +454,8 @@ void CScriptSystem::RemoveScriptInstance(int id, EMonoScriptFlags scriptType)
 
 mono::object CScriptSystem::InitializeScriptInstance(IMonoObject *pScriptInstance, IMonoArray *pParams)
 {
+	FUNCTION_PROFILER_FAST(GetISystem(), PROFILE_SCRIPT, gEnv->bProfilerEnabled);
+
 	CRY_ASSERT(pScriptInstance);
 	
 	mono::object result = pScriptInstance->GetClass()->InvokeArray(pScriptInstance->GetManagedObject(), "InternalInitialize", pParams);

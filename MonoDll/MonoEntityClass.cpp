@@ -8,19 +8,12 @@ CEntityClass::CEntityClass(IEntityClassRegistry::SEntityClassDesc desc, SMonoEnt
 {
 	m_classDesc = desc;
 
-	m_pPropertyHandler = new CEntityPropertyHandler(pProperties, numProperties);
-	m_pEventHandler = new CEntityEventHandler();
-
-	m_proxyCreateFunc = desc.pUserProxyCreateFunc;
+	m_classDesc.pPropertyHandler = new CEntityPropertyHandler(pProperties, numProperties);
+	m_classDesc.pEventHandler = new CEntityEventHandler();
 }
 
 CEntityClass::~CEntityClass()
 {
-	SAFE_DELETE(m_pPropertyHandler);
-	SAFE_DELETE(m_pEventHandler);
-}
-
-int CEntityClass::GetEventCount()
-{
-	return m_pEventHandler->GetEventCount();
+	SAFE_DELETE(m_classDesc.pPropertyHandler);
+	SAFE_DELETE(m_classDesc.pEventHandler);
 }
