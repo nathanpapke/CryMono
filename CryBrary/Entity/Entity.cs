@@ -167,7 +167,8 @@ namespace CryEngine
 		#endregion
 
 		/// <summary>
-        /// This callback is called when this entity has finished spawning. The entity has been created and added to the list of entities.
+        /// This callback is called when this entity has spawned. The entity has been created and added to the list of entities.
+		/// Some functionality is not yet available at the point this method is called. For all game object interactions, use <see cref="OnPostSpawn"/>.
         /// </summary>
         public virtual void OnSpawn() { }
 
