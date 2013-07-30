@@ -278,7 +278,10 @@ void CScriptbind_Entity::OnSpawn(IEntity *pEntity,SEntitySpawnParams &params)
 		return;
 
 	auto gameObject = gEnv->pGameFramework->GetIGameObjectSystem()->CreateGameObjectForEntity(pEntity->GetId());
-	gameObject->ActivateExtension(className);
+	if(!gameObject->ActivateExtension(className))
+	{
+		MonoWarning("[CryMono] Failed to activate game object extension %s on entity %i (%s)", className, params.id, params.sName);
+	}
 }
 
 bool CScriptbind_Entity::OnRemove(IEntity *pIEntity)
@@ -393,8 +396,23 @@ mono::object CScriptbind_Entity::SpawnEntity(EntitySpawnParams monoParams, bool 
 
 			if(IGameObject *pGameObject = gEnv->pGameFramework->GetGameObject(spawnParams.id))
 			{
-				if(CMonoEntityExtension *pEntity = static_cast<CMonoEntityExtension *>(pGameObject->QueryExtension(className)))
-					return pEntity->GetScript()->GetManagedObject();
+				if(CMonoEntityExtension *pEntityExtension = static_cast<CMonoEntityExtension *>(pGameObject->QueryExtension(className)))
+					return pEntityExtension->GetScript()->GetManagedObject();
+				else
+				{
+					MonoWarning("[CryMono] Spawned entity of class %s with id %i, but game object extension query failed!", className, pEntity->GetId());
+
+					auto extensionId = gEnv->pGameFramework->GetIGameObjectSystem()->GetID(className);
+					if(extensionId == IGameObjectSystem::InvalidExtensionID)
+						MonoWarning("[CryMono] IGameObjectSystem::GetId returned invalid id for extension %s", className);
+
+					return nullptr;
+				}
+			}
+			else
+			{
+				MonoWarning("[CryMono] Spawned entity of class %s with id %i, but game object was null!", className, pEntity->GetId());
+				return nullptr;
 			}
 		}
 	}
